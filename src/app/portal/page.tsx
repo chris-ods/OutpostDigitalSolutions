@@ -1,0 +1,233 @@
+"use client";
+
+import withAuth from "../../components/withAuth";
+import { auth } from "../../firebase";
+import { signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../hooks/useAuth";
+import { useState } from "react";
+
+type NavItem = {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+};
+
+const navItems: NavItem[] = [
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      </svg>
+    ),
+  },
+  {
+    id: "projects",
+    label: "Projects",
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+      </svg>
+    ),
+  },
+  {
+    id: "clients",
+    label: "Clients",
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+  },
+  {
+    id: "reports",
+    label: "Reports",
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    ),
+  },
+  {
+    id: "settings",
+    label: "Settings",
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+  },
+];
+
+const stats = [
+  { label: "Active Projects", value: "—", change: null },
+  { label: "Open Tasks", value: "—", change: null },
+  { label: "Clients", value: "—", change: null },
+  { label: "This Month", value: "—", change: null },
+];
+
+function PortalPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [activeNav, setActiveNav] = useState("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push("/login");
+  };
+
+  const displayName = user?.displayName ?? user?.email?.split("@")[0] ?? "User";
+  const initials = displayName
+    .split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  return (
+    <div className="min-h-screen bg-gray-950 flex">
+      {/* Sidebar */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-30 w-64 bg-gray-900 border-r border-gray-800 flex flex-col transform transition-transform duration-200 lg:translate-x-0 lg:static lg:inset-auto ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Brand */}
+        <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-800">
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-600 shrink-0">
+            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+            </svg>
+          </div>
+          <span className="text-white font-semibold text-sm leading-tight">Outpost Digital<br />Solutions</span>
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => { setActiveNav(item.id); setSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+                activeNav === item.id
+                  ? "bg-blue-600 text-white"
+                  : "text-gray-400 hover:text-white hover:bg-gray-800"
+              }`}
+            >
+              {item.icon}
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        {/* User + Logout */}
+        <div className="px-3 py-4 border-t border-gray-800">
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-800 mb-2">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-sm font-medium truncate">{displayName}</p>
+              <p className="text-gray-500 text-xs truncate">{user?.email}</p>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Sign Out
+          </button>
+        </div>
+      </aside>
+
+      {/* Sidebar overlay (mobile) */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-20 bg-black/60 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top bar */}
+        <header className="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              className="lg:hidden text-gray-400 hover:text-white"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div>
+              <h2 className="text-white font-semibold">
+                {navItems.find((n) => n.id === activeNav)?.label ?? "Dashboard"}
+              </h2>
+              <p className="text-gray-500 text-xs">Outpost Digital Solutions Portal</p>
+            </div>
+          </div>
+          <div className="text-gray-500 text-sm hidden sm:block">
+            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+          </div>
+        </header>
+
+        {/* Page body */}
+        <main className="flex-1 p-6">
+          {activeNav === "dashboard" && (
+            <div className="space-y-6">
+              {/* Welcome banner */}
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 text-white">
+                <h3 className="text-xl font-bold mb-1">Welcome back, {displayName.split(" ")[0]}.</h3>
+                <p className="text-blue-200 text-sm">Here&apos;s what&apos;s happening at Outpost today.</p>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {stats.map((stat) => (
+                  <div key={stat.label} className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+                    <p className="text-gray-400 text-xs font-medium uppercase tracking-wide mb-2">{stat.label}</p>
+                    <p className="text-white text-2xl font-bold">{stat.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Recent activity placeholder */}
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <h4 className="text-white font-semibold mb-4">Recent Activity</h4>
+                <div className="flex flex-col items-center justify-center py-10 text-center">
+                  <svg className="w-10 h-10 text-gray-700 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <p className="text-gray-500 text-sm">No recent activity yet.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeNav !== "dashboard" && (
+            <div className="flex flex-col items-center justify-center h-full py-20 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-gray-800 flex items-center justify-center mb-4 text-gray-600">
+                {navItems.find((n) => n.id === activeNav)?.icon}
+              </div>
+              <h3 className="text-white font-semibold mb-1">
+                {navItems.find((n) => n.id === activeNav)?.label}
+              </h3>
+              <p className="text-gray-500 text-sm">This section is coming soon.</p>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+export default withAuth(PortalPage);
