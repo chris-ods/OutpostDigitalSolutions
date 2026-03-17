@@ -49,11 +49,22 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 mb-4">
-            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
-            </svg>
-          </div>
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-4">
+            <rect width="56" height="56" rx="16" fill="#0a1628"/>
+            <line x1="0" y1="28" x2="56" y2="28" stroke="#1e3a5f" strokeWidth="0.4" opacity="0.7"/>
+            <line x1="28" y1="0" x2="28" y2="56" stroke="#1e3a5f" strokeWidth="0.4" opacity="0.7"/>
+            <ellipse cx="29" cy="27" rx="24" ry="20" stroke="#1e3a8a" strokeWidth="0.5" fill="none"/>
+            <ellipse cx="29" cy="27" rx="21" ry="17.5" stroke="#1e40af" strokeWidth="0.5" fill="none"/>
+            <ellipse cx="29" cy="27" rx="18" ry="15" stroke="#1d4ed8" strokeWidth="0.5" fill="none"/>
+            <ellipse cx="29" cy="27" rx="15.5" ry="12.5" stroke="#2563eb" strokeWidth="0.6" fill="none"/>
+            <ellipse cx="29" cy="27" rx="13" ry="10.5" stroke="#3b82f6" strokeWidth="0.6" fill="none"/>
+            <ellipse cx="29" cy="27" rx="10.5" ry="8" stroke="#60a5fa" strokeWidth="0.7" fill="none"/>
+            <ellipse cx="29" cy="27" rx="8" ry="6" stroke="#7cb4fb" strokeWidth="0.7" fill="none"/>
+            <ellipse cx="29" cy="27" rx="5.5" ry="4" stroke="#93c5fd" strokeWidth="0.8" fill="none"/>
+            <ellipse cx="29" cy="27" rx="3" ry="2.2" stroke="#bfdbfe" strokeWidth="0.9" fill="none"/>
+            <path d="M29 23 L31.2 27 L26.8 27 Z" fill="#93c5fd" opacity="0.9"/>
+            <circle cx="29" cy="22" r="1" fill="#dbeafe"/>
+          </svg>
           <h1 className="text-2xl font-bold text-white tracking-tight">Outpost Digital Solutions</h1>
           <p className="text-gray-400 text-sm mt-1">Sign in to your portal</p>
         </div>

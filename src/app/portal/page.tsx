@@ -98,11 +98,19 @@ function PortalPage() {
       >
         {/* Brand */}
         <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-800">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-600 shrink-0">
-            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
-            </svg>
-          </div>
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+            <rect width="36" height="36" rx="10" fill="#0a1628"/>
+            <line x1="0" y1="18" x2="36" y2="18" stroke="#1e3a5f" strokeWidth="0.3" opacity="0.7"/>
+            <line x1="18" y1="0" x2="18" y2="36" stroke="#1e3a5f" strokeWidth="0.3" opacity="0.7"/>
+            <ellipse cx="18.5" cy="17" rx="15" ry="12.5" stroke="#1e40af" strokeWidth="0.5" fill="none"/>
+            <ellipse cx="18.5" cy="17" rx="12.5" ry="10.5" stroke="#2563eb" strokeWidth="0.5" fill="none"/>
+            <ellipse cx="18.5" cy="17" rx="10" ry="8.5" stroke="#3b82f6" strokeWidth="0.5" fill="none"/>
+            <ellipse cx="18.5" cy="17" rx="7.5" ry="6.5" stroke="#60a5fa" strokeWidth="0.6" fill="none"/>
+            <ellipse cx="18.5" cy="17" rx="5" ry="4.5" stroke="#93c5fd" strokeWidth="0.7" fill="none"/>
+            <ellipse cx="18.5" cy="17" rx="2.5" ry="2" stroke="#bfdbfe" strokeWidth="0.8" fill="none"/>
+            <path d="M18.5 13.5 L20.2 17 L16.8 17 Z" fill="#93c5fd" opacity="0.9"/>
+            <circle cx="18.5" cy="12.8" r="0.8" fill="#dbeafe"/>
+          </svg>
           <span className="text-white font-semibold text-sm leading-tight">Outpost Digital<br />Solutions</span>
         </div>
 
