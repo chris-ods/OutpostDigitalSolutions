@@ -3,14 +3,13 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// TODO: Add your own Firebase configuration here
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDzOehZykTrdgDpHDq6v9m7Qm7GQf5IuSg",
+  authDomain: "outpostdigitalsolutions.firebaseapp.com",
+  projectId: "outpostdigitalsolutions",
+  storageBucket: "outpostdigitalsolutions.firebasestorage.app",
+  messagingSenderId: "3015430856",
+  appId: "1:3015430856:web:4d1d26b6e0d43f0d530bfd"
 };
 
 // Initialize Firebase
