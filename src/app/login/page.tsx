@@ -6,6 +6,8 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase";
 import { useRouter } from "next/navigation";
 
+const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -19,16 +21,21 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Look up the email associated with this username
-      const usernameDoc = await getDoc(doc(db, "usernames", username.toLowerCase().trim()));
+      const input = username.toLowerCase().trim();
+      let email: string;
 
-      if (!usernameDoc.exists()) {
-        setError("Invalid username or password.");
-        setLoading(false);
-        return;
+      if (isEmail(input)) {
+        email = input;
+      } else {
+        const usernameDoc = await getDoc(doc(db, "usernames", input));
+        if (!usernameDoc.exists()) {
+          setError("Invalid username or password.");
+          setLoading(false);
+          return;
+        }
+        email = (usernameDoc.data() as { email: string }).email;
       }
 
-      const { email } = usernameDoc.data() as { email: string };
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/portal");
     } catch {
@@ -41,7 +48,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        {/* Logo / Brand */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 mb-4">
             <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -52,12 +58,11 @@ export default function LoginPage() {
           <p className="text-gray-400 text-sm mt-1">Sign in to your portal</p>
         </div>
 
-        {/* Card */}
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 shadow-xl">
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1.5">
-                Username
+                Username or Email
               </label>
               <input
                 id="username"
@@ -66,7 +71,7 @@ export default function LoginPage() {
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
+                placeholder="Enter your username or email"
                 className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               />
             </div>
@@ -107,7 +112,7 @@ export default function LoginPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                   </svg>
-                  Signing in…
+                  Signing in...
                 </span>
               ) : (
                 "Sign In"
