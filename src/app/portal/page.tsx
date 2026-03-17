@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../../hooks/useAuth";
 import { useState } from "react";
 import DocumentLibrary from "./DocumentLibrary";
+import Reports from "./Reports";
 
 type NavItem = {
   id: string;
@@ -232,8 +233,9 @@ function PortalPage() {
           )}
 
           {activeNav === "documents" && <DocumentLibrary />}
+          {activeNav === "reports" && <Reports />}
 
-          {activeNav !== "dashboard" && activeNav !== "documents" && (
+          {activeNav !== "dashboard" && activeNav !== "documents" && activeNav !== "reports" && (
             <div className="flex flex-col items-center justify-center h-full py-20 text-center">
               <div className="w-14 h-14 rounded-2xl bg-gray-800 flex items-center justify-center mb-4 text-gray-600">
                 {navItems.find((n) => n.id === activeNav)?.icon}
