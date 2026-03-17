@@ -8,6 +8,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useState } from "react";
 import DocumentLibrary from "./DocumentLibrary";
 import Reports from "./Reports";
+import ChoreCrusherDashboard from "./ChoreCrusherDashboard";
 
 type NavItem = {
   id: string;
@@ -73,12 +74,6 @@ const navItems: NavItem[] = [
   },
 ];
 
-const stats = [
-  { label: "Active Projects", value: "—", change: null },
-  { label: "Open Tasks", value: "—", change: null },
-  { label: "Clients", value: "—", change: null },
-  { label: "This Month", value: "—", change: null },
-];
 
 function PortalPage() {
   const { user } = useAuth();
@@ -201,36 +196,7 @@ function PortalPage() {
 
         {/* Page body */}
         <main className="flex-1 p-6">
-          {activeNav === "dashboard" && (
-            <div className="space-y-6">
-              {/* Welcome banner */}
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 text-white">
-                <h3 className="text-xl font-bold mb-1">Welcome back, {displayName.split(" ")[0]}.</h3>
-                <p className="text-blue-200 text-sm">Here&apos;s what&apos;s happening at Outpost today.</p>
-              </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {stats.map((stat) => (
-                  <div key={stat.label} className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-                    <p className="text-gray-400 text-xs font-medium uppercase tracking-wide mb-2">{stat.label}</p>
-                    <p className="text-white text-2xl font-bold">{stat.value}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Recent activity placeholder */}
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h4 className="text-white font-semibold mb-4">Recent Activity</h4>
-                <div className="flex flex-col items-center justify-center py-10 text-center">
-                  <svg className="w-10 h-10 text-gray-700 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  <p className="text-gray-500 text-sm">No recent activity yet.</p>
-                </div>
-              </div>
-            </div>
-          )}
+          {activeNav === "dashboard" && <ChoreCrusherDashboard />}
 
           {activeNav === "documents" && <DocumentLibrary />}
           {activeNav === "reports" && <Reports />}
