@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Outpost Digital Solutions | Portal",
   description: "Outpost Digital Solutions company portal",
+  verification: {
+    google: "g3MlbfnRwzqU5Gxyj_d4YIUzwzo0_Hzw8ElhIF9kzeY",
+  },
 };
 
 export default function RootLayout({
