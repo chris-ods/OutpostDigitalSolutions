@@ -58,7 +58,6 @@ const navItems: NavItem[] = [
     ),
   },
   {
-  {
     id: "clients",
     label: "Clients",
     icon: (
