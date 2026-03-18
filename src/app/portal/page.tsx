@@ -7,8 +7,11 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../../hooks/useAuth";
 import { useState } from "react";
 import DocumentLibrary from "./DocumentLibrary";
-import Reports from "./Reports";
 import ChoreCrusherDashboard from "./ChoreCrusherDashboard";
+import ReportsSection from "../../components/ReportsSection";
+import ProjectsSection from "../../components/ProjectsSection";
+import ClientsSection from "../../components/ClientsSection";
+import SettingsSection from "../../components/SettingsSection";
 
 type NavItem = {
   id: string;
@@ -73,7 +76,6 @@ const navItems: NavItem[] = [
     ),
   },
 ];
-
 
 function PortalPage() {
   const { user } = useAuth();
@@ -197,21 +199,11 @@ function PortalPage() {
         {/* Page body */}
         <main className="flex-1 p-6">
           {activeNav === "dashboard" && <ChoreCrusherDashboard />}
-
           {activeNav === "documents" && <DocumentLibrary />}
-          {activeNav === "reports" && <Reports />}
-
-          {activeNav !== "dashboard" && activeNav !== "documents" && activeNav !== "reports" && (
-            <div className="flex flex-col items-center justify-center h-full py-20 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-gray-800 flex items-center justify-center mb-4 text-gray-600">
-                {navItems.find((n) => n.id === activeNav)?.icon}
-              </div>
-              <h3 className="text-white font-semibold mb-1">
-                {navItems.find((n) => n.id === activeNav)?.label}
-              </h3>
-              <p className="text-gray-500 text-sm">This section is coming soon.</p>
-            </div>
-          )}
+          {activeNav === "projects" && <ProjectsSection />}
+          {activeNav === "clients" && <ClientsSection />}
+          {activeNav === "reports" && <ReportsSection />}
+          {activeNav === "settings" && <SettingsSection />}
         </main>
       </div>
     </div>
