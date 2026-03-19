@@ -158,7 +158,7 @@ export default function PrivacyPolicy() {
             </p>
             <p>
               Questions about this policy? Contact us at{" "}
-              <a href="mailto:hello@outpostdigitalsolutions.com">hello@outpostdigitalsolutions.com</a>.
+              <a href="mailto:admin@outpostdigitalsolutions.com">admin@outpostdigitalsolutions.com</a>.
             </p>
           </div>
 
@@ -263,7 +263,7 @@ export default function PrivacyPolicy() {
             </ul>
             <p>
               To exercise any of these rights, email us at{" "}
-              <a href="mailto:hello@outpostdigitalsolutions.com">hello@outpostdigitalsolutions.com</a>.
+              <a href="mailto:admin@outpostdigitalsolutions.com">admin@outpostdigitalsolutions.com</a>.
               We will respond within 30 days.
             </p>
           </div>
@@ -277,7 +277,7 @@ export default function PrivacyPolicy() {
             </p>
             <p>
               <strong>We do not sell personal information.</strong> To exercise your CCPA rights, contact
-              us at <a href="mailto:hello@outpostdigitalsolutions.com">hello@outpostdigitalsolutions.com</a>.
+              us at <a href="mailto:admin@outpostdigitalsolutions.com">admin@outpostdigitalsolutions.com</a>.
             </p>
           </div>
 
@@ -306,7 +306,7 @@ export default function PrivacyPolicy() {
             </p>
             <p>
               <strong>Outpost Digital Solutions LLC</strong><br />
-              Email: <a href="mailto:hello@outpostdigitalsolutions.com">hello@outpostdigitalsolutions.com</a><br />
+              Email: <a href="mailto:admin@outpostdigitalsolutions.com">admin@outpostdigitalsolutions.com</a><br />
               Website: <a href="https://outpostdigitalsolutions.com">outpostdigitalsolutions.com</a>
             </p>
           </div>
@@ -314,7 +314,7 @@ export default function PrivacyPolicy() {
 
         <footer className="pp-footer">
           <div className="pp-footer-links">
-            <a href="mailto:hello@outpostdigitalsolutions.com">Contact</a>
+            <a href="mailto:admin@outpostdigitalsolutions.com">Contact</a>
             <a href="/privacy">Privacy Policy</a>
           </div>
           <p>&copy; 2026 Outpost Digital Solutions LLC. All rights reserved.</p>
