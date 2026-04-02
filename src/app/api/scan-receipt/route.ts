@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// gemini-2.0-flash-lite: current model for new API keys — fast, multimodal, images and PDFs
+// gemini-2.5-flash: current generation, available to new API keys, full vision support
 const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17:generateContent";
 
 const SYSTEM_PROMPT = `You are a receipt data extractor. Analyze the receipt image or document and extract structured data.
 
