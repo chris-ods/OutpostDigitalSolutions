@@ -1786,13 +1786,570 @@ function ClientList({
   ] });
 }
 
+// OdsPanel.tsx
+import { useState as useState3, useCallback as useCallback3, useEffect as useEffect3 } from "react";
+import { getApp } from "firebase/app";
+import {
+  getFirestore as getFirestore2,
+  collection as collection2,
+  addDoc as addDoc2,
+  serverTimestamp as serverTimestamp2,
+  doc as doc2,
+  getDoc as getDoc2,
+  setDoc as setDoc2
+} from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
+// hooks/useClientList.ts
+import { useEffect as useEffect2, useState as useState2, useCallback as useCallback2, useRef as useRef2 } from "react";
+import { initializeApp, getApps } from "firebase/app";
+import {
+  getFirestore,
+  collection,
+  doc,
+  query,
+  orderBy,
+  limit,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  setDoc,
+  getDoc,
+  arrayUnion,
+  serverTimestamp
+} from "firebase/firestore";
+
+// firebase.config.ts
+var firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? "",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? "",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? ""
+};
+var PERMISSIONS_COLLECTION = "permissions";
+
+// hooks/useClientList.ts
+var app;
+var db;
+function getDB() {
+  if (!db) {
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    db = getFirestore(app);
+  }
+  return db;
+}
+var PAGE_SIZE = 30;
+function useClientList(collectionId) {
+  const firestore = getDB();
+  const [clients, setClients] = useState2([]);
+  const [views, setViews] = useState2([]);
+  const [permissions, setPermissions] = useState2(DEFAULT_PERMISSIONS);
+  const [listTitle, setListTitle] = useState2(collectionId);
+  const [loading, setLoading] = useState2(true);
+  const [hasMore, setHasMore] = useState2(false);
+  const [pageLimit, setPageLimit] = useState2(PAGE_SIZE);
+  const loadingMore = useRef2(false);
+  useEffect2(() => {
+    const q = query(
+      collection(firestore, collectionId),
+      orderBy("date", "desc"),
+      limit(pageLimit + 1)
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      const allDocs = snap.docs.filter((d) => !d.id.startsWith("_"));
+      setHasMore(allDocs.length > pageLimit);
+      const records = allDocs.slice(0, pageLimit).map((d) => ({ id: d.id, ...d.data() }));
+      setClients(records);
+      setLoading(false);
+      loadingMore.current = false;
+    }, (err) => {
+      console.error(`[useClientList] clients onSnapshot error (${collectionId}):`, err);
+      setLoading(false);
+      loadingMore.current = false;
+    });
+    return () => unsub();
+  }, [collectionId, firestore, pageLimit]);
+  useEffect2(() => {
+    const viewsRef = collection(firestore, collectionId, "_views");
+    const unsub = onSnapshot(viewsRef, (snap) => {
+      const saved = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data()
+      }));
+      setViews(saved);
+    }, (err) => {
+      console.error(`[useClientList] views onSnapshot error (${collectionId}):`, err);
+    });
+    return () => unsub();
+  }, [collectionId, firestore]);
+  useEffect2(() => {
+    const permRef = doc(firestore, PERMISSIONS_COLLECTION, collectionId);
+    getDoc(permRef).then((snap) => {
+      if (snap.exists()) {
+        setPermissions(snap.data());
+      }
+    }).catch((err) => {
+      console.error(`[useClientList] permissions load error (${collectionId}):`, err);
+    });
+  }, [collectionId, firestore]);
+  const onSave = useCallback2(async (id, field, value, updaterName, fromValue) => {
+    const docRef = doc(firestore, collectionId, id);
+    const changeEntry = {
+      at: { seconds: Math.floor(Date.now() / 1e3) },
+      by: updaterName,
+      field,
+      from: String(fromValue ?? ""),
+      to: String(value)
+    };
+    await updateDoc(docRef, {
+      [field]: value,
+      updatedAt: serverTimestamp(),
+      updatedByName: updaterName,
+      changeLog: arrayUnion(changeEntry)
+    });
+  }, [collectionId, firestore]);
+  const onSaveView = useCallback2(async (view) => {
+    const viewsRef = collection(firestore, collectionId, "_views");
+    const docRef = await addDoc(viewsRef, { ...view, createdAt: serverTimestamp() });
+    return docRef.id;
+  }, [collectionId, firestore]);
+  const onDeleteView = useCallback2(async (id) => {
+    const viewRef = doc(firestore, collectionId, "_views", id);
+    await deleteDoc(viewRef);
+  }, [collectionId, firestore]);
+  const onRenameList = useCallback2(async (name) => {
+    const metaRef = doc(firestore, collectionId, "_meta");
+    await setDoc(metaRef, { title: name }, { merge: true });
+    setListTitle(name);
+  }, [collectionId, firestore]);
+  const onSavePermissions = useCallback2(async (matrix) => {
+    const permRef = doc(firestore, PERMISSIONS_COLLECTION, collectionId);
+    await setDoc(permRef, matrix);
+    setPermissions(matrix);
+  }, [collectionId, firestore]);
+  const onLoadMore = useCallback2(async () => {
+    if (loadingMore.current || !hasMore) return;
+    loadingMore.current = true;
+    setPageLimit((prev) => prev + PAGE_SIZE);
+  }, [hasMore]);
+  return {
+    clients,
+    views,
+    permissions,
+    loading,
+    hasMore,
+    listTitle,
+    onSave,
+    onSaveView,
+    onDeleteView,
+    onSavePermissions,
+    onRenameList,
+    onLoadMore
+  };
+}
+
+// OdsPanel.tsx
+import { jsx as jsx3, jsxs as jsxs3 } from "react/jsx-runtime";
+var S = {
+  overlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0,0,0,0.65)",
+    zIndex: 1e3,
+    display: "flex",
+    alignItems: "stretch",
+    justifyContent: "flex-end"
+  },
+  drawer: {
+    width: "440px",
+    maxWidth: "100vw",
+    background: "#111827",
+    borderLeft: "1px solid #1f2937",
+    display: "flex",
+    flexDirection: "column",
+    fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif",
+    overflowY: "hidden"
+  },
+  drawerHeader: {
+    padding: "20px 24px",
+    borderBottom: "1px solid #1f2937",
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: "12px",
+    flexShrink: 0
+  },
+  drawerBody: { flex: 1, overflowY: "auto", padding: "20px 24px" },
+  drawerFooter: {
+    padding: "14px 24px",
+    borderTop: "1px solid #1f2937",
+    display: "flex",
+    gap: "10px",
+    justifyContent: "flex-end",
+    flexShrink: 0
+  },
+  label: {
+    display: "block",
+    fontSize: "11px",
+    fontWeight: 600,
+    color: "#9ca3af",
+    letterSpacing: "0.06em",
+    textTransform: "uppercase",
+    marginBottom: "6px"
+  },
+  input: {
+    width: "100%",
+    padding: "9px 12px",
+    background: "#1f2937",
+    border: "1px solid #374151",
+    borderRadius: "8px",
+    color: "#f9fafb",
+    fontSize: "13px",
+    outline: "none",
+    fontFamily: "inherit",
+    boxSizing: "border-box"
+  },
+  currencyWrap: { position: "relative" },
+  currencyPrefix: {
+    position: "absolute",
+    left: "12px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    color: "#9ca3af",
+    fontSize: "13px",
+    pointerEvents: "none"
+  },
+  fieldGroup: { marginBottom: "16px" },
+  btnPrimary: {
+    padding: "9px 20px",
+    background: "#3b82f6",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "13px",
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "inherit"
+  },
+  btnGhost: {
+    padding: "9px 20px",
+    background: "transparent",
+    color: "#9ca3af",
+    border: "1px solid #374151",
+    borderRadius: "8px",
+    fontSize: "13px",
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "inherit"
+  },
+  addBtn: {
+    padding: "7px 16px",
+    background: "#3b82f6",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "12px",
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "inherit",
+    whiteSpace: "nowrap"
+  },
+  toolbar: {
+    background: "#0a0f1a",
+    borderBottom: "1px solid #1e293b",
+    padding: "8px 20px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "12px",
+    flexShrink: 0
+  },
+  errorBox: {
+    background: "#2d1515",
+    border: "1px solid #7f1d1d",
+    borderRadius: "8px",
+    padding: "10px 14px",
+    fontSize: "12px",
+    color: "#fca5a5",
+    marginBottom: "14px"
+  },
+  fileBtn: {
+    display: "inline-block",
+    padding: "8px 14px",
+    background: "#1f2937",
+    border: "1px dashed #4b5563",
+    borderRadius: "8px",
+    color: "#d1d5db",
+    fontSize: "12px",
+    cursor: "pointer",
+    fontFamily: "inherit"
+  },
+  fileName: { fontSize: "11px", color: "#6b7280", marginTop: "4px" }
+};
+function getDB2() {
+  return getFirestore2(getApp());
+}
+function getStore() {
+  return getStorage(getApp());
+}
+async function seedPermissionsIfAbsent(collectionId) {
+  const db2 = getDB2();
+  const permRef = doc2(db2, "permissions", collectionId);
+  const snap = await getDoc2(permRef);
+  if (!snap.exists()) {
+    const matrix = {
+      rep: { ...DEFAULT_PERMISSIONS.rep },
+      manager: { ...DEFAULT_PERMISSIONS.manager },
+      admin: { ...DEFAULT_PERMISSIONS.admin }
+    };
+    await setDoc2(permRef, matrix);
+  }
+}
+function AddDrawer({ fields, title, onClose, onSubmit }) {
+  const initial = Object.fromEntries(
+    fields.map((f) => [f.key, f.defaultValue ?? (f.type === "checkbox" ? "false" : "")])
+  );
+  const [values, setValues] = useState3(initial);
+  const [files, setFiles] = useState3({});
+  const [saving, setSaving] = useState3(false);
+  const [error, setError] = useState3("");
+  const set = (key, val) => setValues((v) => ({ ...v, [key]: val }));
+  const setFile = (key, file) => setFiles((f) => ({ ...f, [key]: file }));
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const missing = fields.filter((f) => f.required && f.type !== "file" && !values[f.key]?.trim());
+    const missingFiles = fields.filter((f) => f.required && f.type === "file" && !files[f.key]);
+    if (missing.length || missingFiles.length) {
+      setError(`Required: ${[...missing, ...missingFiles].map((f) => f.label).join(", ")}`);
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      await onSubmit(values, files);
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Save failed. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+  function renderField(field) {
+    const val = values[field.key];
+    switch (field.type) {
+      case "select":
+        return /* @__PURE__ */ jsxs3(
+          "select",
+          {
+            value: val,
+            onChange: (e) => set(field.key, e.target.value),
+            style: { ...S.input, cursor: "pointer" },
+            children: [
+              /* @__PURE__ */ jsx3("option", { value: "", children: "Select\u2026" }),
+              field.options?.map((o) => /* @__PURE__ */ jsx3("option", { value: o, children: o }, o))
+            ]
+          }
+        );
+      case "checkbox":
+        return /* @__PURE__ */ jsxs3("label", { style: { display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }, children: [
+          /* @__PURE__ */ jsx3(
+            "input",
+            {
+              type: "checkbox",
+              checked: val === "true",
+              onChange: (e) => set(field.key, e.target.checked ? "true" : "false"),
+              style: { width: "16px", height: "16px", accentColor: "#3b82f6" }
+            }
+          ),
+          /* @__PURE__ */ jsx3("span", { style: { fontSize: "13px", color: "#d1d5db" }, children: "Yes" })
+        ] });
+      case "currency":
+        return /* @__PURE__ */ jsxs3("div", { style: S.currencyWrap, children: [
+          /* @__PURE__ */ jsx3("span", { style: S.currencyPrefix, children: "$" }),
+          /* @__PURE__ */ jsx3(
+            "input",
+            {
+              type: "number",
+              min: "0",
+              step: "0.01",
+              value: val,
+              onChange: (e) => set(field.key, e.target.value),
+              placeholder: field.placeholder ?? "0.00",
+              style: { ...S.input, paddingLeft: "24px" }
+            }
+          )
+        ] });
+      case "number":
+        return /* @__PURE__ */ jsx3(
+          "input",
+          {
+            type: "number",
+            value: val,
+            onChange: (e) => set(field.key, e.target.value),
+            placeholder: field.placeholder,
+            style: S.input
+          }
+        );
+      case "textarea":
+        return /* @__PURE__ */ jsx3(
+          "textarea",
+          {
+            value: val,
+            onChange: (e) => set(field.key, e.target.value),
+            placeholder: field.placeholder,
+            rows: 3,
+            style: { ...S.input, resize: "vertical" }
+          }
+        );
+      case "file":
+        return /* @__PURE__ */ jsxs3("div", { children: [
+          /* @__PURE__ */ jsxs3("label", { style: S.fileBtn, children: [
+            files[field.key] ? "Change file" : "Choose file",
+            /* @__PURE__ */ jsx3(
+              "input",
+              {
+                type: "file",
+                style: { display: "none" },
+                onChange: (e) => {
+                  if (e.target.files?.[0]) setFile(field.key, e.target.files[0]);
+                }
+              }
+            )
+          ] }),
+          files[field.key] && /* @__PURE__ */ jsx3("div", { style: S.fileName, children: files[field.key].name })
+        ] });
+      default:
+        return /* @__PURE__ */ jsx3(
+          "input",
+          {
+            type: field.type,
+            value: val,
+            onChange: (e) => set(field.key, e.target.value),
+            placeholder: field.placeholder,
+            style: S.input
+          }
+        );
+    }
+  }
+  return /* @__PURE__ */ jsx3("div", { style: S.overlay, onClick: (e) => e.target === e.currentTarget && onClose(), children: /* @__PURE__ */ jsxs3("div", { style: S.drawer, children: [
+    /* @__PURE__ */ jsxs3("div", { style: S.drawerHeader, children: [
+      /* @__PURE__ */ jsxs3("div", { children: [
+        /* @__PURE__ */ jsxs3("div", { style: { fontSize: "15px", fontWeight: 700, color: "#f9fafb" }, children: [
+          "Add ",
+          title
+        ] }),
+        /* @__PURE__ */ jsx3("div", { style: { fontSize: "11px", color: "#6b7280", marginTop: "3px" }, children: "Appears in the list immediately after saving" })
+      ] }),
+      /* @__PURE__ */ jsx3(
+        "button",
+        {
+          onClick: onClose,
+          style: { background: "none", border: "none", color: "#6b7280", cursor: "pointer", fontSize: "20px", lineHeight: 1, padding: "0 4px" },
+          children: "\xD7"
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxs3("form", { onSubmit: handleSubmit, style: { display: "contents" }, children: [
+      /* @__PURE__ */ jsxs3("div", { style: S.drawerBody, children: [
+        error && /* @__PURE__ */ jsx3("div", { style: S.errorBox, children: error }),
+        fields.map((f) => /* @__PURE__ */ jsxs3("div", { style: S.fieldGroup, children: [
+          /* @__PURE__ */ jsxs3("label", { style: S.label, children: [
+            f.label,
+            f.required && /* @__PURE__ */ jsx3("span", { style: { color: "#ef4444", marginLeft: "3px" }, children: "*" })
+          ] }),
+          renderField(f)
+        ] }, f.key))
+      ] }),
+      /* @__PURE__ */ jsxs3("div", { style: S.drawerFooter, children: [
+        /* @__PURE__ */ jsx3("button", { type: "button", onClick: onClose, style: S.btnGhost, children: "Cancel" }),
+        /* @__PURE__ */ jsx3("button", { type: "submit", style: { ...S.btnPrimary, opacity: saving ? 0.65 : 1 }, disabled: saving, children: saving ? "Saving\u2026" : `Add ${title}` })
+      ] })
+    ] })
+  ] }) });
+}
+function OdsPanel({
+  collectionId,
+  title,
+  subtitle,
+  uid: uid3,
+  userName,
+  isAdmin = false,
+  currentRole = "admin",
+  fields,
+  transformRecord
+}) {
+  const [drawerOpen, setDrawerOpen] = useState3(false);
+  const listProps = useClientList(collectionId);
+  useEffect3(() => {
+    seedPermissionsIfAbsent(collectionId).catch(console.error);
+  }, [collectionId]);
+  const handleAdd = useCallback3(async (values, files) => {
+    const db2 = getDB2();
+    const storage = getStore();
+    const fileUrls = {};
+    for (const [key, file] of Object.entries(files)) {
+      const fieldDef = fields.find((f) => f.key === key);
+      const basePath = fieldDef?.storagePath ?? collectionId;
+      const storageRef = ref(storage, `${basePath}/${Date.now()}-${file.name}`);
+      await uploadBytes(storageRef, file);
+      fileUrls[key] = await getDownloadURL(storageRef);
+    }
+    const coerced = { ...values };
+    for (const f of fields) {
+      if ((f.type === "number" || f.type === "currency") && values[f.key]) {
+        coerced[f.key] = parseFloat(values[f.key]) || 0;
+      }
+    }
+    const base = transformRecord ? transformRecord(values, fileUrls) : { ...coerced, ...fileUrls };
+    await addDoc2(collection2(db2, collectionId), {
+      ...base,
+      date: base.date ?? (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
+      createdAt: serverTimestamp2(),
+      createdBy: uid3,
+      createdByName: userName
+    });
+  }, [collectionId, fields, uid3, userName, transformRecord]);
+  return /* @__PURE__ */ jsxs3("div", { style: { display: "flex", flexDirection: "column", height: "100%", background: "#030712" }, children: [
+    /* @__PURE__ */ jsxs3("div", { style: S.toolbar, children: [
+      /* @__PURE__ */ jsx3("div", { style: { display: "flex", alignItems: "center", gap: "10px" }, children: subtitle && /* @__PURE__ */ jsx3("span", { style: { fontSize: "11px", color: "#4b5563", letterSpacing: "0.04em" }, children: subtitle }) }),
+      /* @__PURE__ */ jsxs3("button", { style: S.addBtn, onClick: () => setDrawerOpen(true), children: [
+        "+ Add ",
+        title
+      ] })
+    ] }),
+    /* @__PURE__ */ jsx3("div", { style: { flex: 1, minHeight: 0 }, children: /* @__PURE__ */ jsx3(
+      ClientList,
+      {
+        ...listProps,
+        uid: uid3,
+        userName,
+        isAdmin,
+        currentRole
+      }
+    ) }),
+    drawerOpen && /* @__PURE__ */ jsx3(
+      AddDrawer,
+      {
+        fields,
+        collectionId,
+        title,
+        onClose: () => setDrawerOpen(false),
+        onSubmit: handleAdd
+      }
+    )
+  ] });
+}
+
 // ReceiptScanner.tsx
 import {
-  useState as useState2,
-  useCallback as useCallback2,
-  useRef as useRef2
+  useState as useState4,
+  useCallback as useCallback4,
+  useRef as useRef3
 } from "react";
-import { Fragment as Fragment2, jsx as jsx3, jsxs as jsxs3 } from "react/jsx-runtime";
+import { Fragment as Fragment2, jsx as jsx4, jsxs as jsxs4 } from "react/jsx-runtime";
 var CATEGORIES = [
   "Food & Dining",
   "Travel",
@@ -1843,7 +2400,7 @@ function blankForm() {
   };
 }
 function GeminiStar({ size = 12, color = "#a78bfa" }) {
-  return /* @__PURE__ */ jsx3("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", children: /* @__PURE__ */ jsx3(
+  return /* @__PURE__ */ jsx4("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", children: /* @__PURE__ */ jsx4(
     "path",
     {
       d: "M12 2L13.5 9.5L21 12L13.5 14.5L12 22L10.5 14.5L3 12L10.5 9.5L12 2Z",
@@ -1853,10 +2410,10 @@ function GeminiStar({ size = 12, color = "#a78bfa" }) {
 }
 function CategoryBadge({ cat }) {
   const cls = CATEGORY_COLORS[cat] ?? CATEGORY_COLORS["Other"];
-  return /* @__PURE__ */ jsx3("span", { className: `text-[11px] border px-2 py-0.5 rounded-full font-medium ${cls}`, children: cat });
+  return /* @__PURE__ */ jsx4("span", { className: `text-[11px] border px-2 py-0.5 rounded-full font-medium ${cls}`, children: cat });
 }
 function FieldLabel({ children }) {
-  return /* @__PURE__ */ jsx3("span", { className: "text-[11px] text-gray-500 font-medium uppercase tracking-wider", children });
+  return /* @__PURE__ */ jsx4("span", { className: "text-[11px] text-gray-500 font-medium uppercase tracking-wider", children });
 }
 function ReceiptScanner({
   receipts,
@@ -1865,13 +2422,13 @@ function ReceiptScanner({
   onDelete,
   className = ""
 }) {
-  const [stage, setStage] = useState2("idle");
-  const [dragOver, setDragOver] = useState2(false);
-  const [error, setError] = useState2(null);
-  const [form, setForm] = useState2(blankForm());
-  const [preview, setPreview] = useState2(null);
-  const [deletingId, setDeletingId] = useState2(null);
-  const fileRef = useRef2(null);
+  const [stage, setStage] = useState4("idle");
+  const [dragOver, setDragOver] = useState4(false);
+  const [error, setError] = useState4(null);
+  const [form, setForm] = useState4(blankForm());
+  const [preview, setPreview] = useState4(null);
+  const [deletingId, setDeletingId] = useState4(null);
+  const fileRef = useRef3(null);
   function setField(key, val) {
     setForm((f) => ({ ...f, [key]: val }));
   }
@@ -1881,7 +2438,7 @@ function ReceiptScanner({
       return { ...m, total: +(m.subtotal + m.tax + m.tip).toFixed(2) };
     });
   }
-  const handleFile = useCallback2(
+  const handleFile = useCallback4(
     async (file) => {
       setError(null);
       const allowed = [
@@ -1979,8 +2536,8 @@ function ReceiptScanner({
     setError(null);
     setStage("idle");
   }
-  return /* @__PURE__ */ jsxs3("div", { className: `space-y-6 ${className}`, children: [
-    (stage === "idle" || stage === "processing") && /* @__PURE__ */ jsxs3(
+  return /* @__PURE__ */ jsxs4("div", { className: `space-y-6 ${className}`, children: [
+    (stage === "idle" || stage === "processing") && /* @__PURE__ */ jsxs4(
       "div",
       {
         onDragOver: (e) => {
@@ -1995,7 +2552,7 @@ function ReceiptScanner({
           stage === "processing" ? "border-violet-700 bg-violet-950/20 cursor-default" : dragOver ? "border-violet-500 bg-violet-950/30 cursor-copy" : "border-gray-700 bg-gray-900/50 hover:border-gray-600 hover:bg-gray-900 cursor-pointer"
         ].join(" "),
         children: [
-          /* @__PURE__ */ jsx3(
+          /* @__PURE__ */ jsx4(
             "input",
             {
               ref: fileRef,
@@ -2005,16 +2562,16 @@ function ReceiptScanner({
               onChange: onInputChange
             }
           ),
-          /* @__PURE__ */ jsx3("div", { className: "flex flex-col items-center justify-center py-14 px-6 text-center", children: stage === "processing" ? /* @__PURE__ */ jsxs3(Fragment2, { children: [
-            /* @__PURE__ */ jsxs3("div", { className: "relative w-14 h-14 mb-5", children: [
-              /* @__PURE__ */ jsx3("div", { className: "absolute inset-0 rounded-full border-4 border-violet-900" }),
-              /* @__PURE__ */ jsx3("div", { className: "absolute inset-0 rounded-full border-4 border-t-violet-400 animate-spin" }),
-              /* @__PURE__ */ jsx3("div", { className: "absolute inset-0 flex items-center justify-center", children: /* @__PURE__ */ jsx3(GeminiStar, { size: 20 }) })
+          /* @__PURE__ */ jsx4("div", { className: "flex flex-col items-center justify-center py-14 px-6 text-center", children: stage === "processing" ? /* @__PURE__ */ jsxs4(Fragment2, { children: [
+            /* @__PURE__ */ jsxs4("div", { className: "relative w-14 h-14 mb-5", children: [
+              /* @__PURE__ */ jsx4("div", { className: "absolute inset-0 rounded-full border-4 border-violet-900" }),
+              /* @__PURE__ */ jsx4("div", { className: "absolute inset-0 rounded-full border-4 border-t-violet-400 animate-spin" }),
+              /* @__PURE__ */ jsx4("div", { className: "absolute inset-0 flex items-center justify-center", children: /* @__PURE__ */ jsx4(GeminiStar, { size: 20 }) })
             ] }),
-            /* @__PURE__ */ jsx3("p", { className: "text-white font-medium text-sm", children: "Gemini is reading your receipt\u2026" }),
-            /* @__PURE__ */ jsx3("p", { className: "text-gray-500 text-xs mt-1", children: "This usually takes a few seconds" })
-          ] }) : /* @__PURE__ */ jsxs3(Fragment2, { children: [
-            /* @__PURE__ */ jsx3("div", { className: "w-12 h-12 rounded-2xl bg-gray-800 border border-gray-700 flex items-center justify-center mb-4", children: /* @__PURE__ */ jsx3(
+            /* @__PURE__ */ jsx4("p", { className: "text-white font-medium text-sm", children: "Gemini is reading your receipt\u2026" }),
+            /* @__PURE__ */ jsx4("p", { className: "text-gray-500 text-xs mt-1", children: "This usually takes a few seconds" })
+          ] }) : /* @__PURE__ */ jsxs4(Fragment2, { children: [
+            /* @__PURE__ */ jsx4("div", { className: "w-12 h-12 rounded-2xl bg-gray-800 border border-gray-700 flex items-center justify-center mb-4", children: /* @__PURE__ */ jsx4(
               "svg",
               {
                 className: "w-6 h-6 text-gray-400",
@@ -2022,7 +2579,7 @@ function ReceiptScanner({
                 viewBox: "0 0 24 24",
                 stroke: "currentColor",
                 strokeWidth: 1.5,
-                children: /* @__PURE__ */ jsx3(
+                children: /* @__PURE__ */ jsx4(
                   "path",
                   {
                     strokeLinecap: "round",
@@ -2032,18 +2589,18 @@ function ReceiptScanner({
                 )
               }
             ) }),
-            /* @__PURE__ */ jsx3("p", { className: "text-white font-medium text-sm mb-1", children: "Drop a receipt here or click to upload" }),
-            /* @__PURE__ */ jsx3("p", { className: "text-gray-500 text-xs mb-4", children: "JPG, PNG, WebP, or PDF \u2014 Gemini extracts the details" }),
-            /* @__PURE__ */ jsxs3("div", { className: "inline-flex items-center gap-1.5 text-xs text-violet-400 font-medium", children: [
-              /* @__PURE__ */ jsx3(GeminiStar, { size: 11 }),
+            /* @__PURE__ */ jsx4("p", { className: "text-white font-medium text-sm mb-1", children: "Drop a receipt here or click to upload" }),
+            /* @__PURE__ */ jsx4("p", { className: "text-gray-500 text-xs mb-4", children: "JPG, PNG, WebP, or PDF \u2014 Gemini extracts the details" }),
+            /* @__PURE__ */ jsxs4("div", { className: "inline-flex items-center gap-1.5 text-xs text-violet-400 font-medium", children: [
+              /* @__PURE__ */ jsx4(GeminiStar, { size: 11 }),
               "Powered by Gemini"
             ] })
           ] }) })
         ]
       }
     ),
-    error && /* @__PURE__ */ jsxs3("div", { className: "flex items-start gap-3 bg-red-950/30 border border-red-800/60 rounded-xl px-4 py-3", children: [
-      /* @__PURE__ */ jsx3(
+    error && /* @__PURE__ */ jsxs4("div", { className: "flex items-start gap-3 bg-red-950/30 border border-red-800/60 rounded-xl px-4 py-3", children: [
+      /* @__PURE__ */ jsx4(
         "svg",
         {
           className: "w-4 h-4 text-red-400 shrink-0 mt-0.5",
@@ -2051,7 +2608,7 @@ function ReceiptScanner({
           viewBox: "0 0 24 24",
           stroke: "currentColor",
           strokeWidth: 2,
-          children: /* @__PURE__ */ jsx3(
+          children: /* @__PURE__ */ jsx4(
             "path",
             {
               strokeLinecap: "round",
@@ -2061,16 +2618,16 @@ function ReceiptScanner({
           )
         }
       ),
-      /* @__PURE__ */ jsx3("p", { className: "text-red-400 text-xs leading-relaxed", children: error })
+      /* @__PURE__ */ jsx4("p", { className: "text-red-400 text-xs leading-relaxed", children: error })
     ] }),
-    (stage === "review" || stage === "saving") && /* @__PURE__ */ jsxs3("div", { className: "bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden", children: [
-      /* @__PURE__ */ jsxs3("div", { className: "flex items-center justify-between px-5 py-4 border-b border-gray-800", children: [
-        /* @__PURE__ */ jsxs3("div", { className: "flex items-center gap-2.5", children: [
-          /* @__PURE__ */ jsx3("div", { className: "w-7 h-7 rounded-lg bg-violet-900/50 border border-violet-800/60 flex items-center justify-center", children: /* @__PURE__ */ jsx3(GeminiStar, { size: 13 }) }),
-          /* @__PURE__ */ jsx3("span", { className: "text-white font-semibold text-sm", children: "Review & confirm" }),
-          /* @__PURE__ */ jsx3("span", { className: "text-xs text-gray-500 hidden sm:block", children: "Edit anything Gemini got wrong" })
+    (stage === "review" || stage === "saving") && /* @__PURE__ */ jsxs4("div", { className: "bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden", children: [
+      /* @__PURE__ */ jsxs4("div", { className: "flex items-center justify-between px-5 py-4 border-b border-gray-800", children: [
+        /* @__PURE__ */ jsxs4("div", { className: "flex items-center gap-2.5", children: [
+          /* @__PURE__ */ jsx4("div", { className: "w-7 h-7 rounded-lg bg-violet-900/50 border border-violet-800/60 flex items-center justify-center", children: /* @__PURE__ */ jsx4(GeminiStar, { size: 13 }) }),
+          /* @__PURE__ */ jsx4("span", { className: "text-white font-semibold text-sm", children: "Review & confirm" }),
+          /* @__PURE__ */ jsx4("span", { className: "text-xs text-gray-500 hidden sm:block", children: "Edit anything Gemini got wrong" })
         ] }),
-        preview && /* @__PURE__ */ jsx3(
+        preview && /* @__PURE__ */ jsx4(
           "img",
           {
             src: preview,
@@ -2079,11 +2636,11 @@ function ReceiptScanner({
           }
         )
       ] }),
-      /* @__PURE__ */ jsxs3("div", { className: "p-5 space-y-5", children: [
-        /* @__PURE__ */ jsxs3("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
-          /* @__PURE__ */ jsxs3("label", { className: "flex flex-col gap-1.5", children: [
-            /* @__PURE__ */ jsx3(FieldLabel, { children: "Merchant" }),
-            /* @__PURE__ */ jsx3(
+      /* @__PURE__ */ jsxs4("div", { className: "p-5 space-y-5", children: [
+        /* @__PURE__ */ jsxs4("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
+          /* @__PURE__ */ jsxs4("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ jsx4(FieldLabel, { children: "Merchant" }),
+            /* @__PURE__ */ jsx4(
               "input",
               {
                 type: "text",
@@ -2094,9 +2651,9 @@ function ReceiptScanner({
               }
             )
           ] }),
-          /* @__PURE__ */ jsxs3("label", { className: "flex flex-col gap-1.5", children: [
-            /* @__PURE__ */ jsx3(FieldLabel, { children: "Date" }),
-            /* @__PURE__ */ jsx3(
+          /* @__PURE__ */ jsxs4("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ jsx4(FieldLabel, { children: "Date" }),
+            /* @__PURE__ */ jsx4(
               "input",
               {
                 type: "date",
@@ -2107,38 +2664,38 @@ function ReceiptScanner({
             )
           ] })
         ] }),
-        /* @__PURE__ */ jsxs3("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
-          /* @__PURE__ */ jsxs3("label", { className: "flex flex-col gap-1.5", children: [
-            /* @__PURE__ */ jsx3(FieldLabel, { children: "Category" }),
-            /* @__PURE__ */ jsx3(
+        /* @__PURE__ */ jsxs4("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
+          /* @__PURE__ */ jsxs4("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ jsx4(FieldLabel, { children: "Category" }),
+            /* @__PURE__ */ jsx4(
               "select",
               {
                 value: form.category,
                 onChange: (e) => setField("category", e.target.value),
                 className: "bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600/30 transition",
-                children: CATEGORIES.map((c) => /* @__PURE__ */ jsx3("option", { value: c, children: c }, c))
+                children: CATEGORIES.map((c) => /* @__PURE__ */ jsx4("option", { value: c, children: c }, c))
               }
             )
           ] }),
-          /* @__PURE__ */ jsxs3("label", { className: "flex flex-col gap-1.5", children: [
-            /* @__PURE__ */ jsx3(FieldLabel, { children: "Payment method" }),
-            /* @__PURE__ */ jsx3(
+          /* @__PURE__ */ jsxs4("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ jsx4(FieldLabel, { children: "Payment method" }),
+            /* @__PURE__ */ jsx4(
               "select",
               {
                 value: form.paymentMethod,
                 onChange: (e) => setField("paymentMethod", e.target.value),
                 className: "bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600/30 transition",
-                children: PAYMENT_METHODS.map((p) => /* @__PURE__ */ jsx3("option", { value: p, children: p }, p))
+                children: PAYMENT_METHODS.map((p) => /* @__PURE__ */ jsx4("option", { value: p, children: p }, p))
               }
             )
           ] })
         ] }),
-        /* @__PURE__ */ jsxs3("div", { className: "grid grid-cols-2 sm:grid-cols-4 gap-4", children: [
-          ["subtotal", "tax", "tip"].map((k) => /* @__PURE__ */ jsxs3("label", { className: "flex flex-col gap-1.5", children: [
-            /* @__PURE__ */ jsx3(FieldLabel, { children: k }),
-            /* @__PURE__ */ jsxs3("div", { className: "relative", children: [
-              /* @__PURE__ */ jsx3("span", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none", children: "$" }),
-              /* @__PURE__ */ jsx3(
+        /* @__PURE__ */ jsxs4("div", { className: "grid grid-cols-2 sm:grid-cols-4 gap-4", children: [
+          ["subtotal", "tax", "tip"].map((k) => /* @__PURE__ */ jsxs4("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ jsx4(FieldLabel, { children: k }),
+            /* @__PURE__ */ jsxs4("div", { className: "relative", children: [
+              /* @__PURE__ */ jsx4("span", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none", children: "$" }),
+              /* @__PURE__ */ jsx4(
                 "input",
                 {
                   type: "number",
@@ -2151,11 +2708,11 @@ function ReceiptScanner({
               )
             ] })
           ] }, k)),
-          /* @__PURE__ */ jsxs3("label", { className: "flex flex-col gap-1.5", children: [
-            /* @__PURE__ */ jsx3(FieldLabel, { children: "Total" }),
-            /* @__PURE__ */ jsxs3("div", { className: "relative", children: [
-              /* @__PURE__ */ jsx3("span", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none", children: "$" }),
-              /* @__PURE__ */ jsx3(
+          /* @__PURE__ */ jsxs4("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ jsx4(FieldLabel, { children: "Total" }),
+            /* @__PURE__ */ jsxs4("div", { className: "relative", children: [
+              /* @__PURE__ */ jsx4("span", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none", children: "$" }),
+              /* @__PURE__ */ jsx4(
                 "input",
                 {
                   type: "number",
@@ -2169,17 +2726,17 @@ function ReceiptScanner({
             ] })
           ] })
         ] }),
-        /* @__PURE__ */ jsxs3("div", { children: [
-          /* @__PURE__ */ jsxs3("div", { className: "flex items-center justify-between mb-2", children: [
-            /* @__PURE__ */ jsx3(FieldLabel, { children: "Line items" }),
-            /* @__PURE__ */ jsxs3(
+        /* @__PURE__ */ jsxs4("div", { children: [
+          /* @__PURE__ */ jsxs4("div", { className: "flex items-center justify-between mb-2", children: [
+            /* @__PURE__ */ jsx4(FieldLabel, { children: "Line items" }),
+            /* @__PURE__ */ jsxs4(
               "button",
               {
                 type: "button",
                 onClick: addItem,
                 className: "text-xs text-violet-400 hover:text-violet-300 font-medium transition-colors flex items-center gap-1",
                 children: [
-                  /* @__PURE__ */ jsx3(
+                  /* @__PURE__ */ jsx4(
                     "svg",
                     {
                       className: "w-3 h-3",
@@ -2187,7 +2744,7 @@ function ReceiptScanner({
                       viewBox: "0 0 24 24",
                       stroke: "currentColor",
                       strokeWidth: 2.5,
-                      children: /* @__PURE__ */ jsx3(
+                      children: /* @__PURE__ */ jsx4(
                         "path",
                         {
                           strokeLinecap: "round",
@@ -2202,20 +2759,20 @@ function ReceiptScanner({
               }
             )
           ] }),
-          form.items.length > 0 ? /* @__PURE__ */ jsx3("div", { className: "rounded-xl border border-gray-800 overflow-hidden", children: /* @__PURE__ */ jsxs3("table", { className: "w-full text-xs", children: [
-            /* @__PURE__ */ jsx3("thead", { children: /* @__PURE__ */ jsxs3("tr", { className: "border-b border-gray-800", children: [
-              /* @__PURE__ */ jsx3("th", { className: "text-left text-gray-500 font-medium px-3 py-2 w-full", children: "Description" }),
-              /* @__PURE__ */ jsx3("th", { className: "text-right text-gray-500 font-medium px-3 py-2 whitespace-nowrap", children: "Qty" }),
-              /* @__PURE__ */ jsx3("th", { className: "text-right text-gray-500 font-medium px-3 py-2 whitespace-nowrap", children: "Unit $" }),
-              /* @__PURE__ */ jsx3("th", { className: "text-right text-gray-500 font-medium px-3 py-2 whitespace-nowrap", children: "Total" }),
-              /* @__PURE__ */ jsx3("th", { className: "px-2 py-2 w-6" })
+          form.items.length > 0 ? /* @__PURE__ */ jsx4("div", { className: "rounded-xl border border-gray-800 overflow-hidden", children: /* @__PURE__ */ jsxs4("table", { className: "w-full text-xs", children: [
+            /* @__PURE__ */ jsx4("thead", { children: /* @__PURE__ */ jsxs4("tr", { className: "border-b border-gray-800", children: [
+              /* @__PURE__ */ jsx4("th", { className: "text-left text-gray-500 font-medium px-3 py-2 w-full", children: "Description" }),
+              /* @__PURE__ */ jsx4("th", { className: "text-right text-gray-500 font-medium px-3 py-2 whitespace-nowrap", children: "Qty" }),
+              /* @__PURE__ */ jsx4("th", { className: "text-right text-gray-500 font-medium px-3 py-2 whitespace-nowrap", children: "Unit $" }),
+              /* @__PURE__ */ jsx4("th", { className: "text-right text-gray-500 font-medium px-3 py-2 whitespace-nowrap", children: "Total" }),
+              /* @__PURE__ */ jsx4("th", { className: "px-2 py-2 w-6" })
             ] }) }),
-            /* @__PURE__ */ jsx3("tbody", { children: form.items.map((item, i) => /* @__PURE__ */ jsxs3(
+            /* @__PURE__ */ jsx4("tbody", { children: form.items.map((item, i) => /* @__PURE__ */ jsxs4(
               "tr",
               {
                 className: i < form.items.length - 1 ? "border-b border-gray-800/60" : "",
                 children: [
-                  /* @__PURE__ */ jsx3("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ jsx3(
+                  /* @__PURE__ */ jsx4("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ jsx4(
                     "input",
                     {
                       type: "text",
@@ -2225,7 +2782,7 @@ function ReceiptScanner({
                       className: "w-full bg-transparent text-white placeholder:text-gray-600 focus:outline-none focus:bg-gray-800 rounded px-1 py-0.5 transition-colors"
                     }
                   ) }),
-                  /* @__PURE__ */ jsx3("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ jsx3(
+                  /* @__PURE__ */ jsx4("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ jsx4(
                     "input",
                     {
                       type: "number",
@@ -2240,7 +2797,7 @@ function ReceiptScanner({
                       className: "w-14 text-right bg-transparent text-white focus:outline-none focus:bg-gray-800 rounded px-1 py-0.5 transition-colors"
                     }
                   ) }),
-                  /* @__PURE__ */ jsx3("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ jsx3(
+                  /* @__PURE__ */ jsx4("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ jsx4(
                     "input",
                     {
                       type: "number",
@@ -2255,17 +2812,17 @@ function ReceiptScanner({
                       className: "w-20 text-right bg-transparent text-white focus:outline-none focus:bg-gray-800 rounded px-1 py-0.5 transition-colors"
                     }
                   ) }),
-                  /* @__PURE__ */ jsxs3("td", { className: "px-3 py-1.5 text-right text-gray-300 tabular-nums", children: [
+                  /* @__PURE__ */ jsxs4("td", { className: "px-3 py-1.5 text-right text-gray-300 tabular-nums", children: [
                     "$",
                     item.total.toFixed(2)
                   ] }),
-                  /* @__PURE__ */ jsx3("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ jsx3(
+                  /* @__PURE__ */ jsx4("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ jsx4(
                     "button",
                     {
                       type: "button",
                       onClick: () => removeItem(item.id),
                       className: "text-gray-600 hover:text-red-400 transition-colors",
-                      children: /* @__PURE__ */ jsx3(
+                      children: /* @__PURE__ */ jsx4(
                         "svg",
                         {
                           className: "w-3.5 h-3.5",
@@ -2273,7 +2830,7 @@ function ReceiptScanner({
                           viewBox: "0 0 24 24",
                           stroke: "currentColor",
                           strokeWidth: 2,
-                          children: /* @__PURE__ */ jsx3(
+                          children: /* @__PURE__ */ jsx4(
                             "path",
                             {
                               strokeLinecap: "round",
@@ -2289,11 +2846,11 @@ function ReceiptScanner({
               },
               item.id
             )) })
-          ] }) }) : /* @__PURE__ */ jsx3("p", { className: "text-gray-600 text-xs italic py-2", children: "No line items detected \u2014 add them manually if needed." })
+          ] }) }) : /* @__PURE__ */ jsx4("p", { className: "text-gray-600 text-xs italic py-2", children: "No line items detected \u2014 add them manually if needed." })
         ] }),
-        /* @__PURE__ */ jsxs3("label", { className: "flex flex-col gap-1.5", children: [
-          /* @__PURE__ */ jsx3(FieldLabel, { children: "Notes" }),
-          /* @__PURE__ */ jsx3(
+        /* @__PURE__ */ jsxs4("label", { className: "flex flex-col gap-1.5", children: [
+          /* @__PURE__ */ jsx4(FieldLabel, { children: "Notes" }),
+          /* @__PURE__ */ jsx4(
             "textarea",
             {
               value: form.notes,
@@ -2305,8 +2862,8 @@ function ReceiptScanner({
           )
         ] })
       ] }),
-      /* @__PURE__ */ jsxs3("div", { className: "flex items-center justify-between px-5 py-4 border-t border-gray-800 bg-gray-950/30", children: [
-        /* @__PURE__ */ jsx3(
+      /* @__PURE__ */ jsxs4("div", { className: "flex items-center justify-between px-5 py-4 border-t border-gray-800 bg-gray-950/30", children: [
+        /* @__PURE__ */ jsx4(
           "button",
           {
             type: "button",
@@ -2316,7 +2873,7 @@ function ReceiptScanner({
             children: "Cancel"
           }
         ),
-        /* @__PURE__ */ jsxs3(
+        /* @__PURE__ */ jsxs4(
           "button",
           {
             type: "button",
@@ -2324,8 +2881,8 @@ function ReceiptScanner({
             disabled: stage === "saving",
             className: "inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold px-5 py-2 rounded-xl transition-colors",
             children: [
-              stage === "saving" && /* @__PURE__ */ jsxs3("svg", { className: "w-4 h-4 animate-spin", fill: "none", viewBox: "0 0 24 24", children: [
-                /* @__PURE__ */ jsx3(
+              stage === "saving" && /* @__PURE__ */ jsxs4("svg", { className: "w-4 h-4 animate-spin", fill: "none", viewBox: "0 0 24 24", children: [
+                /* @__PURE__ */ jsx4(
                   "circle",
                   {
                     className: "opacity-25",
@@ -2336,7 +2893,7 @@ function ReceiptScanner({
                     strokeWidth: "4"
                   }
                 ),
-                /* @__PURE__ */ jsx3(
+                /* @__PURE__ */ jsx4(
                   "path",
                   {
                     className: "opacity-75",
@@ -2351,19 +2908,19 @@ function ReceiptScanner({
         )
       ] })
     ] }),
-    receipts.length > 0 && /* @__PURE__ */ jsxs3("div", { className: "space-y-3", children: [
-      /* @__PURE__ */ jsxs3("div", { className: "flex items-center justify-between", children: [
-        /* @__PURE__ */ jsxs3("h3", { className: "text-white font-semibold text-sm", children: [
+    receipts.length > 0 && /* @__PURE__ */ jsxs4("div", { className: "space-y-3", children: [
+      /* @__PURE__ */ jsxs4("div", { className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ jsxs4("h3", { className: "text-white font-semibold text-sm", children: [
           "Saved receipts",
-          /* @__PURE__ */ jsx3("span", { className: "ml-2 text-gray-500 font-normal tabular-nums", children: receipts.length })
+          /* @__PURE__ */ jsx4("span", { className: "ml-2 text-gray-500 font-normal tabular-nums", children: receipts.length })
         ] }),
-        /* @__PURE__ */ jsxs3("span", { className: "text-xs text-gray-500", children: [
+        /* @__PURE__ */ jsxs4("span", { className: "text-xs text-gray-500", children: [
           "$",
           receipts.reduce((s, r) => s + r.total, 0).toFixed(2),
           " total"
         ] })
       ] }),
-      /* @__PURE__ */ jsx3("div", { className: "bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden", children: receipts.map((r, i) => /* @__PURE__ */ jsxs3(
+      /* @__PURE__ */ jsx4("div", { className: "bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden", children: receipts.map((r, i) => /* @__PURE__ */ jsxs4(
         "div",
         {
           className: [
@@ -2371,7 +2928,7 @@ function ReceiptScanner({
             i < receipts.length - 1 ? "border-b border-gray-800/60" : ""
           ].join(" "),
           children: [
-            /* @__PURE__ */ jsx3("div", { className: "shrink-0 w-8 h-8 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center", children: /* @__PURE__ */ jsx3(
+            /* @__PURE__ */ jsx4("div", { className: "shrink-0 w-8 h-8 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center", children: /* @__PURE__ */ jsx4(
               "svg",
               {
                 className: "w-4 h-4 text-gray-500",
@@ -2379,7 +2936,7 @@ function ReceiptScanner({
                 viewBox: "0 0 24 24",
                 stroke: "currentColor",
                 strokeWidth: 1.5,
-                children: /* @__PURE__ */ jsx3(
+                children: /* @__PURE__ */ jsx4(
                   "path",
                   {
                     strokeLinecap: "round",
@@ -2389,37 +2946,37 @@ function ReceiptScanner({
                 )
               }
             ) }),
-            /* @__PURE__ */ jsxs3("div", { className: "flex-1 min-w-0", children: [
-              /* @__PURE__ */ jsxs3("div", { className: "flex items-center gap-2 mb-0.5 flex-wrap", children: [
-                /* @__PURE__ */ jsx3("span", { className: "text-white text-sm font-medium truncate", children: r.merchant || "Unknown merchant" }),
-                /* @__PURE__ */ jsx3(CategoryBadge, { cat: r.category })
+            /* @__PURE__ */ jsxs4("div", { className: "flex-1 min-w-0", children: [
+              /* @__PURE__ */ jsxs4("div", { className: "flex items-center gap-2 mb-0.5 flex-wrap", children: [
+                /* @__PURE__ */ jsx4("span", { className: "text-white text-sm font-medium truncate", children: r.merchant || "Unknown merchant" }),
+                /* @__PURE__ */ jsx4(CategoryBadge, { cat: r.category })
               ] }),
-              /* @__PURE__ */ jsxs3("div", { className: "flex items-center gap-2 text-xs text-gray-500 flex-wrap", children: [
-                /* @__PURE__ */ jsx3("span", { children: r.date }),
-                /* @__PURE__ */ jsx3("span", { children: "\xB7" }),
-                /* @__PURE__ */ jsx3("span", { children: r.paymentMethod }),
-                r.items.length > 0 && /* @__PURE__ */ jsxs3(Fragment2, { children: [
-                  /* @__PURE__ */ jsx3("span", { children: "\xB7" }),
-                  /* @__PURE__ */ jsxs3("span", { children: [
+              /* @__PURE__ */ jsxs4("div", { className: "flex items-center gap-2 text-xs text-gray-500 flex-wrap", children: [
+                /* @__PURE__ */ jsx4("span", { children: r.date }),
+                /* @__PURE__ */ jsx4("span", { children: "\xB7" }),
+                /* @__PURE__ */ jsx4("span", { children: r.paymentMethod }),
+                r.items.length > 0 && /* @__PURE__ */ jsxs4(Fragment2, { children: [
+                  /* @__PURE__ */ jsx4("span", { children: "\xB7" }),
+                  /* @__PURE__ */ jsxs4("span", { children: [
                     r.items.length,
                     " item",
                     r.items.length !== 1 ? "s" : ""
                   ] })
                 ] }),
-                r.notes && /* @__PURE__ */ jsxs3(Fragment2, { children: [
-                  /* @__PURE__ */ jsx3("span", { children: "\xB7" }),
-                  /* @__PURE__ */ jsx3("span", { className: "truncate max-w-[160px]", children: r.notes })
+                r.notes && /* @__PURE__ */ jsxs4(Fragment2, { children: [
+                  /* @__PURE__ */ jsx4("span", { children: "\xB7" }),
+                  /* @__PURE__ */ jsx4("span", { className: "truncate max-w-[160px]", children: r.notes })
                 ] })
               ] })
             ] }),
-            /* @__PURE__ */ jsxs3("div", { className: "shrink-0 text-right", children: [
-              /* @__PURE__ */ jsxs3("p", { className: "text-white font-semibold text-sm tabular-nums", children: [
+            /* @__PURE__ */ jsxs4("div", { className: "shrink-0 text-right", children: [
+              /* @__PURE__ */ jsxs4("p", { className: "text-white font-semibold text-sm tabular-nums", children: [
                 "$",
                 r.total.toFixed(2)
               ] }),
-              /* @__PURE__ */ jsx3("p", { className: "text-gray-600 text-[11px]", children: r.currency })
+              /* @__PURE__ */ jsx4("p", { className: "text-gray-600 text-[11px]", children: r.currency })
             ] }),
-            onDelete && /* @__PURE__ */ jsx3(
+            onDelete && /* @__PURE__ */ jsx4(
               "button",
               {
                 type: "button",
@@ -2434,14 +2991,14 @@ function ReceiptScanner({
                 disabled: deletingId === r.id,
                 className: "shrink-0 text-gray-600 hover:text-red-400 transition-colors disabled:opacity-40",
                 title: "Delete receipt",
-                children: deletingId === r.id ? /* @__PURE__ */ jsxs3(
+                children: deletingId === r.id ? /* @__PURE__ */ jsxs4(
                   "svg",
                   {
                     className: "w-4 h-4 animate-spin",
                     fill: "none",
                     viewBox: "0 0 24 24",
                     children: [
-                      /* @__PURE__ */ jsx3(
+                      /* @__PURE__ */ jsx4(
                         "circle",
                         {
                           className: "opacity-25",
@@ -2452,7 +3009,7 @@ function ReceiptScanner({
                           strokeWidth: "4"
                         }
                       ),
-                      /* @__PURE__ */ jsx3(
+                      /* @__PURE__ */ jsx4(
                         "path",
                         {
                           className: "opacity-75",
@@ -2462,7 +3019,7 @@ function ReceiptScanner({
                       )
                     ]
                   }
-                ) : /* @__PURE__ */ jsx3(
+                ) : /* @__PURE__ */ jsx4(
                   "svg",
                   {
                     className: "w-4 h-4",
@@ -2470,7 +3027,7 @@ function ReceiptScanner({
                     viewBox: "0 0 24 24",
                     stroke: "currentColor",
                     strokeWidth: 1.5,
-                    children: /* @__PURE__ */ jsx3(
+                    children: /* @__PURE__ */ jsx4(
                       "path",
                       {
                         strokeLinecap: "round",
@@ -2487,163 +3044,12 @@ function ReceiptScanner({
         r.id
       )) })
     ] }),
-    receipts.length === 0 && stage === "idle" && /* @__PURE__ */ jsx3("p", { className: "text-center text-gray-600 text-xs py-4", children: "No receipts saved yet \u2014 upload one above to get started." })
+    receipts.length === 0 && stage === "idle" && /* @__PURE__ */ jsx4("p", { className: "text-center text-gray-600 text-xs py-4", children: "No receipts saved yet \u2014 upload one above to get started." })
   ] });
 }
 
-// hooks/useClientList.ts
-import { useEffect as useEffect2, useState as useState3, useCallback as useCallback3, useRef as useRef3 } from "react";
-import { initializeApp, getApps } from "firebase/app";
-import {
-  getFirestore,
-  collection,
-  doc,
-  query,
-  orderBy,
-  limit,
-  onSnapshot,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  setDoc,
-  getDoc,
-  arrayUnion,
-  serverTimestamp
-} from "firebase/firestore";
-
-// firebase.config.ts
-var firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? "",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? "",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? ""
-};
-var PERMISSIONS_COLLECTION = "permissions";
-
-// hooks/useClientList.ts
-var app;
-var db;
-function getDB() {
-  if (!db) {
-    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-    db = getFirestore(app);
-  }
-  return db;
-}
-var PAGE_SIZE = 30;
-function useClientList(collectionId) {
-  const firestore = getDB();
-  const [clients, setClients] = useState3([]);
-  const [views, setViews] = useState3([]);
-  const [permissions, setPermissions] = useState3(DEFAULT_PERMISSIONS);
-  const [listTitle, setListTitle] = useState3(collectionId);
-  const [loading, setLoading] = useState3(true);
-  const [hasMore, setHasMore] = useState3(false);
-  const [pageLimit, setPageLimit] = useState3(PAGE_SIZE);
-  const loadingMore = useRef3(false);
-  useEffect2(() => {
-    const q = query(
-      collection(firestore, collectionId),
-      orderBy("date", "desc"),
-      limit(pageLimit + 1)
-    );
-    const unsub = onSnapshot(q, (snap) => {
-      const allDocs = snap.docs.filter((d) => !d.id.startsWith("_"));
-      setHasMore(allDocs.length > pageLimit);
-      const records = allDocs.slice(0, pageLimit).map((d) => ({ id: d.id, ...d.data() }));
-      setClients(records);
-      setLoading(false);
-      loadingMore.current = false;
-    }, (err) => {
-      console.error(`[useClientList] clients onSnapshot error (${collectionId}):`, err);
-      setLoading(false);
-      loadingMore.current = false;
-    });
-    return () => unsub();
-  }, [collectionId, firestore, pageLimit]);
-  useEffect2(() => {
-    const viewsRef = collection(firestore, collectionId, "_views");
-    const unsub = onSnapshot(viewsRef, (snap) => {
-      const saved = snap.docs.map((d) => ({
-        id: d.id,
-        ...d.data()
-      }));
-      setViews(saved);
-    }, (err) => {
-      console.error(`[useClientList] views onSnapshot error (${collectionId}):`, err);
-    });
-    return () => unsub();
-  }, [collectionId, firestore]);
-  useEffect2(() => {
-    const permRef = doc(firestore, PERMISSIONS_COLLECTION, collectionId);
-    getDoc(permRef).then((snap) => {
-      if (snap.exists()) {
-        setPermissions(snap.data());
-      }
-    }).catch((err) => {
-      console.error(`[useClientList] permissions load error (${collectionId}):`, err);
-    });
-  }, [collectionId, firestore]);
-  const onSave = useCallback3(async (id, field, value, updaterName, fromValue) => {
-    const docRef = doc(firestore, collectionId, id);
-    const changeEntry = {
-      at: { seconds: Math.floor(Date.now() / 1e3) },
-      by: updaterName,
-      field,
-      from: String(fromValue ?? ""),
-      to: String(value)
-    };
-    await updateDoc(docRef, {
-      [field]: value,
-      updatedAt: serverTimestamp(),
-      updatedByName: updaterName,
-      changeLog: arrayUnion(changeEntry)
-    });
-  }, [collectionId, firestore]);
-  const onSaveView = useCallback3(async (view) => {
-    const viewsRef = collection(firestore, collectionId, "_views");
-    const docRef = await addDoc(viewsRef, { ...view, createdAt: serverTimestamp() });
-    return docRef.id;
-  }, [collectionId, firestore]);
-  const onDeleteView = useCallback3(async (id) => {
-    const viewRef = doc(firestore, collectionId, "_views", id);
-    await deleteDoc(viewRef);
-  }, [collectionId, firestore]);
-  const onRenameList = useCallback3(async (name) => {
-    const metaRef = doc(firestore, collectionId, "_meta");
-    await setDoc(metaRef, { title: name }, { merge: true });
-    setListTitle(name);
-  }, [collectionId, firestore]);
-  const onSavePermissions = useCallback3(async (matrix) => {
-    const permRef = doc(firestore, PERMISSIONS_COLLECTION, collectionId);
-    await setDoc(permRef, matrix);
-    setPermissions(matrix);
-  }, [collectionId, firestore]);
-  const onLoadMore = useCallback3(async () => {
-    if (loadingMore.current || !hasMore) return;
-    loadingMore.current = true;
-    setPageLimit((prev) => prev + PAGE_SIZE);
-  }, [hasMore]);
-  return {
-    clients,
-    views,
-    permissions,
-    loading,
-    hasMore,
-    listTitle,
-    onSave,
-    onSaveView,
-    onDeleteView,
-    onSavePermissions,
-    onRenameList,
-    onLoadMore
-  };
-}
-
 // hooks/useClientListMock.ts
-import { useState as useState4, useCallback as useCallback4 } from "react";
+import { useState as useState5, useCallback as useCallback5 } from "react";
 function useClientListMock(_collectionId, options = {}) {
   const {
     initialClients = [],
@@ -2653,13 +3059,13 @@ function useClientListMock(_collectionId, options = {}) {
     loading: initialLoading = false,
     hasMore: initialHasMore = false
   } = options;
-  const [clients, setClients] = useState4(initialClients);
-  const [views, setViews] = useState4(initialViews);
-  const [listTitle, setListTitle] = useState4(initialTitle ?? _collectionId);
-  const [permissions, setPermissions] = useState4(initialPermissions);
-  const [loading] = useState4(initialLoading);
-  const [hasMore] = useState4(initialHasMore);
-  const onSave = useCallback4(async (id, field, value, updaterName, fromValue) => {
+  const [clients, setClients] = useState5(initialClients);
+  const [views, setViews] = useState5(initialViews);
+  const [listTitle, setListTitle] = useState5(initialTitle ?? _collectionId);
+  const [permissions, setPermissions] = useState5(initialPermissions);
+  const [loading] = useState5(initialLoading);
+  const [hasMore] = useState5(initialHasMore);
+  const onSave = useCallback5(async (id, field, value, updaterName, fromValue) => {
     const changeEntry = {
       at: { seconds: Math.floor(Date.now() / 1e3) },
       by: updaterName,
@@ -2679,21 +3085,21 @@ function useClientListMock(_collectionId, options = {}) {
       )
     );
   }, []);
-  const onSaveView = useCallback4(async (view) => {
+  const onSaveView = useCallback5(async (view) => {
     const id = `mock-view-${Date.now()}`;
     setViews((prev) => [...prev, { id, ...view }]);
     return id;
   }, []);
-  const onDeleteView = useCallback4(async (id) => {
+  const onDeleteView = useCallback5(async (id) => {
     setViews((prev) => prev.filter((v) => v.id !== id));
   }, []);
-  const onRenameList = useCallback4(async (name) => {
+  const onRenameList = useCallback5(async (name) => {
     setListTitle(name);
   }, []);
-  const onSavePermissions = useCallback4(async (matrix) => {
+  const onSavePermissions = useCallback5(async (matrix) => {
     setPermissions(matrix);
   }, []);
-  const onLoadMore = useCallback4(async () => {
+  const onLoadMore = useCallback5(async () => {
   }, []);
   return {
     clients,
@@ -2712,15 +3118,15 @@ function useClientListMock(_collectionId, options = {}) {
 }
 
 // hooks/useReceiptListMock.ts
-import { useState as useState5, useCallback as useCallback5 } from "react";
+import { useState as useState6, useCallback as useCallback6 } from "react";
 function uid2() {
   return Math.random().toString(36).slice(2, 10);
 }
 function useReceiptListMock(options = {}) {
-  const [receipts, setReceipts] = useState5(
+  const [receipts, setReceipts] = useState6(
     options.initialReceipts ?? []
   );
-  const onSave = useCallback5(
+  const onSave = useCallback6(
     async (record) => {
       const full = {
         ...record,
@@ -2731,7 +3137,7 @@ function useReceiptListMock(options = {}) {
     },
     []
   );
-  const onDelete = useCallback5(async (id) => {
+  const onDelete = useCallback6(async (id) => {
     setReceipts((prev) => prev.filter((r) => r.id !== id));
   }, []);
   return { receipts, onSave, onDelete };
@@ -2739,6 +3145,7 @@ function useReceiptListMock(options = {}) {
 export {
   ClientList,
   DEFAULT_PERMISSIONS,
+  OdsPanel,
   ReceiptScanner,
   useClientList,
   useClientListMock,

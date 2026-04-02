@@ -32,6 +32,7 @@ var index_exports = {};
 __export(index_exports, {
   ClientList: () => ClientList,
   DEFAULT_PERMISSIONS: () => DEFAULT_PERMISSIONS,
+  OdsPanel: () => OdsPanel,
   ReceiptScanner: () => ReceiptScanner,
   useClientList: () => useClientList,
   useClientListMock: () => useClientListMock,
@@ -1821,9 +1822,543 @@ function ClientList({
   ] });
 }
 
-// ReceiptScanner.tsx
+// OdsPanel.tsx
+var import_react3 = require("react");
+var import_app2 = require("firebase/app");
+var import_firestore2 = require("firebase/firestore");
+var import_storage = require("firebase/storage");
+
+// hooks/useClientList.ts
 var import_react2 = require("react");
+var import_app = require("firebase/app");
+var import_firestore = require("firebase/firestore");
+
+// firebase.config.ts
+var firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? "",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? "",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? ""
+};
+var PERMISSIONS_COLLECTION = "permissions";
+
+// hooks/useClientList.ts
+var app;
+var db;
+function getDB() {
+  if (!db) {
+    app = (0, import_app.getApps)().length === 0 ? (0, import_app.initializeApp)(firebaseConfig) : (0, import_app.getApps)()[0];
+    db = (0, import_firestore.getFirestore)(app);
+  }
+  return db;
+}
+var PAGE_SIZE = 30;
+function useClientList(collectionId) {
+  const firestore = getDB();
+  const [clients, setClients] = (0, import_react2.useState)([]);
+  const [views, setViews] = (0, import_react2.useState)([]);
+  const [permissions, setPermissions] = (0, import_react2.useState)(DEFAULT_PERMISSIONS);
+  const [listTitle, setListTitle] = (0, import_react2.useState)(collectionId);
+  const [loading, setLoading] = (0, import_react2.useState)(true);
+  const [hasMore, setHasMore] = (0, import_react2.useState)(false);
+  const [pageLimit, setPageLimit] = (0, import_react2.useState)(PAGE_SIZE);
+  const loadingMore = (0, import_react2.useRef)(false);
+  (0, import_react2.useEffect)(() => {
+    const q = (0, import_firestore.query)(
+      (0, import_firestore.collection)(firestore, collectionId),
+      (0, import_firestore.orderBy)("date", "desc"),
+      (0, import_firestore.limit)(pageLimit + 1)
+    );
+    const unsub = (0, import_firestore.onSnapshot)(q, (snap) => {
+      const allDocs = snap.docs.filter((d) => !d.id.startsWith("_"));
+      setHasMore(allDocs.length > pageLimit);
+      const records = allDocs.slice(0, pageLimit).map((d) => ({ id: d.id, ...d.data() }));
+      setClients(records);
+      setLoading(false);
+      loadingMore.current = false;
+    }, (err) => {
+      console.error(`[useClientList] clients onSnapshot error (${collectionId}):`, err);
+      setLoading(false);
+      loadingMore.current = false;
+    });
+    return () => unsub();
+  }, [collectionId, firestore, pageLimit]);
+  (0, import_react2.useEffect)(() => {
+    const viewsRef = (0, import_firestore.collection)(firestore, collectionId, "_views");
+    const unsub = (0, import_firestore.onSnapshot)(viewsRef, (snap) => {
+      const saved = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data()
+      }));
+      setViews(saved);
+    }, (err) => {
+      console.error(`[useClientList] views onSnapshot error (${collectionId}):`, err);
+    });
+    return () => unsub();
+  }, [collectionId, firestore]);
+  (0, import_react2.useEffect)(() => {
+    const permRef = (0, import_firestore.doc)(firestore, PERMISSIONS_COLLECTION, collectionId);
+    (0, import_firestore.getDoc)(permRef).then((snap) => {
+      if (snap.exists()) {
+        setPermissions(snap.data());
+      }
+    }).catch((err) => {
+      console.error(`[useClientList] permissions load error (${collectionId}):`, err);
+    });
+  }, [collectionId, firestore]);
+  const onSave = (0, import_react2.useCallback)(async (id, field, value, updaterName, fromValue) => {
+    const docRef = (0, import_firestore.doc)(firestore, collectionId, id);
+    const changeEntry = {
+      at: { seconds: Math.floor(Date.now() / 1e3) },
+      by: updaterName,
+      field,
+      from: String(fromValue ?? ""),
+      to: String(value)
+    };
+    await (0, import_firestore.updateDoc)(docRef, {
+      [field]: value,
+      updatedAt: (0, import_firestore.serverTimestamp)(),
+      updatedByName: updaterName,
+      changeLog: (0, import_firestore.arrayUnion)(changeEntry)
+    });
+  }, [collectionId, firestore]);
+  const onSaveView = (0, import_react2.useCallback)(async (view) => {
+    const viewsRef = (0, import_firestore.collection)(firestore, collectionId, "_views");
+    const docRef = await (0, import_firestore.addDoc)(viewsRef, { ...view, createdAt: (0, import_firestore.serverTimestamp)() });
+    return docRef.id;
+  }, [collectionId, firestore]);
+  const onDeleteView = (0, import_react2.useCallback)(async (id) => {
+    const viewRef = (0, import_firestore.doc)(firestore, collectionId, "_views", id);
+    await (0, import_firestore.deleteDoc)(viewRef);
+  }, [collectionId, firestore]);
+  const onRenameList = (0, import_react2.useCallback)(async (name) => {
+    const metaRef = (0, import_firestore.doc)(firestore, collectionId, "_meta");
+    await (0, import_firestore.setDoc)(metaRef, { title: name }, { merge: true });
+    setListTitle(name);
+  }, [collectionId, firestore]);
+  const onSavePermissions = (0, import_react2.useCallback)(async (matrix) => {
+    const permRef = (0, import_firestore.doc)(firestore, PERMISSIONS_COLLECTION, collectionId);
+    await (0, import_firestore.setDoc)(permRef, matrix);
+    setPermissions(matrix);
+  }, [collectionId, firestore]);
+  const onLoadMore = (0, import_react2.useCallback)(async () => {
+    if (loadingMore.current || !hasMore) return;
+    loadingMore.current = true;
+    setPageLimit((prev) => prev + PAGE_SIZE);
+  }, [hasMore]);
+  return {
+    clients,
+    views,
+    permissions,
+    loading,
+    hasMore,
+    listTitle,
+    onSave,
+    onSaveView,
+    onDeleteView,
+    onSavePermissions,
+    onRenameList,
+    onLoadMore
+  };
+}
+
+// OdsPanel.tsx
 var import_jsx_runtime3 = require("react/jsx-runtime");
+var S = {
+  overlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0,0,0,0.65)",
+    zIndex: 1e3,
+    display: "flex",
+    alignItems: "stretch",
+    justifyContent: "flex-end"
+  },
+  drawer: {
+    width: "440px",
+    maxWidth: "100vw",
+    background: "#111827",
+    borderLeft: "1px solid #1f2937",
+    display: "flex",
+    flexDirection: "column",
+    fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif",
+    overflowY: "hidden"
+  },
+  drawerHeader: {
+    padding: "20px 24px",
+    borderBottom: "1px solid #1f2937",
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: "12px",
+    flexShrink: 0
+  },
+  drawerBody: { flex: 1, overflowY: "auto", padding: "20px 24px" },
+  drawerFooter: {
+    padding: "14px 24px",
+    borderTop: "1px solid #1f2937",
+    display: "flex",
+    gap: "10px",
+    justifyContent: "flex-end",
+    flexShrink: 0
+  },
+  label: {
+    display: "block",
+    fontSize: "11px",
+    fontWeight: 600,
+    color: "#9ca3af",
+    letterSpacing: "0.06em",
+    textTransform: "uppercase",
+    marginBottom: "6px"
+  },
+  input: {
+    width: "100%",
+    padding: "9px 12px",
+    background: "#1f2937",
+    border: "1px solid #374151",
+    borderRadius: "8px",
+    color: "#f9fafb",
+    fontSize: "13px",
+    outline: "none",
+    fontFamily: "inherit",
+    boxSizing: "border-box"
+  },
+  currencyWrap: { position: "relative" },
+  currencyPrefix: {
+    position: "absolute",
+    left: "12px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    color: "#9ca3af",
+    fontSize: "13px",
+    pointerEvents: "none"
+  },
+  fieldGroup: { marginBottom: "16px" },
+  btnPrimary: {
+    padding: "9px 20px",
+    background: "#3b82f6",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "13px",
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "inherit"
+  },
+  btnGhost: {
+    padding: "9px 20px",
+    background: "transparent",
+    color: "#9ca3af",
+    border: "1px solid #374151",
+    borderRadius: "8px",
+    fontSize: "13px",
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "inherit"
+  },
+  addBtn: {
+    padding: "7px 16px",
+    background: "#3b82f6",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "12px",
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "inherit",
+    whiteSpace: "nowrap"
+  },
+  toolbar: {
+    background: "#0a0f1a",
+    borderBottom: "1px solid #1e293b",
+    padding: "8px 20px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "12px",
+    flexShrink: 0
+  },
+  errorBox: {
+    background: "#2d1515",
+    border: "1px solid #7f1d1d",
+    borderRadius: "8px",
+    padding: "10px 14px",
+    fontSize: "12px",
+    color: "#fca5a5",
+    marginBottom: "14px"
+  },
+  fileBtn: {
+    display: "inline-block",
+    padding: "8px 14px",
+    background: "#1f2937",
+    border: "1px dashed #4b5563",
+    borderRadius: "8px",
+    color: "#d1d5db",
+    fontSize: "12px",
+    cursor: "pointer",
+    fontFamily: "inherit"
+  },
+  fileName: { fontSize: "11px", color: "#6b7280", marginTop: "4px" }
+};
+function getDB2() {
+  return (0, import_firestore2.getFirestore)((0, import_app2.getApp)());
+}
+function getStore() {
+  return (0, import_storage.getStorage)((0, import_app2.getApp)());
+}
+async function seedPermissionsIfAbsent(collectionId) {
+  const db2 = getDB2();
+  const permRef = (0, import_firestore2.doc)(db2, "permissions", collectionId);
+  const snap = await (0, import_firestore2.getDoc)(permRef);
+  if (!snap.exists()) {
+    const matrix = {
+      rep: { ...DEFAULT_PERMISSIONS.rep },
+      manager: { ...DEFAULT_PERMISSIONS.manager },
+      admin: { ...DEFAULT_PERMISSIONS.admin }
+    };
+    await (0, import_firestore2.setDoc)(permRef, matrix);
+  }
+}
+function AddDrawer({ fields, title, onClose, onSubmit }) {
+  const initial = Object.fromEntries(
+    fields.map((f) => [f.key, f.defaultValue ?? (f.type === "checkbox" ? "false" : "")])
+  );
+  const [values, setValues] = (0, import_react3.useState)(initial);
+  const [files, setFiles] = (0, import_react3.useState)({});
+  const [saving, setSaving] = (0, import_react3.useState)(false);
+  const [error, setError] = (0, import_react3.useState)("");
+  const set = (key, val) => setValues((v) => ({ ...v, [key]: val }));
+  const setFile = (key, file) => setFiles((f) => ({ ...f, [key]: file }));
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const missing = fields.filter((f) => f.required && f.type !== "file" && !values[f.key]?.trim());
+    const missingFiles = fields.filter((f) => f.required && f.type === "file" && !files[f.key]);
+    if (missing.length || missingFiles.length) {
+      setError(`Required: ${[...missing, ...missingFiles].map((f) => f.label).join(", ")}`);
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      await onSubmit(values, files);
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Save failed. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+  function renderField(field) {
+    const val = values[field.key];
+    switch (field.type) {
+      case "select":
+        return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+          "select",
+          {
+            value: val,
+            onChange: (e) => set(field.key, e.target.value),
+            style: { ...S.input, cursor: "pointer" },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "", children: "Select\u2026" }),
+              field.options?.map((o) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: o, children: o }, o))
+            ]
+          }
+        );
+      case "checkbox":
+        return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { style: { display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+            "input",
+            {
+              type: "checkbox",
+              checked: val === "true",
+              onChange: (e) => set(field.key, e.target.checked ? "true" : "false"),
+              style: { width: "16px", height: "16px", accentColor: "#3b82f6" }
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { style: { fontSize: "13px", color: "#d1d5db" }, children: "Yes" })
+        ] });
+      case "currency":
+        return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { style: S.currencyWrap, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { style: S.currencyPrefix, children: "$" }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+            "input",
+            {
+              type: "number",
+              min: "0",
+              step: "0.01",
+              value: val,
+              onChange: (e) => set(field.key, e.target.value),
+              placeholder: field.placeholder ?? "0.00",
+              style: { ...S.input, paddingLeft: "24px" }
+            }
+          )
+        ] });
+      case "number":
+        return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          "input",
+          {
+            type: "number",
+            value: val,
+            onChange: (e) => set(field.key, e.target.value),
+            placeholder: field.placeholder,
+            style: S.input
+          }
+        );
+      case "textarea":
+        return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          "textarea",
+          {
+            value: val,
+            onChange: (e) => set(field.key, e.target.value),
+            placeholder: field.placeholder,
+            rows: 3,
+            style: { ...S.input, resize: "vertical" }
+          }
+        );
+      case "file":
+        return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { style: S.fileBtn, children: [
+            files[field.key] ? "Change file" : "Choose file",
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+              "input",
+              {
+                type: "file",
+                style: { display: "none" },
+                onChange: (e) => {
+                  if (e.target.files?.[0]) setFile(field.key, e.target.files[0]);
+                }
+              }
+            )
+          ] }),
+          files[field.key] && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { style: S.fileName, children: files[field.key].name })
+        ] });
+      default:
+        return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          "input",
+          {
+            type: field.type,
+            value: val,
+            onChange: (e) => set(field.key, e.target.value),
+            placeholder: field.placeholder,
+            style: S.input
+          }
+        );
+    }
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { style: S.overlay, onClick: (e) => e.target === e.currentTarget && onClose(), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { style: S.drawer, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { style: S.drawerHeader, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { style: { fontSize: "15px", fontWeight: 700, color: "#f9fafb" }, children: [
+          "Add ",
+          title
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { style: { fontSize: "11px", color: "#6b7280", marginTop: "3px" }, children: "Appears in the list immediately after saving" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+        "button",
+        {
+          onClick: onClose,
+          style: { background: "none", border: "none", color: "#6b7280", cursor: "pointer", fontSize: "20px", lineHeight: 1, padding: "0 4px" },
+          children: "\xD7"
+        }
+      )
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("form", { onSubmit: handleSubmit, style: { display: "contents" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { style: S.drawerBody, children: [
+        error && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { style: S.errorBox, children: error }),
+        fields.map((f) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { style: S.fieldGroup, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { style: S.label, children: [
+            f.label,
+            f.required && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { style: { color: "#ef4444", marginLeft: "3px" }, children: "*" })
+          ] }),
+          renderField(f)
+        ] }, f.key))
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { style: S.drawerFooter, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { type: "button", onClick: onClose, style: S.btnGhost, children: "Cancel" }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { type: "submit", style: { ...S.btnPrimary, opacity: saving ? 0.65 : 1 }, disabled: saving, children: saving ? "Saving\u2026" : `Add ${title}` })
+      ] })
+    ] })
+  ] }) });
+}
+function OdsPanel({
+  collectionId,
+  title,
+  subtitle,
+  uid: uid3,
+  userName,
+  isAdmin = false,
+  currentRole = "admin",
+  fields,
+  transformRecord
+}) {
+  const [drawerOpen, setDrawerOpen] = (0, import_react3.useState)(false);
+  const listProps = useClientList(collectionId);
+  (0, import_react3.useEffect)(() => {
+    seedPermissionsIfAbsent(collectionId).catch(console.error);
+  }, [collectionId]);
+  const handleAdd = (0, import_react3.useCallback)(async (values, files) => {
+    const db2 = getDB2();
+    const storage = getStore();
+    const fileUrls = {};
+    for (const [key, file] of Object.entries(files)) {
+      const fieldDef = fields.find((f) => f.key === key);
+      const basePath = fieldDef?.storagePath ?? collectionId;
+      const storageRef = (0, import_storage.ref)(storage, `${basePath}/${Date.now()}-${file.name}`);
+      await (0, import_storage.uploadBytes)(storageRef, file);
+      fileUrls[key] = await (0, import_storage.getDownloadURL)(storageRef);
+    }
+    const coerced = { ...values };
+    for (const f of fields) {
+      if ((f.type === "number" || f.type === "currency") && values[f.key]) {
+        coerced[f.key] = parseFloat(values[f.key]) || 0;
+      }
+    }
+    const base = transformRecord ? transformRecord(values, fileUrls) : { ...coerced, ...fileUrls };
+    await (0, import_firestore2.addDoc)((0, import_firestore2.collection)(db2, collectionId), {
+      ...base,
+      date: base.date ?? (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
+      createdAt: (0, import_firestore2.serverTimestamp)(),
+      createdBy: uid3,
+      createdByName: userName
+    });
+  }, [collectionId, fields, uid3, userName, transformRecord]);
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { style: { display: "flex", flexDirection: "column", height: "100%", background: "#030712" }, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { style: S.toolbar, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { style: { display: "flex", alignItems: "center", gap: "10px" }, children: subtitle && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { style: { fontSize: "11px", color: "#4b5563", letterSpacing: "0.04em" }, children: subtitle }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("button", { style: S.addBtn, onClick: () => setDrawerOpen(true), children: [
+        "+ Add ",
+        title
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { style: { flex: 1, minHeight: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+      ClientList,
+      {
+        ...listProps,
+        uid: uid3,
+        userName,
+        isAdmin,
+        currentRole
+      }
+    ) }),
+    drawerOpen && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+      AddDrawer,
+      {
+        fields,
+        collectionId,
+        title,
+        onClose: () => setDrawerOpen(false),
+        onSubmit: handleAdd
+      }
+    )
+  ] });
+}
+
+// ReceiptScanner.tsx
+var import_react4 = require("react");
+var import_jsx_runtime4 = require("react/jsx-runtime");
 var CATEGORIES = [
   "Food & Dining",
   "Travel",
@@ -1874,7 +2409,7 @@ function blankForm() {
   };
 }
 function GeminiStar({ size = 12, color = "#a78bfa" }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
     "path",
     {
       d: "M12 2L13.5 9.5L21 12L13.5 14.5L12 22L10.5 14.5L3 12L10.5 9.5L12 2Z",
@@ -1884,10 +2419,10 @@ function GeminiStar({ size = 12, color = "#a78bfa" }) {
 }
 function CategoryBadge({ cat }) {
   const cls = CATEGORY_COLORS[cat] ?? CATEGORY_COLORS["Other"];
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `text-[11px] border px-2 py-0.5 rounded-full font-medium ${cls}`, children: cat });
+  return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: `text-[11px] border px-2 py-0.5 rounded-full font-medium ${cls}`, children: cat });
 }
 function FieldLabel({ children }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "text-[11px] text-gray-500 font-medium uppercase tracking-wider", children });
+  return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "text-[11px] text-gray-500 font-medium uppercase tracking-wider", children });
 }
 function ReceiptScanner({
   receipts,
@@ -1896,13 +2431,13 @@ function ReceiptScanner({
   onDelete,
   className = ""
 }) {
-  const [stage, setStage] = (0, import_react2.useState)("idle");
-  const [dragOver, setDragOver] = (0, import_react2.useState)(false);
-  const [error, setError] = (0, import_react2.useState)(null);
-  const [form, setForm] = (0, import_react2.useState)(blankForm());
-  const [preview, setPreview] = (0, import_react2.useState)(null);
-  const [deletingId, setDeletingId] = (0, import_react2.useState)(null);
-  const fileRef = (0, import_react2.useRef)(null);
+  const [stage, setStage] = (0, import_react4.useState)("idle");
+  const [dragOver, setDragOver] = (0, import_react4.useState)(false);
+  const [error, setError] = (0, import_react4.useState)(null);
+  const [form, setForm] = (0, import_react4.useState)(blankForm());
+  const [preview, setPreview] = (0, import_react4.useState)(null);
+  const [deletingId, setDeletingId] = (0, import_react4.useState)(null);
+  const fileRef = (0, import_react4.useRef)(null);
   function setField(key, val) {
     setForm((f) => ({ ...f, [key]: val }));
   }
@@ -1912,7 +2447,7 @@ function ReceiptScanner({
       return { ...m, total: +(m.subtotal + m.tax + m.tip).toFixed(2) };
     });
   }
-  const handleFile = (0, import_react2.useCallback)(
+  const handleFile = (0, import_react4.useCallback)(
     async (file) => {
       setError(null);
       const allowed = [
@@ -2010,8 +2545,8 @@ function ReceiptScanner({
     setError(null);
     setStage("idle");
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: `space-y-6 ${className}`, children: [
-    (stage === "idle" || stage === "processing") && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+  return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: `space-y-6 ${className}`, children: [
+    (stage === "idle" || stage === "processing") && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
       "div",
       {
         onDragOver: (e) => {
@@ -2026,7 +2561,7 @@ function ReceiptScanner({
           stage === "processing" ? "border-violet-700 bg-violet-950/20 cursor-default" : dragOver ? "border-violet-500 bg-violet-950/30 cursor-copy" : "border-gray-700 bg-gray-900/50 hover:border-gray-600 hover:bg-gray-900 cursor-pointer"
         ].join(" "),
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
             "input",
             {
               ref: fileRef,
@@ -2036,16 +2571,16 @@ function ReceiptScanner({
               onChange: onInputChange
             }
           ),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "flex flex-col items-center justify-center py-14 px-6 text-center", children: stage === "processing" ? /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(import_jsx_runtime3.Fragment, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "relative w-14 h-14 mb-5", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "absolute inset-0 rounded-full border-4 border-violet-900" }),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "absolute inset-0 rounded-full border-4 border-t-violet-400 animate-spin" }),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "absolute inset-0 flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(GeminiStar, { size: 20 }) })
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "flex flex-col items-center justify-center py-14 px-6 text-center", children: stage === "processing" ? /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(import_jsx_runtime4.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "relative w-14 h-14 mb-5", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "absolute inset-0 rounded-full border-4 border-violet-900" }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "absolute inset-0 rounded-full border-4 border-t-violet-400 animate-spin" }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "absolute inset-0 flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(GeminiStar, { size: 20 }) })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-white font-medium text-sm", children: "Gemini is reading your receipt\u2026" }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-gray-500 text-xs mt-1", children: "This usually takes a few seconds" })
-          ] }) : /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(import_jsx_runtime3.Fragment, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "w-12 h-12 rounded-2xl bg-gray-800 border border-gray-700 flex items-center justify-center mb-4", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "text-white font-medium text-sm", children: "Gemini is reading your receipt\u2026" }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "text-gray-500 text-xs mt-1", children: "This usually takes a few seconds" })
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(import_jsx_runtime4.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "w-12 h-12 rounded-2xl bg-gray-800 border border-gray-700 flex items-center justify-center mb-4", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
               "svg",
               {
                 className: "w-6 h-6 text-gray-400",
@@ -2053,7 +2588,7 @@ function ReceiptScanner({
                 viewBox: "0 0 24 24",
                 stroke: "currentColor",
                 strokeWidth: 1.5,
-                children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                   "path",
                   {
                     strokeLinecap: "round",
@@ -2063,18 +2598,18 @@ function ReceiptScanner({
                 )
               }
             ) }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-white font-medium text-sm mb-1", children: "Drop a receipt here or click to upload" }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-gray-500 text-xs mb-4", children: "JPG, PNG, WebP, or PDF \u2014 Gemini extracts the details" }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "inline-flex items-center gap-1.5 text-xs text-violet-400 font-medium", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(GeminiStar, { size: 11 }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "text-white font-medium text-sm mb-1", children: "Drop a receipt here or click to upload" }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "text-gray-500 text-xs mb-4", children: "JPG, PNG, WebP, or PDF \u2014 Gemini extracts the details" }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "inline-flex items-center gap-1.5 text-xs text-violet-400 font-medium", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(GeminiStar, { size: 11 }),
               "Powered by Gemini"
             ] })
           ] }) })
         ]
       }
     ),
-    error && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-start gap-3 bg-red-950/30 border border-red-800/60 rounded-xl px-4 py-3", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+    error && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "flex items-start gap-3 bg-red-950/30 border border-red-800/60 rounded-xl px-4 py-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
         "svg",
         {
           className: "w-4 h-4 text-red-400 shrink-0 mt-0.5",
@@ -2082,7 +2617,7 @@ function ReceiptScanner({
           viewBox: "0 0 24 24",
           stroke: "currentColor",
           strokeWidth: 2,
-          children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
             "path",
             {
               strokeLinecap: "round",
@@ -2092,16 +2627,16 @@ function ReceiptScanner({
           )
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-red-400 text-xs leading-relaxed", children: error })
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "text-red-400 text-xs leading-relaxed", children: error })
     ] }),
-    (stage === "review" || stage === "saving") && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center justify-between px-5 py-4 border-b border-gray-800", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center gap-2.5", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "w-7 h-7 rounded-lg bg-violet-900/50 border border-violet-800/60 flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(GeminiStar, { size: 13 }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "text-white font-semibold text-sm", children: "Review & confirm" }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "text-xs text-gray-500 hidden sm:block", children: "Edit anything Gemini got wrong" })
+    (stage === "review" || stage === "saving") && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "flex items-center justify-between px-5 py-4 border-b border-gray-800", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "flex items-center gap-2.5", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "w-7 h-7 rounded-lg bg-violet-900/50 border border-violet-800/60 flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(GeminiStar, { size: 13 }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "text-white font-semibold text-sm", children: "Review & confirm" }),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "text-xs text-gray-500 hidden sm:block", children: "Edit anything Gemini got wrong" })
         ] }),
-        preview && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+        preview && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
           "img",
           {
             src: preview,
@@ -2110,11 +2645,11 @@ function ReceiptScanner({
           }
         )
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "p-5 space-y-5", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: "Merchant" }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "p-5 space-y-5", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(FieldLabel, { children: "Merchant" }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
               "input",
               {
                 type: "text",
@@ -2125,9 +2660,9 @@ function ReceiptScanner({
               }
             )
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: "Date" }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(FieldLabel, { children: "Date" }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
               "input",
               {
                 type: "date",
@@ -2138,38 +2673,38 @@ function ReceiptScanner({
             )
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: "Category" }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(FieldLabel, { children: "Category" }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
               "select",
               {
                 value: form.category,
                 onChange: (e) => setField("category", e.target.value),
                 className: "bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600/30 transition",
-                children: CATEGORIES.map((c) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: c, children: c }, c))
+                children: CATEGORIES.map((c) => /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("option", { value: c, children: c }, c))
               }
             )
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: "Payment method" }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(FieldLabel, { children: "Payment method" }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
               "select",
               {
                 value: form.paymentMethod,
                 onChange: (e) => setField("paymentMethod", e.target.value),
                 className: "bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600/30 transition",
-                children: PAYMENT_METHODS.map((p) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: p, children: p }, p))
+                children: PAYMENT_METHODS.map((p) => /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("option", { value: p, children: p }, p))
               }
             )
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "grid grid-cols-2 sm:grid-cols-4 gap-4", children: [
-          ["subtotal", "tax", "tip"].map((k) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: k }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "relative", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none", children: "$" }),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "grid grid-cols-2 sm:grid-cols-4 gap-4", children: [
+          ["subtotal", "tax", "tip"].map((k) => /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(FieldLabel, { children: k }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "relative", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none", children: "$" }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                 "input",
                 {
                   type: "number",
@@ -2182,11 +2717,11 @@ function ReceiptScanner({
               )
             ] })
           ] }, k)),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: "Total" }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "relative", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none", children: "$" }),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(FieldLabel, { children: "Total" }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "relative", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none", children: "$" }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                 "input",
                 {
                   type: "number",
@@ -2200,17 +2735,17 @@ function ReceiptScanner({
             ] })
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center justify-between mb-2", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: "Line items" }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "flex items-center justify-between mb-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(FieldLabel, { children: "Line items" }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
               "button",
               {
                 type: "button",
                 onClick: addItem,
                 className: "text-xs text-violet-400 hover:text-violet-300 font-medium transition-colors flex items-center gap-1",
                 children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                     "svg",
                     {
                       className: "w-3 h-3",
@@ -2218,7 +2753,7 @@ function ReceiptScanner({
                       viewBox: "0 0 24 24",
                       stroke: "currentColor",
                       strokeWidth: 2.5,
-                      children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                      children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                         "path",
                         {
                           strokeLinecap: "round",
@@ -2233,20 +2768,20 @@ function ReceiptScanner({
               }
             )
           ] }),
-          form.items.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "rounded-xl border border-gray-800 overflow-hidden", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("table", { className: "w-full text-xs", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { className: "border-b border-gray-800", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "text-left text-gray-500 font-medium px-3 py-2 w-full", children: "Description" }),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "text-right text-gray-500 font-medium px-3 py-2 whitespace-nowrap", children: "Qty" }),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "text-right text-gray-500 font-medium px-3 py-2 whitespace-nowrap", children: "Unit $" }),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "text-right text-gray-500 font-medium px-3 py-2 whitespace-nowrap", children: "Total" }),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "px-2 py-2 w-6" })
+          form.items.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "rounded-xl border border-gray-800 overflow-hidden", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("table", { className: "w-full text-xs", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("tr", { className: "border-b border-gray-800", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "text-left text-gray-500 font-medium px-3 py-2 w-full", children: "Description" }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "text-right text-gray-500 font-medium px-3 py-2 whitespace-nowrap", children: "Qty" }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "text-right text-gray-500 font-medium px-3 py-2 whitespace-nowrap", children: "Unit $" }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "text-right text-gray-500 font-medium px-3 py-2 whitespace-nowrap", children: "Total" }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("th", { className: "px-2 py-2 w-6" })
             ] }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tbody", { children: form.items.map((item, i) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("tbody", { children: form.items.map((item, i) => /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
               "tr",
               {
                 className: i < form.items.length - 1 ? "border-b border-gray-800/60" : "",
                 children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                     "input",
                     {
                       type: "text",
@@ -2256,7 +2791,7 @@ function ReceiptScanner({
                       className: "w-full bg-transparent text-white placeholder:text-gray-600 focus:outline-none focus:bg-gray-800 rounded px-1 py-0.5 transition-colors"
                     }
                   ) }),
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                     "input",
                     {
                       type: "number",
@@ -2271,7 +2806,7 @@ function ReceiptScanner({
                       className: "w-14 text-right bg-transparent text-white focus:outline-none focus:bg-gray-800 rounded px-1 py-0.5 transition-colors"
                     }
                   ) }),
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                     "input",
                     {
                       type: "number",
@@ -2286,17 +2821,17 @@ function ReceiptScanner({
                       className: "w-20 text-right bg-transparent text-white focus:outline-none focus:bg-gray-800 rounded px-1 py-0.5 transition-colors"
                     }
                   ) }),
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("td", { className: "px-3 py-1.5 text-right text-gray-300 tabular-nums", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("td", { className: "px-3 py-1.5 text-right text-gray-300 tabular-nums", children: [
                     "$",
                     item.total.toFixed(2)
                   ] }),
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                     "button",
                     {
                       type: "button",
                       onClick: () => removeItem(item.id),
                       className: "text-gray-600 hover:text-red-400 transition-colors",
-                      children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                      children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                         "svg",
                         {
                           className: "w-3.5 h-3.5",
@@ -2304,7 +2839,7 @@ function ReceiptScanner({
                           viewBox: "0 0 24 24",
                           stroke: "currentColor",
                           strokeWidth: 2,
-                          children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                          children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                             "path",
                             {
                               strokeLinecap: "round",
@@ -2320,11 +2855,11 @@ function ReceiptScanner({
               },
               item.id
             )) })
-          ] }) }) : /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-gray-600 text-xs italic py-2", children: "No line items detected \u2014 add them manually if needed." })
+          ] }) }) : /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "text-gray-600 text-xs italic py-2", children: "No line items detected \u2014 add them manually if needed." })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: "Notes" }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(FieldLabel, { children: "Notes" }),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
             "textarea",
             {
               value: form.notes,
@@ -2336,8 +2871,8 @@ function ReceiptScanner({
           )
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center justify-between px-5 py-4 border-t border-gray-800 bg-gray-950/30", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "flex items-center justify-between px-5 py-4 border-t border-gray-800 bg-gray-950/30", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
           "button",
           {
             type: "button",
@@ -2347,7 +2882,7 @@ function ReceiptScanner({
             children: "Cancel"
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
           "button",
           {
             type: "button",
@@ -2355,8 +2890,8 @@ function ReceiptScanner({
             disabled: stage === "saving",
             className: "inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold px-5 py-2 rounded-xl transition-colors",
             children: [
-              stage === "saving" && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("svg", { className: "w-4 h-4 animate-spin", fill: "none", viewBox: "0 0 24 24", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+              stage === "saving" && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("svg", { className: "w-4 h-4 animate-spin", fill: "none", viewBox: "0 0 24 24", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                   "circle",
                   {
                     className: "opacity-25",
@@ -2367,7 +2902,7 @@ function ReceiptScanner({
                     strokeWidth: "4"
                   }
                 ),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                   "path",
                   {
                     className: "opacity-75",
@@ -2382,19 +2917,19 @@ function ReceiptScanner({
         )
       ] })
     ] }),
-    receipts.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "space-y-3", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center justify-between", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("h3", { className: "text-white font-semibold text-sm", children: [
+    receipts.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "space-y-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("h3", { className: "text-white font-semibold text-sm", children: [
           "Saved receipts",
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "ml-2 text-gray-500 font-normal tabular-nums", children: receipts.length })
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "ml-2 text-gray-500 font-normal tabular-nums", children: receipts.length })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "text-xs text-gray-500", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { className: "text-xs text-gray-500", children: [
           "$",
           receipts.reduce((s, r) => s + r.total, 0).toFixed(2),
           " total"
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden", children: receipts.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden", children: receipts.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
         "div",
         {
           className: [
@@ -2402,7 +2937,7 @@ function ReceiptScanner({
             i < receipts.length - 1 ? "border-b border-gray-800/60" : ""
           ].join(" "),
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "shrink-0 w-8 h-8 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "shrink-0 w-8 h-8 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
               "svg",
               {
                 className: "w-4 h-4 text-gray-500",
@@ -2410,7 +2945,7 @@ function ReceiptScanner({
                 viewBox: "0 0 24 24",
                 stroke: "currentColor",
                 strokeWidth: 1.5,
-                children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                   "path",
                   {
                     strokeLinecap: "round",
@@ -2420,37 +2955,37 @@ function ReceiptScanner({
                 )
               }
             ) }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex-1 min-w-0", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center gap-2 mb-0.5 flex-wrap", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "text-white text-sm font-medium truncate", children: r.merchant || "Unknown merchant" }),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(CategoryBadge, { cat: r.category })
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "flex-1 min-w-0", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "flex items-center gap-2 mb-0.5 flex-wrap", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "text-white text-sm font-medium truncate", children: r.merchant || "Unknown merchant" }),
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(CategoryBadge, { cat: r.category })
               ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center gap-2 text-xs text-gray-500 flex-wrap", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: r.date }),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\xB7" }),
-                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: r.paymentMethod }),
-                r.items.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(import_jsx_runtime3.Fragment, { children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\xB7" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "flex items-center gap-2 text-xs text-gray-500 flex-wrap", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: r.date }),
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\xB7" }),
+                /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: r.paymentMethod }),
+                r.items.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(import_jsx_runtime4.Fragment, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\xB7" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { children: [
                     r.items.length,
                     " item",
                     r.items.length !== 1 ? "s" : ""
                   ] })
                 ] }),
-                r.notes && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(import_jsx_runtime3.Fragment, { children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\xB7" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "truncate max-w-[160px]", children: r.notes })
+                r.notes && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(import_jsx_runtime4.Fragment, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { children: "\xB7" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "truncate max-w-[160px]", children: r.notes })
                 ] })
               ] })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "shrink-0 text-right", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("p", { className: "text-white font-semibold text-sm tabular-nums", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "shrink-0 text-right", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("p", { className: "text-white font-semibold text-sm tabular-nums", children: [
                 "$",
                 r.total.toFixed(2)
               ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-gray-600 text-[11px]", children: r.currency })
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "text-gray-600 text-[11px]", children: r.currency })
             ] }),
-            onDelete && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+            onDelete && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
               "button",
               {
                 type: "button",
@@ -2465,14 +3000,14 @@ function ReceiptScanner({
                 disabled: deletingId === r.id,
                 className: "shrink-0 text-gray-600 hover:text-red-400 transition-colors disabled:opacity-40",
                 title: "Delete receipt",
-                children: deletingId === r.id ? /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+                children: deletingId === r.id ? /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(
                   "svg",
                   {
                     className: "w-4 h-4 animate-spin",
                     fill: "none",
                     viewBox: "0 0 24 24",
                     children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                         "circle",
                         {
                           className: "opacity-25",
@@ -2483,7 +3018,7 @@ function ReceiptScanner({
                           strokeWidth: "4"
                         }
                       ),
-                      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                         "path",
                         {
                           className: "opacity-75",
@@ -2493,7 +3028,7 @@ function ReceiptScanner({
                       )
                     ]
                   }
-                ) : /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                ) : /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                   "svg",
                   {
                     className: "w-4 h-4",
@@ -2501,7 +3036,7 @@ function ReceiptScanner({
                     viewBox: "0 0 24 24",
                     stroke: "currentColor",
                     strokeWidth: 1.5,
-                    children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                    children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
                       "path",
                       {
                         strokeLinecap: "round",
@@ -2518,148 +3053,12 @@ function ReceiptScanner({
         r.id
       )) })
     ] }),
-    receipts.length === 0 && stage === "idle" && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-center text-gray-600 text-xs py-4", children: "No receipts saved yet \u2014 upload one above to get started." })
+    receipts.length === 0 && stage === "idle" && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "text-center text-gray-600 text-xs py-4", children: "No receipts saved yet \u2014 upload one above to get started." })
   ] });
 }
 
-// hooks/useClientList.ts
-var import_react3 = require("react");
-var import_app = require("firebase/app");
-var import_firestore = require("firebase/firestore");
-
-// firebase.config.ts
-var firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? "",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? "",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? ""
-};
-var PERMISSIONS_COLLECTION = "permissions";
-
-// hooks/useClientList.ts
-var app;
-var db;
-function getDB() {
-  if (!db) {
-    app = (0, import_app.getApps)().length === 0 ? (0, import_app.initializeApp)(firebaseConfig) : (0, import_app.getApps)()[0];
-    db = (0, import_firestore.getFirestore)(app);
-  }
-  return db;
-}
-var PAGE_SIZE = 30;
-function useClientList(collectionId) {
-  const firestore = getDB();
-  const [clients, setClients] = (0, import_react3.useState)([]);
-  const [views, setViews] = (0, import_react3.useState)([]);
-  const [permissions, setPermissions] = (0, import_react3.useState)(DEFAULT_PERMISSIONS);
-  const [listTitle, setListTitle] = (0, import_react3.useState)(collectionId);
-  const [loading, setLoading] = (0, import_react3.useState)(true);
-  const [hasMore, setHasMore] = (0, import_react3.useState)(false);
-  const [pageLimit, setPageLimit] = (0, import_react3.useState)(PAGE_SIZE);
-  const loadingMore = (0, import_react3.useRef)(false);
-  (0, import_react3.useEffect)(() => {
-    const q = (0, import_firestore.query)(
-      (0, import_firestore.collection)(firestore, collectionId),
-      (0, import_firestore.orderBy)("date", "desc"),
-      (0, import_firestore.limit)(pageLimit + 1)
-    );
-    const unsub = (0, import_firestore.onSnapshot)(q, (snap) => {
-      const allDocs = snap.docs.filter((d) => !d.id.startsWith("_"));
-      setHasMore(allDocs.length > pageLimit);
-      const records = allDocs.slice(0, pageLimit).map((d) => ({ id: d.id, ...d.data() }));
-      setClients(records);
-      setLoading(false);
-      loadingMore.current = false;
-    }, (err) => {
-      console.error(`[useClientList] clients onSnapshot error (${collectionId}):`, err);
-      setLoading(false);
-      loadingMore.current = false;
-    });
-    return () => unsub();
-  }, [collectionId, firestore, pageLimit]);
-  (0, import_react3.useEffect)(() => {
-    const viewsRef = (0, import_firestore.collection)(firestore, collectionId, "_views");
-    const unsub = (0, import_firestore.onSnapshot)(viewsRef, (snap) => {
-      const saved = snap.docs.map((d) => ({
-        id: d.id,
-        ...d.data()
-      }));
-      setViews(saved);
-    }, (err) => {
-      console.error(`[useClientList] views onSnapshot error (${collectionId}):`, err);
-    });
-    return () => unsub();
-  }, [collectionId, firestore]);
-  (0, import_react3.useEffect)(() => {
-    const permRef = (0, import_firestore.doc)(firestore, PERMISSIONS_COLLECTION, collectionId);
-    (0, import_firestore.getDoc)(permRef).then((snap) => {
-      if (snap.exists()) {
-        setPermissions(snap.data());
-      }
-    }).catch((err) => {
-      console.error(`[useClientList] permissions load error (${collectionId}):`, err);
-    });
-  }, [collectionId, firestore]);
-  const onSave = (0, import_react3.useCallback)(async (id, field, value, updaterName, fromValue) => {
-    const docRef = (0, import_firestore.doc)(firestore, collectionId, id);
-    const changeEntry = {
-      at: { seconds: Math.floor(Date.now() / 1e3) },
-      by: updaterName,
-      field,
-      from: String(fromValue ?? ""),
-      to: String(value)
-    };
-    await (0, import_firestore.updateDoc)(docRef, {
-      [field]: value,
-      updatedAt: (0, import_firestore.serverTimestamp)(),
-      updatedByName: updaterName,
-      changeLog: (0, import_firestore.arrayUnion)(changeEntry)
-    });
-  }, [collectionId, firestore]);
-  const onSaveView = (0, import_react3.useCallback)(async (view) => {
-    const viewsRef = (0, import_firestore.collection)(firestore, collectionId, "_views");
-    const docRef = await (0, import_firestore.addDoc)(viewsRef, { ...view, createdAt: (0, import_firestore.serverTimestamp)() });
-    return docRef.id;
-  }, [collectionId, firestore]);
-  const onDeleteView = (0, import_react3.useCallback)(async (id) => {
-    const viewRef = (0, import_firestore.doc)(firestore, collectionId, "_views", id);
-    await (0, import_firestore.deleteDoc)(viewRef);
-  }, [collectionId, firestore]);
-  const onRenameList = (0, import_react3.useCallback)(async (name) => {
-    const metaRef = (0, import_firestore.doc)(firestore, collectionId, "_meta");
-    await (0, import_firestore.setDoc)(metaRef, { title: name }, { merge: true });
-    setListTitle(name);
-  }, [collectionId, firestore]);
-  const onSavePermissions = (0, import_react3.useCallback)(async (matrix) => {
-    const permRef = (0, import_firestore.doc)(firestore, PERMISSIONS_COLLECTION, collectionId);
-    await (0, import_firestore.setDoc)(permRef, matrix);
-    setPermissions(matrix);
-  }, [collectionId, firestore]);
-  const onLoadMore = (0, import_react3.useCallback)(async () => {
-    if (loadingMore.current || !hasMore) return;
-    loadingMore.current = true;
-    setPageLimit((prev) => prev + PAGE_SIZE);
-  }, [hasMore]);
-  return {
-    clients,
-    views,
-    permissions,
-    loading,
-    hasMore,
-    listTitle,
-    onSave,
-    onSaveView,
-    onDeleteView,
-    onSavePermissions,
-    onRenameList,
-    onLoadMore
-  };
-}
-
 // hooks/useClientListMock.ts
-var import_react4 = require("react");
+var import_react5 = require("react");
 function useClientListMock(_collectionId, options = {}) {
   const {
     initialClients = [],
@@ -2669,13 +3068,13 @@ function useClientListMock(_collectionId, options = {}) {
     loading: initialLoading = false,
     hasMore: initialHasMore = false
   } = options;
-  const [clients, setClients] = (0, import_react4.useState)(initialClients);
-  const [views, setViews] = (0, import_react4.useState)(initialViews);
-  const [listTitle, setListTitle] = (0, import_react4.useState)(initialTitle ?? _collectionId);
-  const [permissions, setPermissions] = (0, import_react4.useState)(initialPermissions);
-  const [loading] = (0, import_react4.useState)(initialLoading);
-  const [hasMore] = (0, import_react4.useState)(initialHasMore);
-  const onSave = (0, import_react4.useCallback)(async (id, field, value, updaterName, fromValue) => {
+  const [clients, setClients] = (0, import_react5.useState)(initialClients);
+  const [views, setViews] = (0, import_react5.useState)(initialViews);
+  const [listTitle, setListTitle] = (0, import_react5.useState)(initialTitle ?? _collectionId);
+  const [permissions, setPermissions] = (0, import_react5.useState)(initialPermissions);
+  const [loading] = (0, import_react5.useState)(initialLoading);
+  const [hasMore] = (0, import_react5.useState)(initialHasMore);
+  const onSave = (0, import_react5.useCallback)(async (id, field, value, updaterName, fromValue) => {
     const changeEntry = {
       at: { seconds: Math.floor(Date.now() / 1e3) },
       by: updaterName,
@@ -2695,21 +3094,21 @@ function useClientListMock(_collectionId, options = {}) {
       )
     );
   }, []);
-  const onSaveView = (0, import_react4.useCallback)(async (view) => {
+  const onSaveView = (0, import_react5.useCallback)(async (view) => {
     const id = `mock-view-${Date.now()}`;
     setViews((prev) => [...prev, { id, ...view }]);
     return id;
   }, []);
-  const onDeleteView = (0, import_react4.useCallback)(async (id) => {
+  const onDeleteView = (0, import_react5.useCallback)(async (id) => {
     setViews((prev) => prev.filter((v) => v.id !== id));
   }, []);
-  const onRenameList = (0, import_react4.useCallback)(async (name) => {
+  const onRenameList = (0, import_react5.useCallback)(async (name) => {
     setListTitle(name);
   }, []);
-  const onSavePermissions = (0, import_react4.useCallback)(async (matrix) => {
+  const onSavePermissions = (0, import_react5.useCallback)(async (matrix) => {
     setPermissions(matrix);
   }, []);
-  const onLoadMore = (0, import_react4.useCallback)(async () => {
+  const onLoadMore = (0, import_react5.useCallback)(async () => {
   }, []);
   return {
     clients,
@@ -2728,15 +3127,15 @@ function useClientListMock(_collectionId, options = {}) {
 }
 
 // hooks/useReceiptListMock.ts
-var import_react5 = require("react");
+var import_react6 = require("react");
 function uid2() {
   return Math.random().toString(36).slice(2, 10);
 }
 function useReceiptListMock(options = {}) {
-  const [receipts, setReceipts] = (0, import_react5.useState)(
+  const [receipts, setReceipts] = (0, import_react6.useState)(
     options.initialReceipts ?? []
   );
-  const onSave = (0, import_react5.useCallback)(
+  const onSave = (0, import_react6.useCallback)(
     async (record) => {
       const full = {
         ...record,
@@ -2747,7 +3146,7 @@ function useReceiptListMock(options = {}) {
     },
     []
   );
-  const onDelete = (0, import_react5.useCallback)(async (id) => {
+  const onDelete = (0, import_react6.useCallback)(async (id) => {
     setReceipts((prev) => prev.filter((r) => r.id !== id));
   }, []);
   return { receipts, onSave, onDelete };
@@ -2756,6 +3155,7 @@ function useReceiptListMock(options = {}) {
 0 && (module.exports = {
   ClientList,
   DEFAULT_PERMISSIONS,
+  OdsPanel,
   ReceiptScanner,
   useClientList,
   useClientListMock,

@@ -174,6 +174,42 @@ interface ClientListProps {
 declare const DEFAULT_PERMISSIONS: PermissionsMatrix;
 declare function ClientList({ clients: clientsProp, uid, userName, isAdmin, isManager, showActions, loading, hasMore, onLoadMore, onSave, onClaim, onUnclaim, phase, historicalCutoff, currentRole, permissions, onSavePermissions, listTitle, onRenameList, views: viewsProp, onSaveView, onDeleteView, initialSortField, initialSortDir, }: ClientListProps): react_jsx_runtime.JSX.Element;
 
+type FieldType = "text" | "email" | "tel" | "select" | "date" | "checkbox" | "number" | "currency" | "file" | "textarea";
+interface FieldDef {
+    /** Firestore field key */
+    key: string;
+    label: string;
+    type: FieldType;
+    required?: boolean;
+    placeholder?: string;
+    /** Used when type = "select" */
+    options?: string[];
+    defaultValue?: string;
+    /** Storage sub-path prefix for file uploads (defaults to collectionId) */
+    storagePath?: string;
+}
+interface OdsPanelProps {
+    /** Firestore collection name — also used as the permissions document ID */
+    collectionId: string;
+    /** Panel heading */
+    title: string;
+    subtitle?: string;
+    uid: string;
+    userName: string;
+    isAdmin?: boolean;
+    /** All five ODS roles: rep | manager | admin | owner | dev */
+    currentRole?: AppRole;
+    /** Field definitions for the Add Record drawer */
+    fields: FieldDef[];
+    /**
+     * Transform applied to form values before writing to Firestore.
+     * Receives raw string values AND any uploaded file URLs keyed by field.key.
+     * If omitted, values are written as-is (with type coercion for number/currency).
+     */
+    transformRecord?: (values: Record<string, string>, fileUrls: Record<string, string>) => Record<string, unknown>;
+}
+declare function OdsPanel({ collectionId, title, subtitle, uid, userName, isAdmin, currentRole, fields, transformRecord, }: OdsPanelProps): react_jsx_runtime.JSX.Element;
+
 interface ReceiptItem {
     id: string;
     description: string;
@@ -305,4 +341,4 @@ interface ReceiptMockOptions {
 }
 declare function useReceiptListMock(options?: ReceiptMockOptions): UseReceiptListResult;
 
-export { type AppRole, type ChangeRecord, ClientList, type ClientListProps, type ClientListView, type ClientRecord, type ColPermission, DEFAULT_PERMISSIONS, type FilterRow, type MockOptions, type PermissionsMatrix, type ReceiptCategory, type ReceiptItem, type ReceiptMockOptions, type ReceiptRecord, ReceiptScanner, type ReceiptScannerProps, type UseClientListResult, type UseReceiptListResult, type UserClaim, type UserClaimDisplayProps, useClientList, useClientListMock, useReceiptListMock };
+export { type AppRole, type ChangeRecord, ClientList, type ClientListProps, type ClientListView, type ClientRecord, type ColPermission, DEFAULT_PERMISSIONS, type FieldDef, type FieldType, type FilterRow, type MockOptions, OdsPanel, type OdsPanelProps, type PermissionsMatrix, type ReceiptCategory, type ReceiptItem, type ReceiptMockOptions, type ReceiptRecord, ReceiptScanner, type ReceiptScannerProps, type UseClientListResult, type UseReceiptListResult, type UserClaim, type UserClaimDisplayProps, useClientList, useClientListMock, useReceiptListMock };
