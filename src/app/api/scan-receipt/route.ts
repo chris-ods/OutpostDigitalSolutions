@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
 
-// gemini-2.5-flash: current generation, available to new API keys, full vision support
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17:generateContent";
+// Models to try in order — newest first, stops at first that works
+const MODEL_CANDIDATES = [
+  "gemini-2.5-flash",
+  "gemini-2.5-pro",
+  "gemini-2.5-flash-preview-05-20",
+  "gemini-2.5-flash-preview-04-17",
+  "gemini-2.0-flash",
+  "gemini-2.0-flash-lite",
+  "gemini-1.5-flash",
+];
 
 const SYSTEM_PROMPT = `You are a receipt data extractor. Analyze the receipt image or document and extract structured data.
 
@@ -33,53 +41,16 @@ Rules:
 - Only extract what is actually visible on the receipt — do not invent data.
 - Infer category from the merchant type if not explicit.`;
 
-export async function POST(req: NextRequest) {
-  if (!GEMINI_API_KEY) {
-    return NextResponse.json(
-      { error: "GEMINI_API_KEY is not set on the server. Add it to your .env.local or Firebase environment variables." },
-      { status: 500 }
-    );
-  }
+async function tryModel(
+  model: string,
+  mimeType: string,
+  fileData: string
+): Promise<{ ok: true; data: Record<string, unknown> } | { ok: false; error: string; notAvailable: boolean }> {
+  const url = `${BASE_URL}/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
-  // ── Parse the uploaded file ────────────────────────────────────────────────
-  let fileData: string;
-  let mimeType: string;
-
+  let res: Response;
   try {
-    const formData = await req.formData();
-    const file = formData.get("file") as File | null;
-
-    if (!file) {
-      return NextResponse.json({ error: "No file provided." }, { status: 400 });
-    }
-
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "image/gif",
-      "application/pdf",
-    ];
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: "Unsupported file type. Please upload a JPG, PNG, WebP, or PDF." },
-        { status: 400 }
-      );
-    }
-
-    const buffer = await file.arrayBuffer();
-    fileData = Buffer.from(buffer).toString("base64");
-    mimeType = file.type;
-  } catch {
-    return NextResponse.json(
-      { error: "Could not read the uploaded file." },
-      { status: 400 }
-    );
-  }
-
-  // ── Call Gemini ────────────────────────────────────────────────────────────
-  try {
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
+    res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -91,60 +62,110 @@ export async function POST(req: NextRequest) {
             ],
           },
         ],
-        generationConfig: {
-          temperature: 0.1,
-        },
+        generationConfig: { temperature: 0.1 },
       }),
     });
-
-    if (!geminiRes.ok) {
-      // Surface the real Gemini error so it's visible in the UI
-      let detail = `Gemini ${geminiRes.status}`;
-      try {
-        const body = await geminiRes.json();
-        detail = body?.error?.message ?? JSON.stringify(body);
-      } catch {
-        detail = await geminiRes.text().catch(() => detail);
-      }
-      console.error("Gemini API error:", detail);
-      return NextResponse.json({ error: `Gemini error: ${detail}` }, { status: 502 });
-    }
-
-    const geminiData = await geminiRes.json();
-    const rawText: string =
-      geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-
-    if (!rawText) {
-      const finishReason = geminiData?.candidates?.[0]?.finishReason ?? "unknown";
-      console.error("Gemini returned empty text. finishReason:", finishReason, JSON.stringify(geminiData));
-      return NextResponse.json(
-        { error: `Gemini returned no content (finishReason: ${finishReason}). Try a clearer image.` },
-        { status: 422 }
-      );
-    }
-
-    // Strip any accidental markdown code fences
-    const cleaned = rawText
-      .trim()
-      .replace(/^```(?:json)?\s*/i, "")
-      .replace(/\s*```$/i, "")
-      .trim();
-
-    let parsed: Record<string, unknown>;
-    try {
-      parsed = JSON.parse(cleaned);
-    } catch {
-      console.error("Failed to parse Gemini response as JSON:", rawText);
-      return NextResponse.json(
-        { error: "Gemini response could not be parsed as JSON. Try a clearer or higher-resolution image." },
-        { status: 422 }
-      );
-    }
-
-    return NextResponse.json(parsed);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error("scan-receipt unexpected error:", msg);
-    return NextResponse.json({ error: `Server error: ${msg}` }, { status: 500 });
+    return { ok: false, error: String(err), notAvailable: false };
   }
+
+  if (!res.ok) {
+    let detail = `HTTP ${res.status}`;
+    try {
+      const body = await res.json();
+      detail = body?.error?.message ?? JSON.stringify(body);
+    } catch {
+      detail = await res.text().catch(() => detail);
+    }
+    // "not found" or "no longer available" = skip to next model
+    const notAvailable =
+      detail.includes("not found") ||
+      detail.includes("no longer available") ||
+      detail.includes("not supported");
+    return { ok: false, error: detail, notAvailable };
+  }
+
+  const geminiData = await res.json();
+  const rawText: string =
+    geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+
+  if (!rawText) {
+    const reason = geminiData?.candidates?.[0]?.finishReason ?? "unknown";
+    return { ok: false, error: `Empty response (finishReason: ${reason})`, notAvailable: false };
+  }
+
+  const cleaned = rawText
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+
+  try {
+    const parsed = JSON.parse(cleaned);
+    return { ok: true, data: parsed };
+  } catch {
+    return { ok: false, error: `Could not parse JSON: ${rawText.slice(0, 200)}`, notAvailable: false };
+  }
+}
+
+export async function POST(req: NextRequest) {
+  if (!GEMINI_API_KEY) {
+    return NextResponse.json(
+      { error: "GEMINI_API_KEY is not set on the server. Add it to your .env.local or Firebase environment variables." },
+      { status: 500 }
+    );
+  }
+
+  // ── Parse upload ───────────────────────────────────────────────────────────
+  let fileData: string;
+  let mimeType: string;
+
+  try {
+    const formData = await req.formData();
+    const file = formData.get("file") as File | null;
+
+    if (!file) {
+      return NextResponse.json({ error: "No file provided." }, { status: 400 });
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"];
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json(
+        { error: "Unsupported file type. Please upload a JPG, PNG, WebP, or PDF." },
+        { status: 400 }
+      );
+    }
+
+    const buffer = await file.arrayBuffer();
+    fileData = Buffer.from(buffer).toString("base64");
+    mimeType = file.type;
+  } catch {
+    return NextResponse.json({ error: "Could not read the uploaded file." }, { status: 400 });
+  }
+
+  // ── Try models in order ────────────────────────────────────────────────────
+  const errors: string[] = [];
+
+  for (const model of MODEL_CANDIDATES) {
+    const result = await tryModel(model, mimeType, fileData);
+
+    if (result.ok) {
+      console.log(`scan-receipt: used model ${model}`);
+      return NextResponse.json(result.data);
+    }
+
+    errors.push(`${model}: ${result.error}`);
+
+    if (!result.notAvailable) {
+      // Hard failure (bad key, parse error, etc.) — don't bother trying other models
+      break;
+    }
+    // notAvailable = try the next model
+  }
+
+  console.error("scan-receipt: all models failed:", errors);
+  return NextResponse.json(
+    { error: `No available Gemini model found for this API key. Tried: ${MODEL_CANDIDATES.join(", ")}. Last error: ${errors[errors.length - 1]}` },
+    { status: 502 }
+  );
 }
