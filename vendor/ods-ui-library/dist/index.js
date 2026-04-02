@@ -2096,8 +2096,8 @@ function getStore() {
   return getStorage(getApp());
 }
 async function seedPermissionsIfAbsent(collectionId) {
-  const db3 = getDB2();
-  const permRef = doc2(db3, "permissions", collectionId);
+  const db2 = getDB2();
+  const permRef = doc2(db2, "permissions", collectionId);
   const snap = await getDoc2(permRef);
   if (!snap.exists()) {
     const matrix = {
@@ -2287,7 +2287,7 @@ function OdsPanel({
     seedPermissionsIfAbsent(collectionId).catch(console.error);
   }, [collectionId]);
   const handleAdd = useCallback3(async (values, files) => {
-    const db3 = getDB2();
+    const db2 = getDB2();
     const storage = getStore();
     const fileUrls = {};
     for (const [key, file] of Object.entries(files)) {
@@ -2304,7 +2304,7 @@ function OdsPanel({
       }
     }
     const base = transformRecord ? transformRecord(values, fileUrls) : { ...coerced, ...fileUrls };
-    await addDoc2(collection2(db3, collectionId), {
+    await addDoc2(collection2(db2, collectionId), {
       ...base,
       date: base.date ?? (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
       createdAt: serverTimestamp2(),
@@ -2320,7 +2320,7 @@ function OdsPanel({
         title
       ] })
     ] }),
-    /* @__PURE__ */ jsx3("div", { style: { flex: 1, minHeight: 0 }, children: /* @__PURE__ */ jsx3(
+    /* @__PURE__ */ jsx3("div", { style: { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }, children: /* @__PURE__ */ jsx3(
       ClientList,
       {
         ...listProps,
@@ -3158,14 +3158,27 @@ import {
   deleteDoc as deleteDoc2,
   serverTimestamp as serverTimestamp3
 } from "firebase/firestore";
-var app2;
-var db2;
+import {
+  getStorage as getStorage2,
+  ref as ref2,
+  deleteObject
+} from "firebase/storage";
+var _app;
+var _db;
+var _storage;
 function getDB3() {
-  if (!db2) {
-    app2 = getApps2().length === 0 ? initializeApp2(firebaseConfig) : getApps2()[0];
-    db2 = getFirestore3(app2);
+  if (!_db) {
+    _app = getApps2().length === 0 ? initializeApp2(firebaseConfig) : getApps2()[0];
+    _db = getFirestore3(_app);
   }
-  return db2;
+  return _db;
+}
+function getStorageInstance() {
+  if (!_storage) {
+    _app = getApps2().length === 0 ? initializeApp2(firebaseConfig) : getApps2()[0];
+    _storage = getStorage2(_app);
+  }
+  return _storage;
 }
 var RECEIPTS_COLLECTION = "receipts";
 function useReceiptList(uid3) {
@@ -3191,7 +3204,6 @@ function useReceiptList(uid3) {
           return {
             ...data,
             id: d.id,
-            // Convert Firestore Timestamp to ISO string for ReceiptRecord
             createdAt: typeof data.createdAt?.toDate === "function" ? data.createdAt.toDate().toISOString() : String(data.createdAt ?? "")
           };
         });
@@ -3217,9 +3229,18 @@ function useReceiptList(uid3) {
   );
   const onDelete = useCallback7(
     async (id) => {
+      const receipt = receipts.find((r) => r.id === id);
       await deleteDoc2(doc3(firestore, RECEIPTS_COLLECTION, id));
+      if (receipt?.filePath) {
+        try {
+          const storageRef = ref2(getStorageInstance(), receipt.filePath);
+          await deleteObject(storageRef);
+        } catch (err) {
+          console.warn("[useReceiptList] Storage delete failed:", err);
+        }
+      }
     },
-    [firestore]
+    [firestore, receipts]
   );
   return { receipts, loading, onSave, onDelete };
 }

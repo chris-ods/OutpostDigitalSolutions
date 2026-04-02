@@ -2110,8 +2110,8 @@ function getStore() {
   return (0, import_storage.getStorage)((0, import_app2.getApp)());
 }
 async function seedPermissionsIfAbsent(collectionId) {
-  const db3 = getDB2();
-  const permRef = (0, import_firestore2.doc)(db3, "permissions", collectionId);
+  const db2 = getDB2();
+  const permRef = (0, import_firestore2.doc)(db2, "permissions", collectionId);
   const snap = await (0, import_firestore2.getDoc)(permRef);
   if (!snap.exists()) {
     const matrix = {
@@ -2301,7 +2301,7 @@ function OdsPanel({
     seedPermissionsIfAbsent(collectionId).catch(console.error);
   }, [collectionId]);
   const handleAdd = (0, import_react3.useCallback)(async (values, files) => {
-    const db3 = getDB2();
+    const db2 = getDB2();
     const storage = getStore();
     const fileUrls = {};
     for (const [key, file] of Object.entries(files)) {
@@ -2318,7 +2318,7 @@ function OdsPanel({
       }
     }
     const base = transformRecord ? transformRecord(values, fileUrls) : { ...coerced, ...fileUrls };
-    await (0, import_firestore2.addDoc)((0, import_firestore2.collection)(db3, collectionId), {
+    await (0, import_firestore2.addDoc)((0, import_firestore2.collection)(db2, collectionId), {
       ...base,
       date: base.date ?? (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
       createdAt: (0, import_firestore2.serverTimestamp)(),
@@ -2334,7 +2334,7 @@ function OdsPanel({
         title
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { style: { flex: 1, minHeight: 0 }, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { style: { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
       ClientList,
       {
         ...listProps,
@@ -3157,14 +3157,23 @@ function useReceiptListMock(options = {}) {
 var import_react7 = require("react");
 var import_app3 = require("firebase/app");
 var import_firestore3 = require("firebase/firestore");
-var app2;
-var db2;
+var import_storage2 = require("firebase/storage");
+var _app;
+var _db;
+var _storage;
 function getDB3() {
-  if (!db2) {
-    app2 = (0, import_app3.getApps)().length === 0 ? (0, import_app3.initializeApp)(firebaseConfig) : (0, import_app3.getApps)()[0];
-    db2 = (0, import_firestore3.getFirestore)(app2);
+  if (!_db) {
+    _app = (0, import_app3.getApps)().length === 0 ? (0, import_app3.initializeApp)(firebaseConfig) : (0, import_app3.getApps)()[0];
+    _db = (0, import_firestore3.getFirestore)(_app);
   }
-  return db2;
+  return _db;
+}
+function getStorageInstance() {
+  if (!_storage) {
+    _app = (0, import_app3.getApps)().length === 0 ? (0, import_app3.initializeApp)(firebaseConfig) : (0, import_app3.getApps)()[0];
+    _storage = (0, import_storage2.getStorage)(_app);
+  }
+  return _storage;
 }
 var RECEIPTS_COLLECTION = "receipts";
 function useReceiptList(uid3) {
@@ -3190,7 +3199,6 @@ function useReceiptList(uid3) {
           return {
             ...data,
             id: d.id,
-            // Convert Firestore Timestamp to ISO string for ReceiptRecord
             createdAt: typeof data.createdAt?.toDate === "function" ? data.createdAt.toDate().toISOString() : String(data.createdAt ?? "")
           };
         });
@@ -3216,9 +3224,18 @@ function useReceiptList(uid3) {
   );
   const onDelete = (0, import_react7.useCallback)(
     async (id) => {
+      const receipt = receipts.find((r) => r.id === id);
       await (0, import_firestore3.deleteDoc)((0, import_firestore3.doc)(firestore, RECEIPTS_COLLECTION, id));
+      if (receipt?.filePath) {
+        try {
+          const storageRef = (0, import_storage2.ref)(getStorageInstance(), receipt.filePath);
+          await (0, import_storage2.deleteObject)(storageRef);
+        } catch (err) {
+          console.warn("[useReceiptList] Storage delete failed:", err);
+        }
+      }
     },
-    [firestore]
+    [firestore, receipts]
   );
   return { receipts, loading, onSave, onDelete };
 }

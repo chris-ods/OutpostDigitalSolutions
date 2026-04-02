@@ -232,6 +232,10 @@ interface ReceiptRecord {
     notes: string;
     items: ReceiptItem[];
     createdAt: string;
+    /** Firebase Storage download URL for the original file (optional). */
+    fileUrl?: string;
+    /** Firebase Storage path — used for deletion (optional). */
+    filePath?: string;
 }
 interface ReceiptScannerProps {
     /** Already-saved receipts to display below the upload zone. */
@@ -347,11 +351,13 @@ declare function useReceiptListMock(options?: ReceiptMockOptions): UseReceiptLis
  * Firestore-backed hook for the ReceiptScanner component.
  *
  * Data layout in Firestore:
- *   /receipts/{docId}   ← receipt records (scoped to the authenticated user via uid)
+ *   /receipts/{docId}   ← receipt records scoped per user via uid field
+ *
+ * Storage layout (managed by the consuming app, path stored here):
+ *   receipts/{uid}/{timestamp}_{filename}
  *
  * Usage:
- *   const props = useReceiptList(user.uid);
- *   return <ReceiptScanner {...props} processReceipt={processReceipt} />;
+ *   const { receipts, loading, onSave, onDelete } = useReceiptList(user.uid);
  */
 
 interface UseReceiptListResult {
@@ -360,9 +366,6 @@ interface UseReceiptListResult {
     onSave: (record: Omit<ReceiptRecord, "id" | "createdAt">) => Promise<void>;
     onDelete: (id: string) => Promise<void>;
 }
-/**
- * @param uid  The current user's Firebase UID. Receipts are scoped per user.
- */
 declare function useReceiptList(uid: string): UseReceiptListResult;
 
 export { type AppRole, type ChangeRecord, ClientList, type ClientListProps, type ClientListView, type ClientRecord, type ColPermission, DEFAULT_PERMISSIONS, type FieldDef, type FieldType, type FilterRow, type MockOptions, OdsPanel, type OdsPanelProps, type PermissionsMatrix, type ReceiptCategory, type ReceiptItem, type ReceiptMockOptions, type ReceiptRecord, ReceiptScanner, type ReceiptScannerProps, type UseClientListResult, type UseReceiptListResult, type UserClaim, type UserClaimDisplayProps, useClientList, useClientListMock, useReceiptList, useReceiptListMock };

@@ -1,11 +1,29 @@
 "use client";
 
 import { useCallback } from "react";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../firebase";
 import { ReceiptScanner, useReceiptList } from "ods-ui-library";
 import type { ReceiptRecord } from "ods-ui-library";
 import { useAuth } from "../hooks/useAuth";
 
-async function callScanReceipt(file: File): Promise<Partial<ReceiptRecord>> {
+/**
+ * Upload the file to Firebase Storage under receipts/{uid}/{timestamp}_{filename},
+ * then POST it to the Gemini API route for parsing.
+ * Returns the parsed receipt fields plus the Storage URL and path.
+ */
+async function processReceipt(
+  file: File,
+  uid: string
+): Promise<Partial<ReceiptRecord>> {
+  // 1 — Upload to Storage
+  const ext = file.name.split(".").pop() ?? "bin";
+  const filePath = `receipts/${uid}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+  const storageRef = ref(storage, filePath);
+  await uploadBytes(storageRef, file, { contentType: file.type });
+  const fileUrl = await getDownloadURL(storageRef);
+
+  // 2 — Parse with Gemini (server-side route)
   const form = new FormData();
   form.append("file", file);
 
@@ -21,14 +39,21 @@ async function callScanReceipt(file: File): Promise<Partial<ReceiptRecord>> {
     );
   }
 
-  return res.json();
+  const parsed = await res.json();
+
+  // 3 — Return parsed fields + storage metadata
+  return { ...parsed, fileUrl, filePath };
 }
 
 export default function ReceiptsSection() {
   const { user } = useAuth();
-  const { receipts, loading, onSave, onDelete } = useReceiptList(user?.uid ?? "");
+  const uid = user?.uid ?? "";
+  const { receipts, loading, onSave, onDelete } = useReceiptList(uid);
 
-  const processReceipt = useCallback(callScanReceipt, []);
+  const handleProcessReceipt = useCallback(
+    (file: File) => processReceipt(file, uid),
+    [uid]
+  );
 
   return (
     <div className="space-y-6">
@@ -36,8 +61,8 @@ export default function ReceiptsSection() {
       <div>
         <h3 className="text-white font-semibold text-lg">Receipts</h3>
         <p className="text-gray-500 text-sm mt-0.5">
-          Upload a receipt photo or PDF — Gemini reads it and fills the form for you.
-          Receipts are saved to your account.
+          Upload a receipt photo or PDF — Gemini reads it and fills the form.
+          Files are stored securely and receipts persist to your account.
         </p>
       </div>
 
@@ -51,7 +76,7 @@ export default function ReceiptsSection() {
       ) : (
         <ReceiptScanner
           receipts={receipts}
-          processReceipt={processReceipt}
+          processReceipt={handleProcessReceipt}
           onSave={onSave}
           onDelete={onDelete}
         />
