@@ -1,195 +1,234 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-const QUICK_LINKS = [
+// ─── Project definitions ───────────────────────────────────────────────────────
+
+const PROJECTS = [
   {
-    id: "analytics",
-    label: "Analytics",
-    href: "https://analytics.google.com/analytics/web/#/a167120426p525314290/reports/reportinghub?params=_u..nav%3Dmaui",
+    id: "ods-website",
+    name: "Outpost Digital Solutions",
+    subtitle: "Marketing website & client portal",
+    status: "active",
+    statusLabel: "Live",
+    color: "from-blue-600 to-blue-800",
+    iconColor: "text-white",
     icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      <svg width="20" height="20" viewBox="0 0 36 36" fill="none">
+        <ellipse cx="18.5" cy="17" rx="15" ry="12.5" stroke="white" strokeWidth="1" fill="none"/>
+        <ellipse cx="18.5" cy="17" rx="10" ry="8.5" stroke="white" strokeWidth="1" fill="none"/>
+        <ellipse cx="18.5" cy="17" rx="5" ry="4.5" stroke="white" strokeWidth="1.2" fill="none"/>
+        <path d="M18.5 13.5 L20.2 17 L16.8 17 Z" fill="white" opacity="0.9"/>
+        <circle cx="18.5" cy="12.8" r="1" fill="white"/>
       </svg>
     ),
+    links: [
+      { label: "Website", href: "https://outpostdigitalsolutions.com", external: true },
+      { label: "Firebase Console", href: "https://console.firebase.google.com/project/outpostdigitalsolutions/overview", external: true },
+      { label: "GitHub", href: "https://github.com/cbear1984/OutpostDigitalSolutions", external: true },
+    ],
+    tags: ["Next.js", "Firebase", "App Hosting"],
+    description: "The main ODS marketing site and authenticated portal. Built on Next.js 16 with Firebase App Hosting.",
   },
   {
-    id: "oauth",
-    label: "OAuth",
-    href: "https://console.cloud.google.com/auth/overview?project=chore-crusher",
+    id: "atx-financial",
+    name: "ATX Financial",
+    subtitle: "Insurance agency management platform",
+    status: "active",
+    statusLabel: "Live",
+    color: "from-emerald-600 to-teal-700",
+    iconColor: "text-white",
     icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
+    links: [
+      { label: "Firebase Console", href: "https://console.firebase.google.com/project/atx-financial/overview", external: true },
+      { label: "GitHub", href: "https://github.com/cbear1984/ATX-Financial", external: true },
+    ],
+    tags: ["Next.js", "Firebase", "Firestore", "Role-based auth"],
+    description: "Full-featured agency portal with agent, manager, admin, and owner roles. Client records, commission tracking, and real-time sync.",
   },
   {
-    id: "firebase",
-    label: "Firebase",
-    href: "https://console.firebase.google.com/project/chore-crusher/overview",
+    id: "clientlist",
+    name: "ClientList",
+    subtitle: "Live product demo",
+    status: "demo",
+    statusLabel: "Demo",
+    color: "from-cyan-600 to-sky-700",
+    iconColor: "text-white",
+    navigate: "/design",
     icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75.125v-2.25m3.75 0v2.25m0 0h.375a1.125 1.125 0 011.125 1.125v-1.5a3.375 3.375 0 00-3.375-3.375H3.375m0 0v-2.25m0 0h.375C5.496 13.5 6 12.996 6 12.375m-3.75.125v-3.375" />
       </svg>
     ),
+    links: [],
+    tags: ["ods-ui-library", "React", "Firebase SDK"],
+    description: "Interactive demo showcasing the ClientList component with 22 mock clients, role-based permissions, week picker, and live editing.",
+  },
+  {
+    id: "chore-crusher",
+    name: "Chore Crusher",
+    subtitle: "Household task management app",
+    status: "active",
+    statusLabel: "Active",
+    color: "from-orange-500 to-red-600",
+    iconColor: "text-white",
+    icon: (
+      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+      </svg>
+    ),
+    links: [
+      { label: "Web App", href: "https://www.chorecrusher.com", external: true },
+      { label: "App Store", href: "#", external: false, soon: true },
+      { label: "Google Play", href: "#", external: false, soon: true },
+      { label: "Analytics", href: "https://analytics.google.com/analytics/web/#/a167120426p525314290/reports/reportinghub?params=_u..nav%3Dmaui", external: true },
+      { label: "Firebase Console", href: "https://console.firebase.google.com/project/chore-crusher/overview", external: true },
+      { label: "OAuth Console", href: "https://console.cloud.google.com/auth/overview?project=chore-crusher", external: true },
+    ],
+    tags: ["React Native", "Firebase", "iOS", "Android"],
+    description: "Mobile-first task manager for households. Assign chores, track completion, and earn rewards. Native iOS/Android apps in progress.",
+  },
+  {
+    id: "ods-ui-library",
+    name: "ods-ui-library",
+    subtitle: "Shared component library",
+    status: "internal",
+    statusLabel: "Internal",
+    color: "from-violet-600 to-purple-700",
+    iconColor: "text-white",
+    icon: (
+      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+      </svg>
+    ),
+    links: [
+      { label: "GitHub", href: "https://github.com/cbear1984/ods-ui-library", external: true },
+    ],
+    tags: ["TypeScript", "tsup", "Storybook", "Vitest"],
+    description: "The shared UI component library powering ATX Financial and the ODS portal. ClientList, UserClaimDisplay, hooks, and permissions system.",
   },
 ];
 
-const STORE_LINKS = [
-  {
-    id: "appstore",
-    label: "App Store",
-    sublabel: "Download on the",
-    href: "#",
-    placeholder: true,
-    icon: (
-      <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-      </svg>
-    ),
-    bg: "from-gray-800 to-gray-900",
-    border: "border-gray-700",
-    iconColor: "text-white",
-  },
-  {
-    id: "playstore",
-    label: "Google Play",
-    sublabel: "Get it on",
-    href: "#",
-    placeholder: true,
-    icon: (
-      <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M3.18 23.76c.3.17.64.22.99.14l12.82-7.4-2.82-2.82-10.99 10zM.43 1.01C.17 1.3 0 1.73 0 2.28v19.44c0 .55.17.98.44 1.27l.07.06 10.89-10.89v-.26L.5.95l-.07.06zM20.13 9.53l-2.77-1.6-3.14 3.14 3.14 3.14 2.8-1.61c.8-.46.8-1.21-.03-1.67zM4.17.24L17 7.64l-2.82 2.82L4.17.24z" />
-      </svg>
-    ),
-    bg: "from-gray-800 to-gray-900",
-    border: "border-gray-700",
-    iconColor: "text-white",
-  },
-  {
-    id: "webapp",
-    label: "Web App",
-    sublabel: "Open in browser",
-    href: "https://www.chorecrusher.com",
-    placeholder: false,
-    icon: (
-      <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253M3 12c0 .778.099 1.533.284 2.253" />
-      </svg>
-    ),
-    bg: "from-blue-900 to-blue-950",
-    border: "border-blue-700",
-    iconColor: "text-blue-300",
-  },
-];
+const STATUS_STYLES: Record<string, string> = {
+  active:   "bg-green-900/50 text-green-400 border-green-800",
+  demo:     "bg-cyan-900/50 text-cyan-400 border-cyan-800",
+  internal: "bg-violet-900/50 text-violet-400 border-violet-800",
+};
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ProjectsSection() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const router = useRouter();
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h3 className="text-white font-semibold text-lg">Projects</h3>
-        <p className="text-gray-500 text-sm mt-0.5">Manage and access your active projects</p>
+        <p className="text-gray-500 text-sm mt-0.5">{PROJECTS.length} active projects across Outpost Digital Solutions</p>
       </div>
 
-      {/* Chore Crusher project card */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
-        {/* Project header */}
-        <div className="px-6 py-5 border-b border-gray-800 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-              </svg>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold">Chore Crusher</h4>
-              <p className="text-gray-500 text-xs">Household task management app</p>
-            </div>
-          </div>
-          <span className="text-xs bg-green-900/50 text-green-400 border border-green-800 px-2.5 py-1 rounded-full font-medium">
-            Active
-          </span>
-        </div>
+      {/* Project grid */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {PROJECTS.map((project) => {
+          const isNavCard = !!project.navigate;
 
-        {/* Tab bar */}
-        <div className="flex border-b border-gray-800 px-6 gap-1">
-          {["overview", "quick links"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 text-sm font-medium capitalize transition border-b-2 -mb-px ${
-                activeTab === tab
-                  ? "border-blue-500 text-white"
-                  : "border-transparent text-gray-500 hover:text-gray-300"
+          return (
+            <div
+              key={project.id}
+              className={`bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden flex flex-col ${
+                isNavCard ? "cursor-pointer hover:border-cyan-700/60 hover:bg-gray-800/70 transition-all group" : ""
               }`}
+              onClick={isNavCard ? () => router.push(project.navigate!) : undefined}
             >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab: Overview — store links */}
-        {activeTab === "overview" && (
-          <div className="p-6 space-y-5">
-            <p className="text-gray-400 text-sm">Access Chore Crusher across platforms:</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {STORE_LINKS.map((link) => (
-                <a
-                  key={link.id}
-                  href={link.href}
-                  target={link.placeholder ? undefined : "_blank"}
-                  rel="noreferrer"
-                  className={`relative flex items-center gap-4 bg-gradient-to-br ${link.bg} border ${link.border} rounded-xl px-5 py-4 transition hover:brightness-110 ${
-                    link.placeholder ? "cursor-not-allowed opacity-70" : "cursor-pointer"
-                  }`}
-                  onClick={link.placeholder ? (e) => e.preventDefault() : undefined}
-                >
-                  {link.placeholder && (
-                    <span className="absolute top-2 right-2 text-[10px] bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded font-medium">
-                      Soon
-                    </span>
-                  )}
-                  <span className={link.iconColor}>{link.icon}</span>
-                  <div>
-                    <p className="text-gray-400 text-[11px] leading-none mb-0.5">{link.sublabel}</p>
-                    <p className="text-white font-semibold text-sm">{link.label}</p>
+              {/* Card header */}
+              <div className="px-5 py-4 flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${project.color} flex items-center justify-center shrink-0`}>
+                    {project.icon}
                   </div>
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
+                  <div>
+                    <h4 className="text-white font-semibold text-sm leading-tight">{project.name}</h4>
+                    <p className="text-gray-500 text-xs mt-0.5">{project.subtitle}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`text-xs border px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[project.status] ?? ""}`}>
+                    {project.statusLabel}
+                  </span>
+                  {isNavCard && (
+                    <svg className="w-4 h-4 text-gray-600 group-hover:text-cyan-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                  )}
+                </div>
+              </div>
 
-        {/* Tab: Quick Links */}
-        {activeTab === "quick links" && (
-          <div className="p-6 space-y-3">
-            <p className="text-gray-400 text-sm mb-4">Developer consoles for Chore Crusher:</p>
-            {QUICK_LINKS.map((link) => (
-              <a
-                key={link.id}
-                href={link.href}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-4 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl px-5 py-4 transition group"
-              >
-                <div className="w-9 h-9 rounded-lg bg-gray-700 group-hover:bg-gray-600 flex items-center justify-center text-gray-300 shrink-0 transition">
-                  {link.icon}
+              {/* Description */}
+              <div className="px-5 pb-4">
+                <p className="text-gray-500 text-xs leading-relaxed">{project.description}</p>
+              </div>
+
+              {/* Tags */}
+              <div className="px-5 pb-4 flex flex-wrap gap-1.5">
+                {project.tags.map((tag) => (
+                  <span key={tag} className="text-[11px] bg-gray-800 text-gray-400 border border-gray-700 px-2 py-0.5 rounded-md">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              {/* Links — only shown on non-nav cards */}
+              {!isNavCard && project.links.length > 0 && (
+                <div className="px-5 pb-5 mt-auto flex flex-wrap gap-2">
+                  {project.links.map((link) => (
+                    "soon" in link && link.soon ? (
+                      <span
+                        key={link.label}
+                        className="inline-flex items-center gap-1 text-xs text-gray-600 border border-gray-800 px-3 py-1.5 rounded-lg cursor-not-allowed"
+                      >
+                        {link.label}
+                        <span className="text-[10px] bg-gray-800 text-gray-600 px-1 rounded">Soon</span>
+                      </span>
+                    ) : (
+                      <a
+                        key={link.label}
+                        href={link.href}
+                        target={link.external ? "_blank" : undefined}
+                        rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 rounded-lg transition"
+                      >
+                        {link.label}
+                        {link.external && (
+                          <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        )}
+                      </a>
+                    )
+                  ))}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-white font-medium text-sm">{link.label}</p>
-                  <p className="text-gray-500 text-xs truncate">{link.href}</p>
+              )}
+
+              {/* Nav card CTA */}
+              {isNavCard && (
+                <div className="px-5 pb-5 mt-auto">
+                  <div className="flex items-center gap-2 text-xs text-cyan-500 group-hover:text-cyan-400 font-medium transition-colors">
+                    <span>Open live demo</span>
+                    <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                  </div>
                 </div>
-                <svg className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </a>
-            ))}
-          </div>
-        )}
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
