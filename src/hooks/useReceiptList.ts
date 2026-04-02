@@ -20,6 +20,7 @@ import {
   onSnapshot,
   addDoc,
   deleteDoc,
+  updateDoc,
   serverTimestamp,
 } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
@@ -32,6 +33,7 @@ export interface UseReceiptListResult {
   receipts: ReceiptRecord[];
   loading: boolean;
   onSave: (record: Omit<ReceiptRecord, "id" | "createdAt">) => Promise<void>;
+  onUpdate: (id: string, field: string, value: string | number) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }
 
@@ -89,6 +91,13 @@ export function useReceiptList(uid: string): UseReceiptListResult {
     [uid]
   );
 
+  const onUpdate = useCallback(
+    async (id: string, field: string, value: string | number) => {
+      await updateDoc(doc(db, RECEIPTS_COLLECTION, id), { [field]: value });
+    },
+    []
+  );
+
   const onDelete = useCallback(
     async (id: string) => {
       const receipt = receipts.find((r) => r.id === id);
@@ -104,5 +113,5 @@ export function useReceiptList(uid: string): UseReceiptListResult {
     [receipts]
   );
 
-  return { receipts, loading, onSave, onDelete };
+  return { receipts, loading, onSave, onUpdate, onDelete };
 }

@@ -253,6 +253,18 @@ interface ReceiptScannerProps {
 }
 declare function ReceiptScanner({ receipts, processReceipt, onSave, onDelete, className, }: ReceiptScannerProps): react_jsx_runtime.JSX.Element;
 
+interface ReceiptListProps {
+    receipts: ReceiptRecord[];
+    loading?: boolean;
+    /** Called when the user edits a cell. Persist and pass updated receipts back. */
+    onSave?: (id: string, field: string, value: string | number) => Promise<void>;
+    /** Called when the user clicks delete on a row. */
+    onDelete?: (id: string) => Promise<void>;
+    /** Display title. Defaults to "Receipts". */
+    listTitle?: string;
+}
+declare function ReceiptList({ receipts, loading, onSave, onDelete, listTitle }: ReceiptListProps): react_jsx_runtime.JSX.Element;
+
 /**
  * useClientList
  *
@@ -368,4 +380,4 @@ interface UseReceiptListResult {
 }
 declare function useReceiptList(uid: string): UseReceiptListResult;
 
-export { type AppRole, type ChangeRecord, ClientList, type ClientListProps, type ClientListView, type ClientRecord, type ColPermission, DEFAULT_PERMISSIONS, type FieldDef, type FieldType, type FilterRow, type MockOptions, OdsPanel, type OdsPanelProps, type PermissionsMatrix, type ReceiptCategory, type ReceiptItem, type ReceiptMockOptions, type ReceiptRecord, ReceiptScanner, type ReceiptScannerProps, type UseClientListResult, type UseReceiptListResult, type UserClaim, type UserClaimDisplayProps, useClientList, useClientListMock, useReceiptList, useReceiptListMock };
+export { type AppRole, type ChangeRecord, ClientList, type ClientListProps, type ClientListView, type ClientRecord, type ColPermission, DEFAULT_PERMISSIONS, type FieldDef, type FieldType, type FilterRow, type MockOptions, OdsPanel, type OdsPanelProps, type PermissionsMatrix, type ReceiptCategory, type ReceiptItem, ReceiptList, type ReceiptListProps, type ReceiptMockOptions, type ReceiptRecord, ReceiptScanner, type ReceiptScannerProps, type UseClientListResult, type UseReceiptListResult, type UserClaim, type UserClaimDisplayProps, useClientList, useClientListMock, useReceiptList, useReceiptListMock };

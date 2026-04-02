@@ -940,7 +940,7 @@ function ClientList({
       setLoadingMore(false);
     }
   }, [onLoadMore, loadingMore]);
-  function exportCSV() {
+  function exportCSV2() {
     const rows = [...pendingRows, ...claimedRows];
     if (!rows.length) return;
     const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
@@ -1511,7 +1511,7 @@ function ClientList({
               /* @__PURE__ */ jsx2("div", { className: "cl-export-menu-title", children: "Export to CSV" }),
               /* @__PURE__ */ jsx2("div", { className: "cl-export-menu-sub", children: "Exports all currently filtered records" })
             ] }),
-            /* @__PURE__ */ jsx2("div", { className: "cl-export-menu-body", children: /* @__PURE__ */ jsx2("button", { className: "cl-export-dl-btn", onClick: exportCSV, children: "Download" }) })
+            /* @__PURE__ */ jsx2("div", { className: "cl-export-menu-body", children: /* @__PURE__ */ jsx2("button", { className: "cl-export-dl-btn", onClick: exportCSV2, children: "Download" }) })
           ] })
         ] }),
         isPrivileged && /* @__PURE__ */ jsx2(
@@ -1795,7 +1795,7 @@ import {
   addDoc as addDoc2,
   serverTimestamp as serverTimestamp2,
   doc as doc2,
-  getDoc as getDoc2,
+  getDoc,
   setDoc as setDoc2
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -1815,7 +1815,6 @@ import {
   updateDoc,
   deleteDoc,
   setDoc,
-  getDoc,
   arrayUnion,
   serverTimestamp
 } from "firebase/firestore";
@@ -1887,13 +1886,11 @@ function useClientList(collectionId) {
   }, [collectionId, firestore]);
   useEffect2(() => {
     const permRef = doc(firestore, PERMISSIONS_COLLECTION, collectionId);
-    getDoc(permRef).then((snap) => {
-      if (snap.exists()) {
-        setPermissions(snap.data());
-      }
-    }).catch((err) => {
-      console.error(`[useClientList] permissions load error (${collectionId}):`, err);
+    const unsub = onSnapshot(permRef, (snap) => {
+      if (snap.exists()) setPermissions(snap.data());
+    }, () => {
     });
+    return () => unsub();
   }, [collectionId, firestore]);
   const onSave = useCallback2(async (id, field, value, updaterName, fromValue) => {
     const docRef = doc(firestore, collectionId, id);
@@ -2098,7 +2095,7 @@ function getStore() {
 async function seedPermissionsIfAbsent(collectionId) {
   const db2 = getDB2();
   const permRef = doc2(db2, "permissions", collectionId);
-  const snap = await getDoc2(permRef);
+  const snap = await getDoc(permRef);
   if (!snap.exists()) {
     const matrix = {
       rep: { ...DEFAULT_PERMISSIONS.rep },
@@ -2374,21 +2371,6 @@ var PAYMENT_METHODS = [
   "Google Pay",
   "Other"
 ];
-var CATEGORY_COLORS = {
-  "AI & API Services": "bg-violet-900/40 text-violet-400 border-violet-800",
-  "Software & Subscriptions": "bg-blue-900/40 text-blue-400 border-blue-800",
-  "Cloud & Infrastructure": "bg-cyan-900/40 text-cyan-400 border-cyan-800",
-  "Hardware & Equipment": "bg-slate-800/60 text-slate-300 border-slate-700",
-  "Contractors & Freelancers": "bg-amber-900/40 text-amber-400 border-amber-800",
-  "Marketing & Advertising": "bg-pink-900/40 text-pink-400 border-pink-800",
-  "Travel & Lodging": "bg-sky-900/40 text-sky-400 border-sky-800",
-  "Meals & Entertainment": "bg-orange-900/40 text-orange-400 border-orange-800",
-  "Education & Training": "bg-green-900/40 text-green-400 border-green-800",
-  "Legal & Professional": "bg-rose-900/40 text-rose-400 border-rose-800",
-  "Office & Supplies": "bg-teal-900/40 text-teal-400 border-teal-800",
-  "Utilities & Internet": "bg-yellow-900/40 text-yellow-400 border-yellow-800",
-  Other: "bg-gray-800 text-gray-400 border-gray-700"
-};
 function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
@@ -2416,10 +2398,6 @@ function GeminiStar({ size = 12, color = "#a78bfa" }) {
     }
   ) });
 }
-function CategoryBadge({ cat }) {
-  const cls = CATEGORY_COLORS[cat] ?? CATEGORY_COLORS["Other"];
-  return /* @__PURE__ */ jsx4("span", { className: `text-[11px] border px-2 py-0.5 rounded-full font-medium ${cls}`, children: cat });
-}
 function FieldLabel({ children }) {
   return /* @__PURE__ */ jsx4("span", { className: "text-[11px] text-gray-500 font-medium uppercase tracking-wider", children });
 }
@@ -2435,7 +2413,6 @@ function ReceiptScanner({
   const [error, setError] = useState4(null);
   const [form, setForm] = useState4(blankForm());
   const [preview, setPreview] = useState4(null);
-  const [deletingId, setDeletingId] = useState4(null);
   const fileRef = useRef3(null);
   function setField(key, val) {
     setForm((f) => ({ ...f, [key]: val }));
@@ -2915,149 +2892,625 @@ function ReceiptScanner({
           }
         )
       ] })
-    ] }),
-    receipts.length > 0 && /* @__PURE__ */ jsxs4("div", { className: "space-y-3", children: [
-      /* @__PURE__ */ jsxs4("div", { className: "flex items-center justify-between", children: [
-        /* @__PURE__ */ jsxs4("h3", { className: "text-white font-semibold text-sm", children: [
-          "Saved receipts",
-          /* @__PURE__ */ jsx4("span", { className: "ml-2 text-gray-500 font-normal tabular-nums", children: receipts.length })
-        ] }),
-        /* @__PURE__ */ jsxs4("span", { className: "text-xs text-gray-500", children: [
-          "$",
-          receipts.reduce((s, r) => s + r.total, 0).toFixed(2),
-          " total"
+    ] })
+  ] });
+}
+
+// ReceiptList.tsx
+import { useState as useState5, useMemo as useMemo2, useRef as useRef4 } from "react";
+import { jsx as jsx5, jsxs as jsxs5 } from "react/jsx-runtime";
+var CATEGORY_OPTIONS = [
+  "AI & API Services",
+  "Software & Subscriptions",
+  "Cloud & Infrastructure",
+  "Hardware & Equipment",
+  "Contractors & Freelancers",
+  "Marketing & Advertising",
+  "Travel & Lodging",
+  "Meals & Entertainment",
+  "Education & Training",
+  "Legal & Professional",
+  "Office & Supplies",
+  "Utilities & Internet",
+  "Other"
+];
+var PAYMENT_OPTIONS = [
+  "Credit Card",
+  "Debit Card",
+  "Cash",
+  "Check",
+  "Apple Pay",
+  "Google Pay",
+  "Other"
+];
+var COLUMNS2 = [
+  { key: "date", label: "Date", sortable: true, filterType: "date" },
+  { key: "merchant", label: "Merchant", sortable: true, filterType: "text" },
+  { key: "category", label: "Category", sortable: true, filterType: "enum" },
+  { key: "total", label: "Total", sortable: true, filterType: "number" },
+  { key: "subtotal", label: "Subtotal", sortable: true, filterType: "number" },
+  { key: "tax", label: "Tax", sortable: true, filterType: "number" },
+  { key: "tip", label: "Tip", sortable: false, filterType: "number" },
+  { key: "paymentMethod", label: "Payment", sortable: true, filterType: "enum" },
+  { key: "currency", label: "Currency", sortable: false, filterType: "enum" },
+  { key: "items", label: "Items", noFilter: true },
+  { key: "notes", label: "Notes", filterType: "text" },
+  { key: "createdAt", label: "Added", sortable: true, filterType: "date" }
+];
+var DEFAULT_VISIBLE = [
+  "date",
+  "merchant",
+  "category",
+  "total",
+  "subtotal",
+  "tax",
+  "paymentMethod",
+  "items",
+  "notes"
+];
+var EDITABLE_COLS2 = /* @__PURE__ */ new Set([
+  "date",
+  "merchant",
+  "category",
+  "total",
+  "subtotal",
+  "tax",
+  "tip",
+  "paymentMethod",
+  "currency",
+  "notes"
+]);
+function fmtDate2(s) {
+  if (!s) return "\u2014";
+  const [y, m, d] = s.split("-");
+  if (!y || !m || !d) return s;
+  return new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+function fmtMoney(v) {
+  if (v === void 0 || v === null || v === 0) return "\u2014";
+  return "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtCreatedAt(iso) {
+  if (!iso) return "\u2014";
+  try {
+    return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch {
+    return iso;
+  }
+}
+function getOperators2(ft) {
+  switch (ft) {
+    case "enum":
+      return ["is"];
+    case "text":
+      return ["contains", "is"];
+    case "number":
+      return [">", "\u2265", "<", "\u2264", "between"];
+    case "date":
+      return ["is", "before", "after", "between"];
+    default:
+      return ["contains"];
+  }
+}
+function filterRowsToSpecs2(rows) {
+  const result = {};
+  for (const row of rows) {
+    if (!row.field || !row.value) continue;
+    const col = COLUMNS2.find((c) => c.key === row.field);
+    const ft = col?.filterType ?? "text";
+    if (ft === "enum") {
+      const prev = result[row.field];
+      const vals = prev?.kind === "enum" ? prev.values : [];
+      if (!vals.includes(row.value)) result[row.field] = { kind: "enum", values: [...vals, row.value] };
+    } else if (ft === "text") {
+      result[row.field] = row.operator === "is" ? { kind: "enum", values: [row.value] } : { kind: "text", q: row.value };
+    } else {
+      switch (row.operator) {
+        case "is":
+        case "=":
+          result[row.field] = { kind: "range", min: row.value, max: row.value };
+          break;
+        case ">":
+          result[row.field] = { kind: "range", min: row.value };
+          break;
+        case "\u2265":
+        case "after":
+          result[row.field] = { kind: "range", min: row.value };
+          break;
+        case "<":
+          result[row.field] = { kind: "range", max: row.value };
+          break;
+        case "\u2264":
+        case "before":
+          result[row.field] = { kind: "range", max: row.value };
+          break;
+        case "between":
+          result[row.field] = { kind: "range", min: row.value, max: row.value2 || void 0 };
+          break;
+      }
+    }
+  }
+  return result;
+}
+function applyFilters(receipts, specs) {
+  return receipts.filter((r) => {
+    for (const [field, spec] of Object.entries(specs)) {
+      const raw = r[field];
+      const val = raw === void 0 || raw === null ? "" : String(raw);
+      if (spec.kind === "enum") {
+        if (!spec.values.includes(val)) return false;
+      } else if (spec.kind === "text") {
+        if (!val.toLowerCase().includes(spec.q.toLowerCase())) return false;
+      } else if (spec.kind === "range") {
+        const num = parseFloat(val);
+        if (spec.min !== void 0 && num < parseFloat(spec.min)) return false;
+        if (spec.max !== void 0 && num > parseFloat(spec.max)) return false;
+      }
+    }
+    return true;
+  });
+}
+function getEnumValues(receipts, field) {
+  const set = /* @__PURE__ */ new Set();
+  receipts.forEach((r) => {
+    const v = r[field];
+    if (v !== void 0 && v !== null && v !== "") set.add(String(v));
+  });
+  return Array.from(set).sort();
+}
+function exportCSV(receipts, visibleCols) {
+  const cols = COLUMNS2.filter((c) => visibleCols.includes(c.key));
+  const header = cols.map((c) => c.label).join(",");
+  const rows = receipts.map(
+    (r) => cols.map((c) => {
+      let v = r[c.key];
+      if (c.key === "items") v = Array.isArray(r.items) ? r.items.length : 0;
+      if (c.key === "createdAt") v = fmtCreatedAt(r.createdAt);
+      const s = v === void 0 || v === null ? "" : String(v);
+      return s.includes(",") || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s;
+    }).join(",")
+  );
+  const blob = new Blob([[header, ...rows].join("\n")], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "receipts.csv";
+  a.click();
+}
+function Spinner2() {
+  return /* @__PURE__ */ jsx5("span", { className: "cl-spinner", "aria-label": "Loading" });
+}
+function PencilIcon2() {
+  return /* @__PURE__ */ jsx5("svg", { className: "cl-pencil", width: "11", height: "11", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx5("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" }) });
+}
+function CellInput2({ type, initialValue, options, onSave, onCancel }) {
+  const [val, setVal] = useState5(initialValue);
+  if (type === "select" && options) {
+    return /* @__PURE__ */ jsx5(
+      "select",
+      {
+        autoFocus: true,
+        className: "cl-cell-select",
+        value: val,
+        onChange: (e) => setVal(e.target.value),
+        onBlur: () => onSave(val),
+        onKeyDown: (e) => {
+          if (e.key === "Escape") {
+            e.stopPropagation();
+            onCancel();
+          }
+          if (e.key === "Enter") {
+            e.stopPropagation();
+            onSave(val);
+          }
+        },
+        children: options.map((o) => /* @__PURE__ */ jsx5("option", { value: o, children: o }, o))
+      }
+    );
+  }
+  return /* @__PURE__ */ jsxs5("div", { className: "cl-cell-edit-wrap", children: [
+    /* @__PURE__ */ jsx5(
+      "input",
+      {
+        autoFocus: true,
+        className: "cl-cell-input",
+        type: type === "number" ? "number" : type === "date" ? "date" : "text",
+        value: val,
+        onChange: (e) => setVal(e.target.value),
+        onKeyDown: (e) => {
+          if (e.key === "Escape") {
+            e.stopPropagation();
+            onCancel();
+          }
+          if (e.key === "Enter") {
+            e.stopPropagation();
+            onSave(val);
+          }
+        }
+      }
+    ),
+    /* @__PURE__ */ jsxs5("div", { className: "cl-cell-actions", children: [
+      /* @__PURE__ */ jsx5("button", { className: "cl-cell-cancel-btn", onMouseDown: (e) => e.preventDefault(), onClick: onCancel, title: "Cancel (Esc)", children: /* @__PURE__ */ jsx5("svg", { width: "9", height: "9", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 3.5, children: /* @__PURE__ */ jsx5("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }) }) }),
+      /* @__PURE__ */ jsx5("button", { className: "cl-cell-confirm-btn", onMouseDown: (e) => e.preventDefault(), onClick: () => onSave(val), title: "Save (Enter)", children: /* @__PURE__ */ jsx5("svg", { width: "9", height: "9", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 3.5, children: /* @__PURE__ */ jsx5("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M5 13l4 4L19 7" }) }) })
+    ] })
+  ] });
+}
+function ReceiptList({ receipts, loading, onSave, onDelete, listTitle = "Receipts" }) {
+  const [colOrder, setColOrder] = useState5(DEFAULT_VISIBLE);
+  const [visibleCols, setVisibleCols] = useState5(DEFAULT_VISIBLE);
+  const [showColPicker, setShowColPicker] = useState5(false);
+  const [sortField, setSortField] = useState5("date");
+  const [sortDir, setSortDir] = useState5("desc");
+  const [filterRows, setFilterRows] = useState5([]);
+  const [showFilters, setShowFilters] = useState5(false);
+  const uid3 = useRef4(0);
+  function newId() {
+    return String(++uid3.current);
+  }
+  const [editingCell, setEditingCell] = useState5(null);
+  const dragCol = useRef4(null);
+  const filterSpecs = useMemo2(() => filterRowsToSpecs2(filterRows), [filterRows]);
+  const displayCols = useMemo2(
+    () => colOrder.filter((k) => visibleCols.includes(k)),
+    [colOrder, visibleCols]
+  );
+  const filtered = useMemo2(() => {
+    let rows = applyFilters(receipts, filterSpecs);
+    if (sortField) {
+      rows = [...rows].sort((a, b) => {
+        let av = a[sortField];
+        let bv = b[sortField];
+        if (sortField === "createdAt") {
+          av = a.createdAt ?? "";
+          bv = b.createdAt ?? "";
+        }
+        const aStr = av === void 0 || av === null ? "" : String(av);
+        const bStr = bv === void 0 || bv === null ? "" : String(bv);
+        const aNum = parseFloat(aStr);
+        const bNum = parseFloat(bStr);
+        let cmp = 0;
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+          cmp = aNum - bNum;
+        } else {
+          cmp = aStr.localeCompare(bStr);
+        }
+        return sortDir === "asc" ? cmp : -cmp;
+      });
+    }
+    return rows;
+  }, [receipts, filterSpecs, sortField, sortDir]);
+  const totals = useMemo2(() => ({
+    total: filtered.reduce((s, r) => s + (r.total ?? 0), 0),
+    subtotal: filtered.reduce((s, r) => s + (r.subtotal ?? 0), 0),
+    tax: filtered.reduce((s, r) => s + (r.tax ?? 0), 0),
+    tip: filtered.reduce((s, r) => s + (r.tip ?? 0), 0)
+  }), [filtered]);
+  function toggleSort(key) {
+    if (sortField === key) setSortDir((d) => d === "asc" ? "desc" : "asc");
+    else {
+      setSortField(key);
+      setSortDir("asc");
+    }
+  }
+  function addFilter() {
+    const first = COLUMNS2.find((c) => !c.noFilter);
+    if (!first) return;
+    setFilterRows((prev) => [...prev, {
+      id: newId(),
+      field: first.key,
+      operator: getOperators2(first.filterType)[0],
+      value: "",
+      value2: ""
+    }]);
+    setShowFilters(true);
+  }
+  function updateFilter(id, patch) {
+    setFilterRows((prev) => prev.map((r) => r.id === id ? { ...r, ...patch } : r));
+  }
+  function removeFilter(id) {
+    setFilterRows((prev) => prev.filter((r) => r.id !== id));
+  }
+  async function commitCell(id, field, raw) {
+    setEditingCell(null);
+    if (!onSave) return;
+    const numFields = /* @__PURE__ */ new Set(["total", "subtotal", "tax", "tip"]);
+    const value = numFields.has(field) ? parseFloat(raw) || 0 : raw;
+    await onSave(id, field, value);
+  }
+  function renderCell(r, col) {
+    const isEditing = editingCell?.id === r.id && editingCell?.field === col.key;
+    const canEdit = !!onSave && EDITABLE_COLS2.has(col.key);
+    if (isEditing) {
+      let type = "text";
+      let opts;
+      if (col.key === "category") {
+        type = "select";
+        opts = CATEGORY_OPTIONS;
+      } else if (col.key === "paymentMethod") {
+        type = "select";
+        opts = PAYMENT_OPTIONS;
+      } else if (col.key === "currency") {
+        type = "select";
+        opts = ["USD", "EUR", "GBP", "CAD", "AUD"];
+      } else if (col.filterType === "number") type = "number";
+      else if (col.filterType === "date") type = "date";
+      const raw = r[col.key];
+      const initial = raw === void 0 || raw === null ? "" : String(raw);
+      return /* @__PURE__ */ jsx5(
+        CellInput2,
+        {
+          type,
+          initialValue: initial,
+          options: opts,
+          onSave: (v) => commitCell(r.id, col.key, v),
+          onCancel: () => setEditingCell(null)
+        }
+      );
+    }
+    let display = "\u2014";
+    switch (col.key) {
+      case "date":
+        display = fmtDate2(r.date);
+        break;
+      case "merchant":
+        display = r.merchant || "\u2014";
+        break;
+      case "category":
+        display = r.category ? /* @__PURE__ */ jsx5("span", { style: { fontSize: 11, fontWeight: 500, opacity: 0.9 }, children: r.category }) : "\u2014";
+        break;
+      case "total":
+        display = /* @__PURE__ */ jsx5("span", { style: { fontWeight: 600 }, children: fmtMoney(r.total) });
+        break;
+      case "subtotal":
+        display = fmtMoney(r.subtotal);
+        break;
+      case "tax":
+        display = fmtMoney(r.tax);
+        break;
+      case "tip":
+        display = r.tip ? fmtMoney(r.tip) : "\u2014";
+        break;
+      case "paymentMethod":
+        display = r.paymentMethod || "\u2014";
+        break;
+      case "currency":
+        display = r.currency || "USD";
+        break;
+      case "items":
+        display = r.items?.length ? /* @__PURE__ */ jsxs5("span", { style: { color: "var(--cl-text-3)" }, children: [
+          r.items.length,
+          " item",
+          r.items.length !== 1 ? "s" : ""
+        ] }) : "\u2014";
+        break;
+      case "notes":
+        display = r.notes ? /* @__PURE__ */ jsx5("span", { style: { color: "var(--cl-text-3)", fontStyle: "italic" }, children: r.notes }) : "\u2014";
+        break;
+      case "createdAt":
+        display = fmtCreatedAt(r.createdAt);
+        break;
+      default:
+        display = String(r[col.key] ?? "\u2014");
+    }
+    return /* @__PURE__ */ jsxs5(
+      "div",
+      {
+        className: `cl-cell-inner${canEdit ? " cl-cell-editable" : ""}`,
+        onClick: () => canEdit && setEditingCell({ id: r.id, field: col.key }),
+        children: [
+          /* @__PURE__ */ jsx5("span", { className: "cl-cell-value", children: display }),
+          canEdit && /* @__PURE__ */ jsx5(PencilIcon2, {})
+        ]
+      }
+    );
+  }
+  if (loading) {
+    return /* @__PURE__ */ jsx5("div", { className: "cl-root", style: { alignItems: "center", justifyContent: "center", minHeight: 200 }, children: /* @__PURE__ */ jsx5(Spinner2, {}) });
+  }
+  const activeFilters = filterRows.filter((r) => r.value);
+  return /* @__PURE__ */ jsxs5("div", { className: "cl-root", children: [
+    /* @__PURE__ */ jsxs5("div", { className: "cl-toolbar", children: [
+      /* @__PURE__ */ jsxs5("div", { className: "cl-toolbar-left", children: [
+        /* @__PURE__ */ jsx5("span", { className: "cl-list-title", children: listTitle }),
+        /* @__PURE__ */ jsx5("span", { className: "cl-count", children: filtered.length }),
+        filtered.length !== receipts.length && /* @__PURE__ */ jsxs5("span", { className: "cl-count", style: { color: "var(--cl-text-4)", marginLeft: 4 }, children: [
+          "of ",
+          receipts.length
         ] })
       ] }),
-      /* @__PURE__ */ jsx4("div", { className: "bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden", children: receipts.map((r, i) => /* @__PURE__ */ jsxs4(
-        "div",
-        {
-          className: [
-            "flex items-center gap-4 px-4 py-3 hover:bg-gray-800/50 transition-colors",
-            i < receipts.length - 1 ? "border-b border-gray-800/60" : ""
-          ].join(" "),
-          children: [
-            /* @__PURE__ */ jsx4("div", { className: "shrink-0 w-8 h-8 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center", children: /* @__PURE__ */ jsx4(
-              "svg",
-              {
-                className: "w-4 h-4 text-gray-500",
-                fill: "none",
-                viewBox: "0 0 24 24",
-                stroke: "currentColor",
-                strokeWidth: 1.5,
-                children: /* @__PURE__ */ jsx4(
-                  "path",
-                  {
-                    strokeLinecap: "round",
-                    strokeLinejoin: "round",
-                    d: "M9 14.25l6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185z"
-                  }
-                )
-              }
-            ) }),
-            /* @__PURE__ */ jsxs4("div", { className: "flex-1 min-w-0", children: [
-              /* @__PURE__ */ jsxs4("div", { className: "flex items-center gap-2 mb-0.5 flex-wrap", children: [
-                /* @__PURE__ */ jsx4("span", { className: "text-white text-sm font-medium truncate", children: r.merchant || "Unknown merchant" }),
-                /* @__PURE__ */ jsx4(CategoryBadge, { cat: r.category })
-              ] }),
-              /* @__PURE__ */ jsxs4("div", { className: "flex items-center gap-2 text-xs text-gray-500 flex-wrap", children: [
-                /* @__PURE__ */ jsx4("span", { children: r.date }),
-                /* @__PURE__ */ jsx4("span", { children: "\xB7" }),
-                /* @__PURE__ */ jsx4("span", { children: r.paymentMethod }),
-                r.items.length > 0 && /* @__PURE__ */ jsxs4(Fragment2, { children: [
-                  /* @__PURE__ */ jsx4("span", { children: "\xB7" }),
-                  /* @__PURE__ */ jsxs4("span", { children: [
-                    r.items.length,
-                    " item",
-                    r.items.length !== 1 ? "s" : ""
-                  ] })
-                ] }),
-                r.notes && /* @__PURE__ */ jsxs4(Fragment2, { children: [
-                  /* @__PURE__ */ jsx4("span", { children: "\xB7" }),
-                  /* @__PURE__ */ jsx4("span", { className: "truncate max-w-[160px]", children: r.notes })
-                ] })
-              ] })
+      /* @__PURE__ */ jsxs5("div", { className: "cl-toolbar-right", children: [
+        /* @__PURE__ */ jsx5("span", { style: { fontSize: 12, color: "var(--cl-text-3)", marginRight: 8 }, children: fmtMoney(totals.total) }),
+        /* @__PURE__ */ jsxs5(
+          "button",
+          {
+            className: `cl-icon-btn${showFilters ? " cl-icon-btn--active" : ""}`,
+            onClick: () => {
+              setShowFilters((v) => !v);
+              if (!showFilters && filterRows.length === 0) addFilter();
+            },
+            title: "Filters",
+            children: [
+              /* @__PURE__ */ jsx5("svg", { width: "14", height: "14", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx5("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M3 4h18M7 8h10M10 12h4M12 16h0" }) }),
+              activeFilters.length > 0 && /* @__PURE__ */ jsx5("span", { className: "cl-filter-badge", children: activeFilters.length })
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxs5("div", { style: { position: "relative" }, children: [
+          /* @__PURE__ */ jsx5(
+            "button",
+            {
+              className: `cl-icon-btn${showColPicker ? " cl-icon-btn--active" : ""}`,
+              onClick: () => setShowColPicker((v) => !v),
+              title: "Columns",
+              children: /* @__PURE__ */ jsx5("svg", { width: "14", height: "14", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx5("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 4h1M9 8h1M9 12h1M9 16h1M9 20h1M14 4h1M14 8h1M14 12h1M14 16h1M14 20h1" }) })
+            }
+          ),
+          showColPicker && /* @__PURE__ */ jsxs5("div", { className: "cl-col-picker-panel", style: { right: 0, top: "calc(100% + 6px)" }, children: [
+            /* @__PURE__ */ jsxs5("div", { className: "cl-col-picker-header", children: [
+              /* @__PURE__ */ jsx5("span", { children: "Columns" }),
+              /* @__PURE__ */ jsx5("button", { className: "cl-col-picker-reset", onClick: () => setVisibleCols(DEFAULT_VISIBLE), children: "Reset" })
             ] }),
-            /* @__PURE__ */ jsxs4("div", { className: "shrink-0 text-right", children: [
-              /* @__PURE__ */ jsxs4("p", { className: "text-white font-semibold text-sm tabular-nums", children: [
-                "$",
-                r.total.toFixed(2)
-              ] }),
-              /* @__PURE__ */ jsx4("p", { className: "text-gray-600 text-[11px]", children: r.currency })
-            ] }),
-            onDelete && /* @__PURE__ */ jsx4(
-              "button",
-              {
-                type: "button",
-                onClick: async () => {
-                  setDeletingId(r.id);
-                  try {
-                    await onDelete(r.id);
-                  } finally {
-                    setDeletingId(null);
+            COLUMNS2.map((c) => /* @__PURE__ */ jsxs5("label", { className: "cl-col-picker-row", children: [
+              /* @__PURE__ */ jsx5(
+                "input",
+                {
+                  type: "checkbox",
+                  checked: visibleCols.includes(c.key),
+                  onChange: (e) => {
+                    if (e.target.checked) {
+                      setVisibleCols((v) => [...v, c.key]);
+                      setColOrder((o) => o.includes(c.key) ? o : [...o, c.key]);
+                    } else {
+                      setVisibleCols((v) => v.filter((k) => k !== c.key));
+                    }
                   }
-                },
-                disabled: deletingId === r.id,
-                className: "shrink-0 text-gray-600 hover:text-red-400 transition-colors disabled:opacity-40",
-                title: "Delete receipt",
-                children: deletingId === r.id ? /* @__PURE__ */ jsxs4(
-                  "svg",
-                  {
-                    className: "w-4 h-4 animate-spin",
-                    fill: "none",
-                    viewBox: "0 0 24 24",
-                    children: [
-                      /* @__PURE__ */ jsx4(
-                        "circle",
-                        {
-                          className: "opacity-25",
-                          cx: "12",
-                          cy: "12",
-                          r: "10",
-                          stroke: "currentColor",
-                          strokeWidth: "4"
-                        }
-                      ),
-                      /* @__PURE__ */ jsx4(
-                        "path",
-                        {
-                          className: "opacity-75",
-                          fill: "currentColor",
-                          d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                        }
-                      )
-                    ]
-                  }
-                ) : /* @__PURE__ */ jsx4(
-                  "svg",
-                  {
-                    className: "w-4 h-4",
-                    fill: "none",
-                    viewBox: "0 0 24 24",
-                    stroke: "currentColor",
-                    strokeWidth: 1.5,
-                    children: /* @__PURE__ */ jsx4(
-                      "path",
-                      {
-                        strokeLinecap: "round",
-                        strokeLinejoin: "round",
-                        d: "M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                      }
-                    )
-                  }
-                )
-              }
-            )
-          ]
-        },
-        r.id
-      )) })
+                }
+              ),
+              c.label
+            ] }, c.key))
+          ] })
+        ] }),
+        /* @__PURE__ */ jsx5(
+          "button",
+          {
+            className: "cl-icon-btn",
+            onClick: () => exportCSV(filtered, visibleCols),
+            title: "Export CSV",
+            children: /* @__PURE__ */ jsx5("svg", { width: "14", height: "14", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx5("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" }) })
+          }
+        )
+      ] })
     ] }),
-    receipts.length === 0 && stage === "idle" && /* @__PURE__ */ jsx4("p", { className: "text-center text-gray-600 text-xs py-4", children: "No receipts saved yet \u2014 upload one above to get started." })
+    showFilters && /* @__PURE__ */ jsxs5("div", { className: "cl-filter-bar", children: [
+      filterRows.map((row) => {
+        const col = COLUMNS2.find((c) => c.key === row.field);
+        const ops = getOperators2(col?.filterType);
+        const isEnum = col?.filterType === "enum";
+        const enumVals = isEnum ? getEnumValues(receipts, row.field) : [];
+        return /* @__PURE__ */ jsxs5("div", { className: "cl-filter-row", children: [
+          /* @__PURE__ */ jsx5(
+            "select",
+            {
+              className: "cl-filter-select",
+              value: row.field,
+              onChange: (e) => {
+                const newCol = COLUMNS2.find((c) => c.key === e.target.value);
+                updateFilter(row.id, {
+                  field: e.target.value,
+                  operator: getOperators2(newCol?.filterType)[0],
+                  value: "",
+                  value2: ""
+                });
+              },
+              children: COLUMNS2.filter((c) => !c.noFilter).map((c) => /* @__PURE__ */ jsx5("option", { value: c.key, children: c.label }, c.key))
+            }
+          ),
+          /* @__PURE__ */ jsx5(
+            "select",
+            {
+              className: "cl-filter-select",
+              value: row.operator,
+              onChange: (e) => updateFilter(row.id, { operator: e.target.value, value: "", value2: "" }),
+              children: ops.map((o) => /* @__PURE__ */ jsx5("option", { value: o, children: o }, o))
+            }
+          ),
+          isEnum ? /* @__PURE__ */ jsxs5(
+            "select",
+            {
+              className: "cl-filter-select cl-filter-value",
+              value: row.value,
+              onChange: (e) => updateFilter(row.id, { value: e.target.value }),
+              children: [
+                /* @__PURE__ */ jsx5("option", { value: "", children: "\u2014 select \u2014" }),
+                enumVals.map((v) => /* @__PURE__ */ jsx5("option", { value: v, children: v }, v))
+              ]
+            }
+          ) : /* @__PURE__ */ jsx5(
+            "input",
+            {
+              className: "cl-filter-input cl-filter-value",
+              type: col?.filterType === "number" ? "number" : col?.filterType === "date" ? "date" : "text",
+              placeholder: "value\u2026",
+              value: row.value,
+              onChange: (e) => updateFilter(row.id, { value: e.target.value })
+            }
+          ),
+          row.operator === "between" && /* @__PURE__ */ jsx5(
+            "input",
+            {
+              className: "cl-filter-input cl-filter-value",
+              type: col?.filterType === "number" ? "number" : "date",
+              placeholder: "to\u2026",
+              value: row.value2,
+              onChange: (e) => updateFilter(row.id, { value2: e.target.value })
+            }
+          ),
+          /* @__PURE__ */ jsx5("button", { className: "cl-filter-remove", onClick: () => removeFilter(row.id), children: /* @__PURE__ */ jsx5("svg", { width: "10", height: "10", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 3, children: /* @__PURE__ */ jsx5("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }) }) })
+        ] }, row.id);
+      }),
+      /* @__PURE__ */ jsx5("button", { className: "cl-filter-add-btn", onClick: addFilter, children: "+ Add filter" })
+    ] }),
+    /* @__PURE__ */ jsx5("div", { className: "cl-table-wrapper", children: /* @__PURE__ */ jsx5("div", { className: "cl-scroll-x", children: /* @__PURE__ */ jsxs5("table", { className: "cl-table", children: [
+      /* @__PURE__ */ jsx5("thead", { children: /* @__PURE__ */ jsxs5("tr", { children: [
+        displayCols.map((key) => {
+          const col = COLUMNS2.find((c) => c.key === key);
+          return /* @__PURE__ */ jsx5(
+            "th",
+            {
+              className: "cl-th",
+              draggable: true,
+              onDragStart: () => {
+                dragCol.current = key;
+              },
+              onDragOver: (e) => e.preventDefault(),
+              onDrop: () => {
+                if (!dragCol.current || dragCol.current === key) return;
+                setColOrder((prev) => {
+                  const next = [...prev];
+                  const from = next.indexOf(dragCol.current);
+                  const to = next.indexOf(key);
+                  if (from === -1 || to === -1) return prev;
+                  next.splice(from, 1);
+                  next.splice(to, 0, dragCol.current);
+                  return next;
+                });
+                dragCol.current = null;
+              },
+              children: col.sortable ? /* @__PURE__ */ jsxs5("button", { className: "cl-th-sort-btn", onClick: () => toggleSort(key), children: [
+                col.label,
+                sortField === key ? /* @__PURE__ */ jsx5("span", { className: "cl-sort-arrow", children: sortDir === "asc" ? "\u2191" : "\u2193" }) : /* @__PURE__ */ jsx5("span", { className: "cl-sort-arrow cl-sort-arrow--inactive", children: "\u2195" })
+              ] }) : col.label
+            },
+            key
+          );
+        }),
+        onDelete && /* @__PURE__ */ jsx5("th", { className: "cl-th", style: { width: 36 } })
+      ] }) }),
+      /* @__PURE__ */ jsx5("tbody", { children: filtered.length === 0 ? /* @__PURE__ */ jsx5("tr", { children: /* @__PURE__ */ jsx5("td", { colSpan: displayCols.length + (onDelete ? 1 : 0), className: "cl-empty", children: receipts.length === 0 ? "No receipts yet \u2014 upload one above." : "No receipts match the current filters." }) }) : filtered.map((r) => /* @__PURE__ */ jsxs5("tr", { className: "cl-row", children: [
+        displayCols.map((key) => {
+          const col = COLUMNS2.find((c) => c.key === key);
+          return /* @__PURE__ */ jsx5("td", { className: "cl-td", children: renderCell(r, col) }, key);
+        }),
+        onDelete && /* @__PURE__ */ jsx5("td", { className: "cl-td", style: { textAlign: "center" }, children: /* @__PURE__ */ jsx5(
+          "button",
+          {
+            className: "cl-icon-btn",
+            style: { color: "var(--cl-text-5)" },
+            onClick: () => onDelete(r.id),
+            title: "Delete",
+            children: /* @__PURE__ */ jsx5("svg", { width: "13", height: "13", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 1.5, children: /* @__PURE__ */ jsx5("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" }) })
+          }
+        ) })
+      ] }, r.id)) }),
+      filtered.length > 0 && /* @__PURE__ */ jsx5("tfoot", { children: /* @__PURE__ */ jsxs5("tr", { className: "cl-row", style: { borderTop: "1px solid var(--cl-border-2)" }, children: [
+        displayCols.map((key) => /* @__PURE__ */ jsx5("td", { className: "cl-td", style: { color: "var(--cl-text-3)", fontWeight: 600, fontSize: 12 }, children: key === "merchant" ? `${filtered.length} receipt${filtered.length !== 1 ? "s" : ""}` : key === "total" ? fmtMoney(totals.total) : key === "subtotal" ? fmtMoney(totals.subtotal) : key === "tax" ? fmtMoney(totals.tax) : key === "tip" ? totals.tip ? fmtMoney(totals.tip) : "" : "" }, key)),
+        onDelete && /* @__PURE__ */ jsx5("td", { className: "cl-td" })
+      ] }) })
+    ] }) }) })
   ] });
 }
 
 // hooks/useClientListMock.ts
-import { useState as useState5, useCallback as useCallback5 } from "react";
+import { useState as useState6, useCallback as useCallback6 } from "react";
 function useClientListMock(_collectionId, options = {}) {
   const {
     initialClients = [],
@@ -3067,13 +3520,13 @@ function useClientListMock(_collectionId, options = {}) {
     loading: initialLoading = false,
     hasMore: initialHasMore = false
   } = options;
-  const [clients, setClients] = useState5(initialClients);
-  const [views, setViews] = useState5(initialViews);
-  const [listTitle, setListTitle] = useState5(initialTitle ?? _collectionId);
-  const [permissions, setPermissions] = useState5(initialPermissions);
-  const [loading] = useState5(initialLoading);
-  const [hasMore] = useState5(initialHasMore);
-  const onSave = useCallback5(async (id, field, value, updaterName, fromValue) => {
+  const [clients, setClients] = useState6(initialClients);
+  const [views, setViews] = useState6(initialViews);
+  const [listTitle, setListTitle] = useState6(initialTitle ?? _collectionId);
+  const [permissions, setPermissions] = useState6(initialPermissions);
+  const [loading] = useState6(initialLoading);
+  const [hasMore] = useState6(initialHasMore);
+  const onSave = useCallback6(async (id, field, value, updaterName, fromValue) => {
     const changeEntry = {
       at: { seconds: Math.floor(Date.now() / 1e3) },
       by: updaterName,
@@ -3093,21 +3546,21 @@ function useClientListMock(_collectionId, options = {}) {
       )
     );
   }, []);
-  const onSaveView = useCallback5(async (view) => {
+  const onSaveView = useCallback6(async (view) => {
     const id = `mock-view-${Date.now()}`;
     setViews((prev) => [...prev, { id, ...view }]);
     return id;
   }, []);
-  const onDeleteView = useCallback5(async (id) => {
+  const onDeleteView = useCallback6(async (id) => {
     setViews((prev) => prev.filter((v) => v.id !== id));
   }, []);
-  const onRenameList = useCallback5(async (name) => {
+  const onRenameList = useCallback6(async (name) => {
     setListTitle(name);
   }, []);
-  const onSavePermissions = useCallback5(async (matrix) => {
+  const onSavePermissions = useCallback6(async (matrix) => {
     setPermissions(matrix);
   }, []);
-  const onLoadMore = useCallback5(async () => {
+  const onLoadMore = useCallback6(async () => {
   }, []);
   return {
     clients,
@@ -3126,15 +3579,15 @@ function useClientListMock(_collectionId, options = {}) {
 }
 
 // hooks/useReceiptListMock.ts
-import { useState as useState6, useCallback as useCallback6 } from "react";
+import { useState as useState7, useCallback as useCallback7 } from "react";
 function uid2() {
   return Math.random().toString(36).slice(2, 10);
 }
 function useReceiptListMock(options = {}) {
-  const [receipts, setReceipts] = useState6(
+  const [receipts, setReceipts] = useState7(
     options.initialReceipts ?? []
   );
-  const onSave = useCallback6(
+  const onSave = useCallback7(
     async (record) => {
       const full = {
         ...record,
@@ -3145,14 +3598,14 @@ function useReceiptListMock(options = {}) {
     },
     []
   );
-  const onDelete = useCallback6(async (id) => {
+  const onDelete = useCallback7(async (id) => {
     setReceipts((prev) => prev.filter((r) => r.id !== id));
   }, []);
   return { receipts, onSave, onDelete };
 }
 
 // hooks/useReceiptList.ts
-import { useEffect as useEffect4, useState as useState7, useCallback as useCallback7 } from "react";
+import { useEffect as useEffect5, useState as useState8, useCallback as useCallback8 } from "react";
 import { getApps as getApps2, initializeApp as initializeApp2 } from "firebase/app";
 import {
   getFirestore as getFirestore3,
@@ -3191,9 +3644,9 @@ function getStorageInstance() {
 var RECEIPTS_COLLECTION = "receipts";
 function useReceiptList(uid3) {
   const firestore = getDB3();
-  const [receipts, setReceipts] = useState7([]);
-  const [loading, setLoading] = useState7(true);
-  useEffect4(() => {
+  const [receipts, setReceipts] = useState8([]);
+  const [loading, setLoading] = useState8(true);
+  useEffect5(() => {
     if (!uid3) {
       setReceipts([]);
       setLoading(false);
@@ -3225,7 +3678,7 @@ function useReceiptList(uid3) {
     );
     return () => unsub();
   }, [uid3, firestore]);
-  const onSave = useCallback7(
+  const onSave = useCallback8(
     async (record) => {
       await addDoc3(collection3(firestore, RECEIPTS_COLLECTION), {
         ...record,
@@ -3235,7 +3688,7 @@ function useReceiptList(uid3) {
     },
     [uid3, firestore]
   );
-  const onDelete = useCallback7(
+  const onDelete = useCallback8(
     async (id) => {
       const receipt = receipts.find((r) => r.id === id);
       await deleteDoc2(doc3(firestore, RECEIPTS_COLLECTION, id));
@@ -3256,6 +3709,7 @@ export {
   ClientList,
   DEFAULT_PERMISSIONS,
   OdsPanel,
+  ReceiptList,
   ReceiptScanner,
   useClientList,
   useClientListMock,
