@@ -53,6 +53,8 @@ interface ClientRecord {
     agentStatus?: string;
     adminStatus?: string;
     notes?: string;
+    clientPaidDate?: string;
+    compDate?: string;
     historical?: boolean;
     createdAt?: {
         seconds: number;
@@ -76,6 +78,8 @@ interface ClientListView {
     id: string;
     name: string;
     colOrder?: string[];
+    /** Explicit list of column keys to show. If omitted, all columns are shown. */
+    visibleCols?: string[];
     sortField?: string | null;
     sortDir?: "asc" | "desc";
     filterRows?: FilterRow[];

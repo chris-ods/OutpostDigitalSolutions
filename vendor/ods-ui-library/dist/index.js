@@ -33,7 +33,7 @@ function styleInject(css, { insertAt } = {}) {
 }
 
 // ClientList.css
-styleInject(".cl-root {\n  --cl-bg: #030712;\n  --cl-surface: #111827;\n  --cl-surface-2: #1f2937;\n  --cl-border: #1f2937;\n  --cl-border-2: #374151;\n  --cl-text: #f9fafb;\n  --cl-text-2: #d1d5db;\n  --cl-text-3: #9ca3af;\n  --cl-text-4: #6b7280;\n  --cl-text-5: #4b5563;\n  --cl-accent: #3b82f6;\n  --cl-accent-dark: #1d4ed8;\n  --cl-indigo: #6366f1;\n  --cl-green: #22c55e;\n  --cl-amber: #f59e0b;\n  --cl-red: #ef4444;\n  --cl-purple: #a855f7;\n  --cl-yellow: #facc15;\n  font-family:\n    ui-sans-serif,\n    system-ui,\n    -apple-system,\n    sans-serif;\n  font-size: 13px;\n  background: var(--cl-bg);\n  color: var(--cl-text);\n  min-height: 100%;\n}\n.cl-header {\n  background: color-mix(in srgb, var(--cl-surface) 70%, transparent);\n  border-bottom: 1px solid var(--cl-border);\n  padding: 20px 24px;\n}\n.cl-header-row {\n  display: flex;\n  align-items: flex-start;\n  justify-content: space-between;\n  gap: 16px;\n  flex-wrap: wrap;\n}\n.cl-header-left {\n  display: flex;\n  align-items: center;\n  gap: 16px;\n}\n.cl-header-accent {\n  width: 4px;\n  height: 36px;\n  border-radius: 9999px;\n  background: var(--cl-accent);\n}\n.cl-title {\n  font-size: 22px;\n  font-weight: 700;\n  line-height: 1;\n  color: var(--cl-text);\n}\n.cl-subtitle {\n  font-size: 11px;\n  color: var(--cl-text-4);\n  margin-top: 6px;\n}\n.cl-header-right {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n.cl-search-area {\n  padding: 20px 24px 12px;\n  display: flex;\n  flex-direction: column;\n  gap: 12px;\n}\n.cl-search-wrap {\n  position: relative;\n}\n.cl-search-icon {\n  position: absolute;\n  left: 14px;\n  top: 50%;\n  transform: translateY(-50%);\n  width: 16px;\n  height: 16px;\n  color: var(--cl-text-4);\n  pointer-events: none;\n}\n.cl-search-input {\n  width: 100%;\n  padding: 10px 36px 10px 40px;\n  background: var(--cl-surface);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 10px;\n  color: var(--cl-text);\n  font-size: 13px;\n  outline: none;\n  transition: border-color 0.15s, box-shadow 0.15s;\n  box-sizing: border-box;\n}\n.cl-search-input:focus {\n  border-color: var(--cl-accent);\n  box-shadow: 0 0 0 2px color-mix(in srgb, var(--cl-accent) 25%, transparent);\n}\n.cl-search-input::placeholder {\n  color: var(--cl-text-4);\n}\n.cl-search-clear {\n  position: absolute;\n  right: 12px;\n  top: 50%;\n  transform: translateY(-50%);\n  background: none;\n  border: none;\n  color: var(--cl-text-4);\n  cursor: pointer;\n  padding: 2px;\n}\n.cl-search-clear:hover {\n  color: var(--cl-text);\n}\n.cl-pills {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  flex-wrap: wrap;\n}\n.cl-pill-divider {\n  width: 1px;\n  height: 16px;\n  background: var(--cl-border-2);\n  margin: 0 4px;\n}\n.cl-pill {\n  padding: 4px 12px;\n  border-radius: 9999px;\n  font-size: 11px;\n  font-weight: 500;\n  border: 1px solid var(--cl-border-2);\n  background: var(--cl-surface-2);\n  color: var(--cl-text-3);\n  cursor: pointer;\n  transition: all 0.15s;\n  white-space: nowrap;\n}\n.cl-pill:hover {\n  color: var(--cl-text);\n  border-color: var(--cl-text-4);\n}\n.cl-pill.active {\n  background: var(--cl-accent);\n  border-color: color-mix(in srgb, var(--cl-accent) 80%, white);\n  color: white;\n}\n.cl-clear-btn {\n  margin-left: auto;\n  font-size: 11px;\n  color: var(--cl-text-4);\n  background: none;\n  border: none;\n  cursor: pointer;\n  display: flex;\n  align-items: center;\n  gap: 4px;\n}\n.cl-clear-btn:hover {\n  color: var(--cl-text);\n}\n.cl-toolbar {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  padding: 7px 24px;\n  border-bottom: 1px solid var(--cl-border);\n  background: color-mix(in srgb, var(--cl-surface) 60%, transparent);\n  overflow-x: auto;\n}\n.cl-toolbar-seg {\n  display: flex;\n  align-items: center;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 8px;\n  padding: 2px;\n  gap: 1px;\n  flex-shrink: 0;\n}\n.cl-toolbar-view-item {\n  display: flex;\n  align-items: center;\n}\n.cl-seg-btn {\n  padding: 3px 10px;\n  border-radius: 6px;\n  font-size: 11px;\n  font-weight: 500;\n  border: none;\n  background: none;\n  color: var(--cl-text-4);\n  cursor: pointer;\n  white-space: nowrap;\n  transition: background 0.1s, color 0.1s;\n}\n.cl-seg-btn:hover {\n  background: var(--cl-border-2);\n  color: var(--cl-text-2);\n}\n.cl-seg-btn.active {\n  background: var(--cl-surface);\n  color: var(--cl-text);\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);\n}\n.cl-seg-delete {\n  display: flex;\n  align-items: center;\n  padding: 2px 4px 2px 0;\n  background: none;\n  border: none;\n  color: var(--cl-text-5);\n  cursor: pointer;\n  opacity: 0;\n  transition: opacity 0.15s, color 0.15s;\n}\n.cl-toolbar-view-item:hover .cl-seg-delete {\n  opacity: 1;\n}\n.cl-seg-delete:hover {\n  color: var(--cl-red);\n}\n.cl-seg-add {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 10px;\n  border-radius: 6px;\n  font-size: 11px;\n  font-weight: 500;\n  border: 1px dashed var(--cl-border-2);\n  background: none;\n  color: var(--cl-text-4);\n  cursor: pointer;\n  white-space: nowrap;\n  transition: color 0.1s, border-color 0.1s;\n  flex-shrink: 0;\n}\n.cl-seg-add:hover {\n  color: var(--cl-text-2);\n  border-color: var(--cl-text-4);\n}\n.cl-toolbar-save-wrap {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n}\n.cl-toolbar-save-input {\n  padding: 3px 8px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 6px;\n  color: var(--cl-text);\n  font-size: 11px;\n  outline: none;\n  width: 120px;\n}\n.cl-toolbar-save-input:focus {\n  border-color: var(--cl-indigo);\n}\n.cl-toolbar-save-input::placeholder {\n  color: var(--cl-text-4);\n}\n.cl-toolbar-save-confirm {\n  padding: 3px 8px;\n  background: var(--cl-indigo);\n  border: none;\n  border-radius: 6px;\n  color: white;\n  font-size: 11px;\n  font-weight: 500;\n  cursor: pointer;\n}\n.cl-toolbar-save-confirm:hover:not(:disabled) {\n  background: color-mix(in srgb, var(--cl-indigo) 80%, white);\n}\n.cl-toolbar-save-confirm:disabled {\n  opacity: 0.5;\n  cursor: default;\n}\n.cl-toolbar-save-cancel {\n  padding: 3px 8px;\n  background: none;\n  border: none;\n  color: var(--cl-text-4);\n  font-size: 11px;\n  cursor: pointer;\n}\n.cl-toolbar-save-cancel:hover {\n  color: var(--cl-text);\n}\n.cl-title-editable {\n  cursor: pointer;\n}\n.cl-title-editable:hover {\n  color: var(--cl-accent);\n}\n.cl-rename-input {\n  font-size: 22px;\n  font-weight: 700;\n  line-height: 1;\n  background: none;\n  border: none;\n  border-bottom: 2px solid var(--cl-accent);\n  color: var(--cl-text);\n  outline: none;\n  width: 260px;\n  padding: 0 2px;\n}\n.cl-table-area {\n  padding: 0 24px 32px;\n}\n.cl-table-wrap {\n  background: var(--cl-surface);\n  border: 1px solid var(--cl-border);\n  border-radius: 12px;\n  overflow: hidden;\n}\n.cl-table-scroll {\n  overflow-x: auto;\n}\n.cl-table {\n  width: 100%;\n  font-size: 11px;\n  white-space: nowrap;\n  border-collapse: collapse;\n}\n.cl-thead {\n  position: sticky;\n  top: 0;\n  z-index: 10;\n  background: var(--cl-surface);\n  border-bottom: 1px solid var(--cl-border);\n}\n.cl-th {\n  padding: 10px 12px;\n  text-align: left;\n  font-size: 11px;\n  color: var(--cl-text-3);\n  font-weight: 500;\n  white-space: nowrap;\n  transition: border-left 0.1s;\n}\n.cl-th.meta {\n  color: var(--cl-text-5);\n}\n.cl-th.drag-over {\n  border-left: 2px solid var(--cl-accent);\n  padding-left: 10px;\n}\n.cl-th.dragging {\n  opacity: 0.4;\n}\n.cl-th-inner {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n}\n.cl-th-inner:hover .cl-drag-grip {\n  opacity: 1;\n}\n.cl-drag-grip {\n  cursor: grab;\n  color: var(--cl-text-5);\n  opacity: 0;\n  transition: opacity 0.15s;\n  flex-shrink: 0;\n  display: flex;\n  align-items: center;\n}\n.cl-drag-grip:active {\n  cursor: grabbing;\n}\n.cl-drag-grip:hover {\n  color: var(--cl-text-3);\n}\n.cl-sort-btn {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  background: none;\n  border: none;\n  color: inherit;\n  font-size: inherit;\n  font-weight: inherit;\n  cursor: pointer;\n  padding: 0;\n}\n.cl-sort-btn:hover {\n  color: var(--cl-text);\n}\n.cl-sort-btn.sorted {\n  color: var(--cl-text);\n}\n.cl-sort-arrow {\n  font-size: 9px;\n  color: var(--cl-accent);\n}\n.cl-sort-arrow.unsorted {\n  color: var(--cl-text-5);\n}\n.cl-filter-btn {\n  padding: 2px;\n  border-radius: 4px;\n  background: none;\n  border: none;\n  cursor: pointer;\n  transition: color 0.15s;\n  opacity: 0;\n  display: flex;\n}\n.cl-th-inner:hover .cl-filter-btn {\n  opacity: 1;\n}\n.cl-filter-btn.filtered {\n  color: var(--cl-accent);\n  opacity: 1 !important;\n}\n.cl-filter-btn:not(.filtered) {\n  color: var(--cl-text-5);\n}\n.cl-filter-btn:not(.filtered):hover {\n  color: var(--cl-text-3);\n}\n.cl-filter-count {\n  font-size: 9px;\n  background: var(--cl-accent);\n  color: white;\n  border-radius: 9999px;\n  width: 14px;\n  height: 14px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-weight: 700;\n  line-height: 1;\n  flex-shrink: 0;\n}\n.cl-th-actions {\n  position: sticky;\n  right: 0;\n  background: var(--cl-surface);\n  border-left: 1px solid color-mix(in srgb, var(--cl-border) 60%, transparent);\n  padding: 10px 12px;\n  color: var(--cl-text-3);\n  font-weight: 500;\n  font-size: 11px;\n}\n.cl-tr {\n  border-bottom: 1px solid color-mix(in srgb, var(--cl-border) 50%, transparent);\n  transition: background 0.1s;\n}\n.cl-tr:last-child {\n  border-bottom: 0;\n}\n.cl-tr:hover {\n  background: color-mix(in srgb, var(--cl-surface-2) 20%, transparent);\n}\n.cl-tr.pending {\n  background: color-mix(in srgb, #451a03 5%, transparent);\n}\n.cl-tr-section {\n  border-bottom: 1px solid;\n}\n.cl-tr-section.pending-section {\n  background: color-mix(in srgb, #451a03 20%, transparent);\n  border-color: color-mix(in srgb, #78350f 30%, transparent);\n}\n.cl-tr-section.claimed-section {\n  background: color-mix(in srgb, #052e16 20%, transparent);\n  border-color: color-mix(in srgb, #14532d 30%, transparent);\n}\n.cl-tr-section td {\n  padding: 6px 12px;\n}\n.cl-section-label {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n.cl-section-dot {\n  width: 8px;\n  height: 8px;\n  border-radius: 9999px;\n  flex-shrink: 0;\n}\n.cl-section-dot.pulse {\n  animation: pulse 1.5s infinite;\n}\n.cl-section-title {\n  font-size: 9px;\n  font-weight: 700;\n  text-transform: uppercase;\n  letter-spacing: 0.15em;\n}\n.cl-section-count {\n  font-size: 9px;\n  color: var(--cl-text-5);\n}\n@keyframes pulse {\n  0%, 100% {\n    opacity: 1;\n  }\n  50% {\n    opacity: 0.4;\n  }\n}\n.cl-td {\n  padding: 8px 12px;\n  font-size: 11px;\n  color: var(--cl-text-2);\n}\n.cl-td.text-primary {\n  color: var(--cl-text);\n  font-weight: 500;\n}\n.cl-td.mono {\n  font-family: ui-monospace, monospace;\n}\n.cl-td.meta {\n  color: var(--cl-text-5);\n}\n.cl-td.narrow {\n  width: 24px;\n}\n.cl-td-actions {\n  position: sticky;\n  right: 0;\n  background: #030712;\n  border-left: 1px solid color-mix(in srgb, var(--cl-border) 60%, transparent);\n  padding: 8px 12px;\n}\n.cl-cell-edit {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  cursor: pointer;\n}\n.cl-cell-edit:hover .cl-pencil {\n  opacity: 1;\n}\n.cl-pencil {\n  opacity: 0;\n  transition: opacity 0.15s;\n  flex-shrink: 0;\n  color: var(--cl-text-5);\n}\n.cl-cell-edit-wrap {\n  display: flex;\n  flex-direction: column;\n  gap: 5px;\n}\n.cl-cell-input {\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-accent);\n  border-radius: 5px;\n  color: var(--cl-text);\n  font-size: 12px;\n  padding: 5px 8px;\n  outline: none;\n  min-width: 150px;\n  width: 100%;\n  box-sizing: border-box;\n  box-shadow: 0 0 0 2px color-mix(in srgb, var(--cl-accent) 20%, transparent);\n}\n.cl-cell-actions {\n  display: flex;\n  gap: 5px;\n}\n.cl-cell-cancel-btn,\n.cl-cell-confirm-btn {\n  width: 18px;\n  height: 18px;\n  border-radius: 50%;\n  border: none;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  cursor: pointer;\n  flex-shrink: 0;\n  transition: opacity 0.1s;\n}\n.cl-cell-cancel-btn {\n  background: var(--cl-red);\n  color: white;\n}\n.cl-cell-confirm-btn {\n  background: var(--cl-green);\n  color: white;\n}\n.cl-cell-cancel-btn:hover,\n.cl-cell-confirm-btn:hover {\n  opacity: 0.85;\n}\n.cl-cell-select {\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-accent);\n  border-radius: 4px;\n  color: var(--cl-text);\n  font-size: 11px;\n  padding: 2px 4px;\n  outline: none;\n  width: 100%;\n}\n.cl-badge {\n  display: inline-flex;\n  align-items: center;\n  padding: 2px 6px;\n  border-radius: 4px;\n  border: 1px solid;\n  font-size: 9px;\n  font-weight: 500;\n}\n.cl-badge.approved {\n  background: color-mix(in srgb, #14532d 40%, transparent);\n  color: #4ade80;\n  border-color: color-mix(in srgb, #15803d 50%, transparent);\n}\n.cl-badge.declined {\n  background: color-mix(in srgb, #450a0a 40%, transparent);\n  color: #f87171;\n  border-color: color-mix(in srgb, #b91c1c 50%, transparent);\n}\n.cl-badge.sent-uw {\n  background: color-mix(in srgb, #1e3a5f 40%, transparent);\n  color: #60a5fa;\n  border-color: color-mix(in srgb, #1d4ed8 50%, transparent);\n}\n.cl-badge.pending {\n  background: color-mix(in srgb, #422006 40%, transparent);\n  color: #fbbf24;\n  border-color: color-mix(in srgb, #b45309 50%, transparent);\n}\n.cl-badge.cancelled {\n  background: var(--cl-surface-2);\n  color: var(--cl-text-4);\n  border-color: var(--cl-border-2);\n}\n.cl-badge.split {\n  background: color-mix(in srgb, #3b0764 50%, transparent);\n  color: #c4b5fd;\n  border-color: color-mix(in srgb, #7e22ce 50%, transparent);\n}\n.cl-badge.alp {\n  background: color-mix(in srgb, #422006 50%, transparent);\n  color: #fcd34d;\n  border-color: color-mix(in srgb, #b45309 50%, transparent);\n}\n.cl-badge.special {\n  background: color-mix(in srgb, #422006 50%, transparent);\n  color: #fcd34d;\n  border-color: color-mix(in srgb, #b45309 50%, transparent);\n}\n.cl-badge.unclaimed {\n  color: var(--cl-amber);\n}\n.cl-badge.claimed {\n  color: var(--cl-green);\n}\n.cl-note-text {\n  color: var(--cl-yellow);\n  max-width: 140px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  display: block;\n}\n.cl-note-add {\n  color: var(--cl-text-5);\n  font-style: italic;\n}\n.cl-no-agent {\n  color: var(--cl-text-5);\n  font-style: italic;\n}\n.cl-dup-warn {\n  color: #f87171;\n  font-weight: 600;\n}\n.cl-premium {\n  font-weight: 600;\n}\n.cl-spinner {\n  width: 12px;\n  height: 12px;\n  border: 2px solid var(--cl-border-2);\n  border-top-color: var(--cl-accent);\n  border-radius: 50%;\n  animation: cl-spin 0.7s linear infinite;\n  flex-shrink: 0;\n}\n@keyframes cl-spin {\n  to {\n    transform: rotate(360deg);\n  }\n}\n.cl-btn-claim {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  padding: 4px 8px;\n  background: #15803d;\n  border: none;\n  border-radius: 4px;\n  color: white;\n  font-size: 9px;\n  font-weight: 700;\n  cursor: pointer;\n  transition: background 0.15s;\n  white-space: nowrap;\n}\n.cl-btn-claim:hover:not(:disabled) {\n  background: #16a34a;\n}\n.cl-btn-claim:disabled {\n  background: var(--cl-surface-2);\n  cursor: not-allowed;\n}\n.cl-btn-unclaim {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  padding: 4px 8px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 4px;\n  color: var(--cl-text-3);\n  font-size: 9px;\n  cursor: pointer;\n  transition: all 0.15s;\n  white-space: nowrap;\n}\n.cl-btn-unclaim:hover:not(:disabled) {\n  background: color-mix(in srgb, #450a0a 50%, transparent);\n  border-color: color-mix(in srgb, #b91c1c 60%, transparent);\n  color: #fca5a5;\n}\n.cl-btn-unclaim:disabled {\n  cursor: not-allowed;\n}\n.cl-export-wrap {\n  position: relative;\n}\n.cl-export-btn {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 8px 16px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 8px;\n  color: var(--cl-text-2);\n  font-size: 13px;\n  font-weight: 500;\n  cursor: pointer;\n  transition: background 0.15s;\n}\n.cl-export-btn:hover:not(:disabled) {\n  background: var(--cl-border-2);\n}\n.cl-export-btn:disabled {\n  opacity: 0.4;\n  cursor: not-allowed;\n}\n.cl-export-menu {\n  position: absolute;\n  right: 0;\n  top: calc(100% + 6px);\n  z-index: 50;\n  background: var(--cl-surface);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 12px;\n  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);\n  width: 240px;\n  overflow: hidden;\n}\n.cl-export-menu-header {\n  padding: 12px 16px;\n  border-bottom: 1px solid var(--cl-border);\n}\n.cl-export-menu-title {\n  font-size: 12px;\n  font-weight: 600;\n  color: var(--cl-text-2);\n}\n.cl-export-menu-sub {\n  font-size: 11px;\n  color: var(--cl-text-4);\n  margin-top: 2px;\n}\n.cl-export-menu-body {\n  padding: 12px 16px;\n}\n.cl-export-dl-btn {\n  width: 100%;\n  padding: 8px;\n  background: var(--cl-accent);\n  border: none;\n  border-radius: 8px;\n  color: white;\n  font-size: 13px;\n  font-weight: 600;\n  cursor: pointer;\n  transition: background 0.15s;\n}\n.cl-export-dl-btn:hover {\n  background: var(--cl-accent-dark);\n}\n.cl-active-filters {\n  padding: 0 24px 16px;\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  flex-wrap: wrap;\n}\n.cl-active-filters-label {\n  font-size: 11px;\n  color: var(--cl-text-4);\n}\n.cl-filter-chip {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 8px;\n  background: color-mix(in srgb, #1e3a5f 80%, transparent);\n  border: 1px solid color-mix(in srgb, #1d4ed8 50%, transparent);\n  border-radius: 9999px;\n  font-size: 11px;\n  color: #93c5fd;\n  white-space: nowrap;\n}\n.cl-filter-chip-remove {\n  background: none;\n  border: none;\n  color: inherit;\n  cursor: pointer;\n  padding: 0;\n  line-height: 1;\n  margin-left: 2px;\n}\n.cl-filter-chip-remove:hover {\n  color: white;\n}\n.cl-filter-clear-all {\n  font-size: 11px;\n  color: var(--cl-text-4);\n  background: none;\n  border: none;\n  cursor: pointer;\n}\n.cl-filter-clear-all:hover {\n  color: var(--cl-red);\n}\n.cl-perm-btn {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  padding: 7px 12px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 8px;\n  color: var(--cl-text-3);\n  font-size: 12px;\n  font-weight: 500;\n  cursor: pointer;\n  transition: all 0.15s;\n  white-space: nowrap;\n}\n.cl-perm-btn:hover {\n  color: var(--cl-text);\n  border-color: var(--cl-text-4);\n}\n.cl-perm-btn.active {\n  background: color-mix(in srgb, var(--cl-indigo) 15%, transparent);\n  border-color: color-mix(in srgb, var(--cl-indigo) 60%, transparent);\n  color: var(--cl-indigo);\n}\n.cl-perm {\n  margin: 0 0 0 0;\n  border-bottom: 1px solid var(--cl-border);\n  background: var(--cl-surface);\n}\n.cl-perm-header {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 12px 24px;\n  border-bottom: 1px solid var(--cl-border);\n  background: color-mix(in srgb, var(--cl-surface-2) 50%, transparent);\n}\n.cl-perm-title {\n  font-size: 13px;\n  font-weight: 600;\n  color: var(--cl-text);\n  margin-right: 8px;\n}\n.cl-perm-subtitle {\n  font-size: 11px;\n  color: var(--cl-text-4);\n}\n.cl-perm-save {\n  padding: 6px 14px;\n  background: var(--cl-indigo);\n  border: none;\n  border-radius: 6px;\n  color: white;\n  font-size: 12px;\n  font-weight: 600;\n  cursor: pointer;\n  transition: background 0.15s;\n}\n.cl-perm-save:hover:not(:disabled) {\n  background: color-mix(in srgb, var(--cl-indigo) 80%, white);\n}\n.cl-perm-save:disabled {\n  opacity: 0.5;\n  cursor: default;\n}\n.cl-perm-close {\n  padding: 4px;\n  background: none;\n  border: none;\n  color: var(--cl-text-4);\n  cursor: pointer;\n  border-radius: 4px;\n  display: flex;\n  align-items: center;\n  transition: color 0.15s;\n}\n.cl-perm-close:hover {\n  color: var(--cl-text);\n}\n.cl-perm-scroll {\n  overflow-x: auto;\n  max-height: 420px;\n  overflow-y: auto;\n}\n.cl-perm-table {\n  width: 100%;\n  border-collapse: collapse;\n  font-size: 12px;\n}\n.cl-perm-th {\n  padding: 8px 12px;\n  text-align: center;\n  font-size: 11px;\n  font-weight: 600;\n  color: var(--cl-text-3);\n  background: var(--cl-surface);\n  border-bottom: 1px solid var(--cl-border);\n  position: sticky;\n  top: 0;\n  z-index: 2;\n}\n.cl-perm-th.cl-perm-col-label {\n  text-align: left;\n  min-width: 140px;\n}\n.cl-perm-th.cl-perm-role-group {\n  border-left: 1px solid var(--cl-border-2);\n  color: var(--cl-text-2);\n  font-size: 12px;\n}\n.cl-perm-th.cl-perm-sub {\n  font-weight: 400;\n  color: var(--cl-text-4);\n  font-size: 10px;\n}\n.cl-perm-th.cl-perm-sub:nth-child(odd) {\n  border-left: 1px solid var(--cl-border-2);\n}\n.cl-perm-tr {\n  border-bottom: 1px solid color-mix(in srgb, var(--cl-border) 40%, transparent);\n}\n.cl-perm-tr:hover {\n  background: color-mix(in srgb, var(--cl-surface-2) 30%, transparent);\n}\n.cl-perm-td {\n  padding: 7px 12px;\n}\n.cl-perm-td.cl-perm-col-name {\n  font-size: 12px;\n  color: var(--cl-text-2);\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.cl-perm-td.cl-perm-cell {\n  text-align: center;\n  border-left: 1px solid color-mix(in srgb, var(--cl-border) 40%, transparent);\n}\n.cl-perm-td.cl-perm-cell:nth-child(odd) {\n  border-left: 1px solid var(--cl-border-2);\n}\n.cl-perm-check {\n  width: 15px;\n  height: 15px;\n  accent-color: var(--cl-indigo);\n  cursor: pointer;\n  border-radius: 3px;\n}\n.cl-perm-check:disabled {\n  opacity: 0.25;\n  cursor: default;\n}\n.cl-perm-tag {\n  font-size: 9px;\n  font-weight: 600;\n  text-transform: uppercase;\n  padding: 1px 5px;\n  border-radius: 4px;\n  letter-spacing: 0.05em;\n  background: color-mix(in srgb, var(--cl-surface-2) 80%, transparent);\n  border: 1px solid var(--cl-border-2);\n  color: var(--cl-text-5);\n}\n.cl-search-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n.cl-search-row .cl-search-wrap {\n  flex: 1;\n}\n.cl-filter-toggle {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n  padding: 9px 14px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 10px;\n  color: var(--cl-text-3);\n  font-size: 13px;\n  font-weight: 500;\n  cursor: pointer;\n  transition: all 0.15s;\n  white-space: nowrap;\n}\n.cl-filter-toggle:hover {\n  color: var(--cl-text);\n  border-color: var(--cl-text-4);\n}\n.cl-filter-toggle.active {\n  background: color-mix(in srgb, var(--cl-accent) 15%, transparent);\n  border-color: color-mix(in srgb, var(--cl-accent) 60%, transparent);\n  color: var(--cl-accent);\n}\n.cl-filter-toggle-count {\n  background: var(--cl-accent);\n  color: white;\n  border-radius: 9999px;\n  padding: 0 5px;\n  font-size: 10px;\n  font-weight: 700;\n  line-height: 16px;\n}\n.cl-fb {\n  margin-top: 8px;\n  background: var(--cl-surface);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 10px;\n  overflow: hidden;\n}\n.cl-fb-empty {\n  padding: 12px 20px;\n  font-size: 12px;\n  color: var(--cl-text-4);\n  margin: 0;\n}\n.cl-fb-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 8px 20px;\n  border-bottom: 1px solid color-mix(in srgb, var(--cl-border) 60%, transparent);\n}\n.cl-fb-row:last-of-type {\n  border-bottom: none;\n}\n.cl-fb-where {\n  font-size: 11px;\n  font-weight: 600;\n  color: var(--cl-text-4);\n  text-transform: uppercase;\n  letter-spacing: 0.08em;\n  flex-shrink: 0;\n  width: 36px;\n  margin-right: 8px;\n}\n.cl-fb-select {\n  padding: 4px 6px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 6px;\n  color: var(--cl-text);\n  font-size: 10px;\n  outline: none;\n  cursor: pointer;\n  transition: border-color 0.15s;\n}\n.cl-fb-select:focus {\n  border-color: var(--cl-accent);\n}\n.cl-fb-select-op {\n  min-width: 72px;\n}\n.cl-fb-select-val {\n  flex: 1;\n}\n.cl-fb-input {\n  padding: 4px 6px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 6px;\n  color: var(--cl-text);\n  font-size: 10px;\n  outline: none;\n  transition: border-color 0.15s;\n  min-width: 64px;\n}\n.cl-fb-input:focus {\n  border-color: var(--cl-accent);\n}\n.cl-fb-input::placeholder {\n  color: var(--cl-text-4);\n}\n.cl-fb-input-wide {\n  flex: 1;\n}\n.cl-fb-and {\n  font-size: 11px;\n  color: var(--cl-text-4);\n  flex-shrink: 0;\n}\n.cl-fb-remove {\n  flex-shrink: 0;\n  background: none;\n  border: none;\n  color: var(--cl-text-5);\n  cursor: pointer;\n  padding: 4px;\n  border-radius: 4px;\n  display: flex;\n  align-items: center;\n  transition: color 0.15s;\n}\n.cl-fb-remove:hover {\n  color: var(--cl-red);\n}\n.cl-fb-footer {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  padding: 8px 20px;\n  border-top: 1px solid color-mix(in srgb, var(--cl-border) 60%, transparent);\n  background: color-mix(in srgb, var(--cl-surface-2) 40%, transparent);\n}\n.cl-fb-add {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  background: none;\n  border: none;\n  color: var(--cl-accent);\n  font-size: 12px;\n  font-weight: 500;\n  cursor: pointer;\n  padding: 0;\n}\n.cl-fb-add:hover {\n  color: color-mix(in srgb, var(--cl-accent) 80%, white);\n}\n.cl-fb-clear {\n  background: none;\n  border: none;\n  color: var(--cl-text-4);\n  font-size: 12px;\n  cursor: pointer;\n  margin-left: auto;\n  padding: 0;\n}\n.cl-fb-clear:hover {\n  color: var(--cl-red);\n}\n.cl-empty {\n  text-align: center;\n  padding: 80px 0;\n}\n.cl-empty-icon {\n  width: 56px;\n  height: 56px;\n  border-radius: 9999px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  margin: 0 auto 16px;\n}\n.cl-empty-title {\n  font-size: 18px;\n  font-weight: 600;\n  color: var(--cl-text);\n  margin-bottom: 4px;\n}\n.cl-empty-sub {\n  font-size: 13px;\n  color: var(--cl-text-4);\n}\n.cl-load-more {\n  display: flex;\n  justify-content: center;\n  padding-top: 16px;\n}\n.cl-load-more-btn {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 10px 24px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 12px;\n  color: var(--cl-text-2);\n  font-size: 13px;\n  font-weight: 500;\n  cursor: pointer;\n  transition: all 0.15s;\n}\n.cl-load-more-btn:hover:not(:disabled) {\n  background: var(--cl-border-2);\n  border-color: var(--cl-text-4);\n}\n.cl-load-more-btn:disabled {\n  opacity: 0.6;\n  cursor: not-allowed;\n}\n.cl-all-loaded {\n  text-align: center;\n  color: var(--cl-text-5);\n  font-size: 11px;\n  margin-top: 16px;\n}\n.cl-meta-cell {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  position: relative;\n}\n.cl-info-btn {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  width: 16px;\n  height: 16px;\n  border-radius: 50%;\n  background: none;\n  border: none;\n  padding: 0;\n  color: var(--cl-text-4);\n  cursor: pointer;\n  flex-shrink: 0;\n  opacity: 0;\n  transition: opacity 0.15s, color 0.15s;\n}\n.cl-meta-cell:hover .cl-info-btn,\n.cl-info-btn:focus-visible {\n  opacity: 1;\n}\n.cl-info-btn:hover {\n  color: var(--cl-accent);\n}\n.cl-info-popover {\n  position: absolute;\n  top: calc(100% + 6px);\n  left: 0;\n  z-index: 200;\n  min-width: 220px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 10px;\n  padding: 10px 12px;\n  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);\n  font-size: 11px;\n  white-space: nowrap;\n}\n.cl-info-popover--log {\n  min-width: 280px;\n  max-height: 320px;\n  overflow-y: auto;\n  white-space: normal;\n}\n.cl-info-popover-row {\n  display: flex;\n  align-items: baseline;\n  gap: 8px;\n  padding: 2px 0;\n  color: var(--cl-text-2);\n}\n.cl-info-label {\n  font-weight: 600;\n  color: var(--cl-text-3);\n  min-width: 60px;\n  flex-shrink: 0;\n}\n.cl-info-divider {\n  border: none;\n  border-top: 1px solid var(--cl-border-2);\n  margin: 8px 0 6px;\n}\n.cl-info-log-header {\n  font-size: 10px;\n  font-weight: 700;\n  letter-spacing: 0.06em;\n  text-transform: uppercase;\n  color: var(--cl-text-4);\n  margin-bottom: 6px;\n}\n.cl-info-log-entry {\n  padding: 5px 0;\n  border-bottom: 1px solid var(--cl-border);\n}\n.cl-info-log-entry:last-child {\n  border-bottom: none;\n}\n.cl-info-log-meta {\n  font-size: 10px;\n  color: var(--cl-text-4);\n  margin-bottom: 3px;\n}\n.cl-info-log-change {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  font-size: 11px;\n  flex-wrap: wrap;\n}\n.cl-info-field {\n  font-weight: 600;\n  color: var(--cl-text-3);\n  margin-right: 2px;\n}\n.cl-info-from {\n  color: var(--cl-red);\n  text-decoration: line-through;\n  opacity: 0.8;\n  max-width: 100px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n.cl-info-to {\n  color: var(--cl-green);\n  max-width: 100px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n.cl-info-log-empty {\n  font-size: 11px;\n  color: var(--cl-text-4);\n  font-style: italic;\n  padding: 4px 0;\n}\n.cl-loading {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  min-height: 100%;\n}\n.cl-loading-spinner {\n  width: 32px;\n  height: 32px;\n  border: 3px solid var(--cl-border-2);\n  border-top-color: var(--cl-accent);\n  border-radius: 50%;\n  animation: cl-spin 0.7s linear infinite;\n}\n");
+styleInject('.cl-root {\n  --cl-bg: #030712;\n  --cl-surface: #111827;\n  --cl-surface-2: #1f2937;\n  --cl-border: #1f2937;\n  --cl-border-2: #374151;\n  --cl-text: #f9fafb;\n  --cl-text-2: #d1d5db;\n  --cl-text-3: #9ca3af;\n  --cl-text-4: #6b7280;\n  --cl-text-5: #4b5563;\n  --cl-accent: #3b82f6;\n  --cl-accent-dark: #1d4ed8;\n  --cl-indigo: #6366f1;\n  --cl-green: #22c55e;\n  --cl-amber: #f59e0b;\n  --cl-red: #ef4444;\n  --cl-purple: #a855f7;\n  --cl-yellow: #facc15;\n  font-family:\n    ui-sans-serif,\n    system-ui,\n    -apple-system,\n    sans-serif;\n  font-size: 13px;\n  background: var(--cl-bg);\n  color: var(--cl-text);\n  flex: 1;\n  min-height: 0;\n  display: flex;\n  flex-direction: column;\n  overflow: hidden;\n}\n.cl-header {\n  background: color-mix(in srgb, var(--cl-surface) 70%, transparent);\n  border-bottom: 1px solid var(--cl-border);\n  padding: 20px 24px;\n}\n.cl-header-row {\n  display: flex;\n  align-items: flex-start;\n  justify-content: space-between;\n  gap: 16px;\n  flex-wrap: wrap;\n}\n.cl-header-left {\n  display: flex;\n  align-items: center;\n  gap: 16px;\n}\n.cl-header-accent {\n  width: 4px;\n  height: 36px;\n  border-radius: 9999px;\n  background: var(--cl-accent);\n}\n.cl-title {\n  font-size: 22px;\n  font-weight: 700;\n  line-height: 1;\n  color: var(--cl-text);\n}\n.cl-subtitle {\n  font-size: 11px;\n  color: var(--cl-text-4);\n  margin-top: 6px;\n}\n.cl-header-right {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n.cl-search-area {\n  padding: 20px 24px 12px;\n  display: flex;\n  flex-direction: column;\n  gap: 12px;\n}\n.cl-search-wrap {\n  position: relative;\n}\n.cl-search-icon {\n  position: absolute;\n  left: 14px;\n  top: 50%;\n  transform: translateY(-50%);\n  width: 16px;\n  height: 16px;\n  color: var(--cl-text-4);\n  pointer-events: none;\n}\n.cl-search-input {\n  width: 100%;\n  padding: 10px 36px 10px 40px;\n  background: var(--cl-surface);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 10px;\n  color: var(--cl-text);\n  font-size: 13px;\n  outline: none;\n  transition: border-color 0.15s, box-shadow 0.15s;\n  box-sizing: border-box;\n}\n.cl-search-input:focus {\n  border-color: var(--cl-accent);\n  box-shadow: 0 0 0 2px color-mix(in srgb, var(--cl-accent) 25%, transparent);\n}\n.cl-search-input::placeholder {\n  color: var(--cl-text-4);\n}\n.cl-search-clear {\n  position: absolute;\n  right: 12px;\n  top: 50%;\n  transform: translateY(-50%);\n  background: none;\n  border: none;\n  color: var(--cl-text-4);\n  cursor: pointer;\n  padding: 2px;\n}\n.cl-search-clear:hover {\n  color: var(--cl-text);\n}\n.cl-pills {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  flex-wrap: wrap;\n}\n.cl-pill-divider {\n  width: 1px;\n  height: 16px;\n  background: var(--cl-border-2);\n  margin: 0 4px;\n}\n.cl-pill {\n  padding: 4px 12px;\n  border-radius: 9999px;\n  font-size: 11px;\n  font-weight: 500;\n  border: 1px solid var(--cl-border-2);\n  background: var(--cl-surface-2);\n  color: var(--cl-text-3);\n  cursor: pointer;\n  transition: all 0.15s;\n  white-space: nowrap;\n}\n.cl-pill:hover {\n  color: var(--cl-text);\n  border-color: var(--cl-text-4);\n}\n.cl-pill.active {\n  background: var(--cl-accent);\n  border-color: color-mix(in srgb, var(--cl-accent) 80%, white);\n  color: white;\n}\n.cl-clear-btn {\n  margin-left: auto;\n  font-size: 11px;\n  color: var(--cl-text-4);\n  background: none;\n  border: none;\n  cursor: pointer;\n  display: flex;\n  align-items: center;\n  gap: 4px;\n}\n.cl-clear-btn:hover {\n  color: var(--cl-text);\n}\n.cl-toolbar-row {\n  display: flex;\n  align-items: center;\n  border-bottom: 1px solid var(--cl-border);\n  background: color-mix(in srgb, var(--cl-surface) 60%, transparent);\n  position: relative;\n  z-index: 200;\n}\n.cl-toolbar {\n  flex: 1;\n  min-width: 0;\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  padding: 7px 24px;\n  overflow-x: auto;\n  overflow-y: visible;\n}\n.cl-action-bar {\n  display: flex;\n  align-items: center;\n  gap: 1px;\n  flex-shrink: 0;\n  padding: 0 12px;\n}\n.cl-action-wrap {\n  position: relative;\n}\n.cl-action-btn {\n  background: none;\n  border: none;\n  border-radius: 6px;\n  color: var(--cl-text-4);\n  cursor: pointer;\n  padding: 5px 6px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  transition: background 0.15s, color 0.15s;\n}\n.cl-action-btn:hover:not(:disabled) {\n  background: var(--cl-surface-2);\n  color: var(--cl-text-2);\n}\n.cl-action-btn.active {\n  color: var(--cl-accent);\n  background: color-mix(in srgb, var(--cl-accent) 12%, transparent);\n}\n.cl-action-btn:disabled {\n  opacity: 0.35;\n  cursor: not-allowed;\n}\n.cl-action-wrap .cl-export-menu {\n  right: 0;\n  top: calc(100% + 4px);\n}\n.cl-day-seg {\n  display: flex;\n  align-items: center;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 6px;\n  padding: 2px;\n  gap: 1px;\n  flex-shrink: 0;\n}\n.cl-day-btn {\n  background: none;\n  border: none;\n  border-radius: 4px;\n  color: var(--cl-text-4);\n  font-size: 10px;\n  font-weight: 600;\n  cursor: pointer;\n  padding: 3px 6px;\n  line-height: 1;\n  transition: background 0.1s, color 0.1s;\n  white-space: nowrap;\n}\n.cl-day-btn:hover {\n  background: var(--cl-border-2);\n  color: var(--cl-text-2);\n}\n.cl-day-btn.active {\n  background: var(--cl-accent);\n  color: #fff;\n}\n.cl-day-week-btn {\n  font-size: 10px;\n  padding: 3px 8px;\n}\n.cl-day-sep {\n  width: 1px;\n  height: 14px;\n  background: var(--cl-border-2);\n  margin: 0 2px;\n  flex-shrink: 0;\n}\n.cl-toolbar-seg {\n  display: flex;\n  align-items: center;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 8px;\n  padding: 2px;\n  gap: 1px;\n  flex-shrink: 0;\n}\n.cl-toolbar-view-item {\n  display: flex;\n  align-items: center;\n}\n.cl-seg-btn {\n  padding: 3px 10px;\n  border-radius: 6px;\n  font-size: 11px;\n  font-weight: 500;\n  border: none;\n  background: none;\n  color: var(--cl-text-4);\n  cursor: pointer;\n  white-space: nowrap;\n  transition: background 0.1s, color 0.1s;\n}\n.cl-seg-btn:hover {\n  background: var(--cl-border-2);\n  color: var(--cl-text-2);\n}\n.cl-seg-btn.active {\n  background: var(--cl-surface);\n  color: var(--cl-text);\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);\n}\n.cl-seg-delete {\n  display: flex;\n  align-items: center;\n  padding: 2px 4px 2px 0;\n  background: none;\n  border: none;\n  color: var(--cl-text-5);\n  cursor: pointer;\n  opacity: 0;\n  transition: opacity 0.15s, color 0.15s;\n}\n.cl-toolbar-view-item:hover .cl-seg-delete {\n  opacity: 1;\n}\n.cl-seg-delete:hover {\n  color: var(--cl-red);\n}\n.cl-seg-add {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  padding: 3px 10px;\n  border-radius: 6px;\n  font-size: 11px;\n  font-weight: 500;\n  border: 1px dashed var(--cl-border-2);\n  background: none;\n  color: var(--cl-text-4);\n  cursor: pointer;\n  white-space: nowrap;\n  transition: color 0.1s, border-color 0.1s;\n  flex-shrink: 0;\n}\n.cl-seg-add:hover {\n  color: var(--cl-text-2);\n  border-color: var(--cl-text-4);\n}\n.cl-toolbar-save-wrap {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n}\n.cl-toolbar-save-input {\n  padding: 3px 8px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 6px;\n  color: var(--cl-text);\n  font-size: 11px;\n  outline: none;\n  width: 120px;\n}\n.cl-toolbar-save-input:focus {\n  border-color: var(--cl-indigo);\n}\n.cl-toolbar-save-input::placeholder {\n  color: var(--cl-text-4);\n}\n.cl-toolbar-save-confirm {\n  padding: 3px 8px;\n  background: var(--cl-indigo);\n  border: none;\n  border-radius: 6px;\n  color: white;\n  font-size: 11px;\n  font-weight: 500;\n  cursor: pointer;\n}\n.cl-toolbar-save-confirm:hover:not(:disabled) {\n  background: color-mix(in srgb, var(--cl-indigo) 80%, white);\n}\n.cl-toolbar-save-confirm:disabled {\n  opacity: 0.5;\n  cursor: default;\n}\n.cl-toolbar-save-cancel {\n  padding: 3px 8px;\n  background: none;\n  border: none;\n  color: var(--cl-text-4);\n  font-size: 11px;\n  cursor: pointer;\n}\n.cl-toolbar-save-cancel:hover {\n  color: var(--cl-text);\n}\n.cl-title-editable {\n  cursor: pointer;\n}\n.cl-title-editable:hover {\n  color: var(--cl-accent);\n}\n.cl-rename-input {\n  font-size: 22px;\n  font-weight: 700;\n  line-height: 1;\n  background: none;\n  border: none;\n  border-bottom: 2px solid var(--cl-accent);\n  color: var(--cl-text);\n  outline: none;\n  width: 260px;\n  padding: 0 2px;\n}\n.cl-table-area {\n  flex: 1;\n  min-height: 0;\n  display: flex;\n  flex-direction: column;\n  padding: 0 24px 24px;\n}\n.cl-table-wrap {\n  flex: 1;\n  min-height: 0;\n  display: flex;\n  flex-direction: column;\n  background: var(--cl-surface);\n  border: 1px solid var(--cl-border);\n  border-radius: 12px;\n}\n.cl-table-scroll {\n  flex: 1;\n  min-height: 0;\n  overflow-x: auto;\n  overflow-y: auto;\n  border-radius: 12px 12px 0 0;\n}\n.cl-table-scroll::-webkit-scrollbar {\n  display: none;\n}\n.cl-hscroll-bar {\n  display: flex;\n  align-items: center;\n  flex-shrink: 0;\n}\n.cl-scroll-left-btn {\n  flex-shrink: 0;\n  width: 28px;\n  height: 12px;\n  background: var(--cl-surface-2);\n  border: none;\n  border-radius: 0 0 0 12px;\n  color: var(--cl-text-3);\n  cursor: pointer;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 16px;\n  padding: 0;\n  line-height: 1;\n}\n.cl-scroll-left-btn:hover {\n  background: var(--cl-border-2);\n  color: var(--cl-text);\n}\n.cl-hscroll-track {\n  flex: 1;\n  height: 12px;\n  background: var(--cl-surface-2);\n  border-radius: 0 0 12px 0;\n  position: relative;\n  cursor: pointer;\n  user-select: none;\n}\n.cl-hscroll-thumb {\n  position: absolute;\n  top: 2px;\n  height: 8px;\n  background: var(--cl-border-2);\n  border-radius: 4px;\n  cursor: grab;\n  transition: background 0.15s;\n}\n.cl-hscroll-thumb:hover {\n  background: var(--cl-text-4);\n}\n.cl-hscroll-thumb:active {\n  cursor: grabbing;\n  background: var(--cl-text-4);\n}\n.cl-table {\n  min-width: 100%;\n  width: max-content;\n  font-size: 11px;\n  white-space: nowrap;\n  border-collapse: collapse;\n}\n.cl-thead {\n  position: sticky;\n  top: 0;\n  z-index: 10;\n  background: var(--cl-surface);\n  border-bottom: 1px solid var(--cl-border);\n}\n.cl-th {\n  padding: 10px 12px;\n  text-align: left;\n  font-size: 11px;\n  color: var(--cl-text-3);\n  font-weight: 500;\n  white-space: nowrap;\n  transition: border-left 0.1s;\n}\n.cl-th.meta {\n  color: var(--cl-text-5);\n}\n.cl-th.drag-over {\n  border-left: 2px solid var(--cl-accent);\n  padding-left: 10px;\n}\n.cl-th.dragging {\n  opacity: 0.4;\n}\n.cl-th-inner {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n}\n.cl-th-inner:hover .cl-drag-grip {\n  opacity: 1;\n}\n.cl-drag-grip {\n  cursor: grab;\n  color: var(--cl-text-5);\n  opacity: 0;\n  transition: opacity 0.15s;\n  flex-shrink: 0;\n  display: flex;\n  align-items: center;\n}\n.cl-drag-grip:active {\n  cursor: grabbing;\n}\n.cl-drag-grip:hover {\n  color: var(--cl-text-3);\n}\n.cl-sort-btn {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  background: none;\n  border: none;\n  color: inherit;\n  font-size: inherit;\n  font-weight: inherit;\n  cursor: pointer;\n  padding: 0;\n}\n.cl-sort-btn:hover {\n  color: var(--cl-text);\n}\n.cl-sort-btn.sorted {\n  color: var(--cl-text);\n}\n.cl-sort-arrow {\n  font-size: 9px;\n  color: var(--cl-accent);\n}\n.cl-sort-arrow.unsorted {\n  color: var(--cl-text-5);\n}\n.cl-filter-btn {\n  padding: 2px;\n  border-radius: 4px;\n  background: none;\n  border: none;\n  cursor: pointer;\n  transition: color 0.15s;\n  opacity: 0;\n  display: flex;\n}\n.cl-th-inner:hover .cl-filter-btn {\n  opacity: 1;\n}\n.cl-filter-btn.filtered {\n  color: var(--cl-accent);\n  opacity: 1 !important;\n}\n.cl-filter-btn:not(.filtered) {\n  color: var(--cl-text-5);\n}\n.cl-filter-btn:not(.filtered):hover {\n  color: var(--cl-text-3);\n}\n.cl-filter-count {\n  font-size: 9px;\n  background: var(--cl-accent);\n  color: white;\n  border-radius: 9999px;\n  width: 14px;\n  height: 14px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-weight: 700;\n  line-height: 1;\n  flex-shrink: 0;\n}\n.cl-th-actions {\n  position: sticky;\n  right: 0;\n  background: var(--cl-surface);\n  border-left: 1px solid color-mix(in srgb, var(--cl-border) 60%, transparent);\n  padding: 10px 12px;\n  color: var(--cl-text-3);\n  font-weight: 500;\n  font-size: 11px;\n}\n.cl-tr {\n  border-bottom: 1px solid color-mix(in srgb, var(--cl-border) 50%, transparent);\n  transition: background 0.1s;\n}\n.cl-tr:last-child {\n  border-bottom: 0;\n}\n.cl-tr:hover {\n  background: color-mix(in srgb, var(--cl-surface-2) 20%, transparent);\n}\n.cl-tr.pending {\n  background: color-mix(in srgb, #451a03 5%, transparent);\n}\n.cl-tr-section {\n  border-bottom: 1px solid;\n}\n.cl-tr-section.pending-section {\n  background: color-mix(in srgb, #451a03 20%, transparent);\n  border-color: color-mix(in srgb, #78350f 30%, transparent);\n}\n.cl-tr-section.claimed-section {\n  background: color-mix(in srgb, #052e16 20%, transparent);\n  border-color: color-mix(in srgb, #14532d 30%, transparent);\n}\n.cl-tr-section td {\n  padding: 6px 12px;\n}\n.cl-section-label {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n.cl-section-dot {\n  width: 8px;\n  height: 8px;\n  border-radius: 9999px;\n  flex-shrink: 0;\n}\n.cl-section-dot.pulse {\n  animation: pulse 1.5s infinite;\n}\n.cl-section-title {\n  font-size: 9px;\n  font-weight: 700;\n  text-transform: uppercase;\n  letter-spacing: 0.15em;\n}\n.cl-section-count {\n  font-size: 9px;\n  color: var(--cl-text-5);\n}\n@keyframes pulse {\n  0%, 100% {\n    opacity: 1;\n  }\n  50% {\n    opacity: 0.4;\n  }\n}\n.cl-td {\n  padding: 8px 12px;\n  font-size: 11px;\n  color: var(--cl-text-2);\n}\n.cl-td.text-primary {\n  color: var(--cl-text);\n  font-weight: 500;\n}\n.cl-td.mono {\n  font-family: ui-monospace, monospace;\n}\n.cl-td.meta {\n  color: var(--cl-text-5);\n}\n.cl-td.narrow {\n  width: 24px;\n}\n.cl-td-actions {\n  position: sticky;\n  right: 0;\n  background: #030712;\n  border-left: 1px solid color-mix(in srgb, var(--cl-border) 60%, transparent);\n  padding: 8px 12px;\n}\n.cl-cell-edit {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  cursor: pointer;\n}\n.cl-cell-edit:hover .cl-pencil {\n  opacity: 1;\n}\n.cl-pencil {\n  opacity: 0;\n  transition: opacity 0.15s;\n  flex-shrink: 0;\n  color: var(--cl-text-5);\n}\n.cl-cell-edit-wrap {\n  display: flex;\n  flex-direction: column;\n  gap: 5px;\n}\n.cl-cell-input {\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-accent);\n  border-radius: 5px;\n  color: var(--cl-text);\n  font-size: 12px;\n  padding: 5px 8px;\n  outline: none;\n  min-width: 150px;\n  width: 100%;\n  box-sizing: border-box;\n  box-shadow: 0 0 0 2px color-mix(in srgb, var(--cl-accent) 20%, transparent);\n}\n.cl-cell-actions {\n  display: flex;\n  gap: 5px;\n}\n.cl-cell-cancel-btn,\n.cl-cell-confirm-btn {\n  width: 18px;\n  height: 18px;\n  border-radius: 50%;\n  border: none;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  cursor: pointer;\n  flex-shrink: 0;\n  transition: opacity 0.1s;\n}\n.cl-cell-cancel-btn {\n  background: var(--cl-red);\n  color: white;\n}\n.cl-cell-confirm-btn {\n  background: var(--cl-green);\n  color: white;\n}\n.cl-cell-cancel-btn:hover,\n.cl-cell-confirm-btn:hover {\n  opacity: 0.85;\n}\n.cl-cell-select {\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-accent);\n  border-radius: 4px;\n  color: var(--cl-text);\n  font-size: 11px;\n  padding: 2px 4px;\n  outline: none;\n  width: 100%;\n}\n.cl-inline-select-wrap {\n  display: inline-flex;\n  align-items: center;\n}\n.cl-cell-select-plain {\n  background: transparent;\n  border: none;\n  color: var(--cl-text-2);\n  font: inherit;\n  font-size: 11px;\n  cursor: pointer;\n  outline: none;\n  -webkit-appearance: auto;\n  appearance: auto;\n  padding: 0;\n  max-width: 120px;\n}\n.cl-cell-select-plain:hover {\n  color: var(--cl-text);\n}\n.cl-badge-select {\n  font: inherit;\n  cursor: pointer;\n  outline: none;\n  border: none;\n  -webkit-appearance: auto;\n  appearance: auto;\n}\n.cl-badge {\n  display: inline-flex;\n  align-items: center;\n  padding: 2px 6px;\n  border-radius: 4px;\n  border: 1px solid;\n  font-size: 9px;\n  font-weight: 500;\n}\n.cl-badge.approved {\n  background: color-mix(in srgb, #14532d 40%, transparent);\n  color: #4ade80;\n  border-color: color-mix(in srgb, #15803d 50%, transparent);\n}\n.cl-badge.declined {\n  background: color-mix(in srgb, #450a0a 40%, transparent);\n  color: #f87171;\n  border-color: color-mix(in srgb, #b91c1c 50%, transparent);\n}\n.cl-badge.sent-uw {\n  background: color-mix(in srgb, #1e3a5f 40%, transparent);\n  color: #60a5fa;\n  border-color: color-mix(in srgb, #1d4ed8 50%, transparent);\n}\n.cl-badge.pending {\n  background: color-mix(in srgb, #422006 40%, transparent);\n  color: #fbbf24;\n  border-color: color-mix(in srgb, #b45309 50%, transparent);\n}\n.cl-badge.cancelled {\n  background: var(--cl-surface-2);\n  color: var(--cl-text-4);\n  border-color: var(--cl-border-2);\n}\n.cl-badge.split {\n  background: color-mix(in srgb, #3b0764 50%, transparent);\n  color: #c4b5fd;\n  border-color: color-mix(in srgb, #7e22ce 50%, transparent);\n}\n.cl-badge.alp {\n  background: color-mix(in srgb, #422006 50%, transparent);\n  color: #fcd34d;\n  border-color: color-mix(in srgb, #b45309 50%, transparent);\n}\n.cl-badge.special {\n  background: color-mix(in srgb, #422006 50%, transparent);\n  color: #fcd34d;\n  border-color: color-mix(in srgb, #b45309 50%, transparent);\n}\n.cl-badge.unclaimed {\n  color: var(--cl-amber);\n}\n.cl-badge.claimed {\n  color: var(--cl-green);\n}\n.cl-note-text {\n  color: var(--cl-yellow);\n  max-width: 140px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  display: block;\n}\n.cl-note-add {\n  color: var(--cl-text-5);\n  font-style: italic;\n}\n.cl-no-agent {\n  color: var(--cl-text-5);\n  font-style: italic;\n}\n.cl-dup-warn {\n  color: #f87171;\n  font-weight: 600;\n}\n.cl-premium {\n  font-weight: 600;\n}\n.cl-spinner {\n  width: 12px;\n  height: 12px;\n  border: 2px solid var(--cl-border-2);\n  border-top-color: var(--cl-accent);\n  border-radius: 50%;\n  animation: cl-spin 0.7s linear infinite;\n  flex-shrink: 0;\n}\n@keyframes cl-spin {\n  to {\n    transform: rotate(360deg);\n  }\n}\n.cl-btn-claim {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  padding: 4px 8px;\n  background: #15803d;\n  border: none;\n  border-radius: 4px;\n  color: white;\n  font-size: 9px;\n  font-weight: 700;\n  cursor: pointer;\n  transition: background 0.15s;\n  white-space: nowrap;\n}\n.cl-btn-claim:hover:not(:disabled) {\n  background: #16a34a;\n}\n.cl-btn-claim:disabled {\n  background: var(--cl-surface-2);\n  cursor: not-allowed;\n}\n.cl-btn-unclaim {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  padding: 4px 8px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 4px;\n  color: var(--cl-text-3);\n  font-size: 9px;\n  cursor: pointer;\n  transition: all 0.15s;\n  white-space: nowrap;\n}\n.cl-btn-unclaim:hover:not(:disabled) {\n  background: color-mix(in srgb, #450a0a 50%, transparent);\n  border-color: color-mix(in srgb, #b91c1c 60%, transparent);\n  color: #fca5a5;\n}\n.cl-btn-unclaim:disabled {\n  cursor: not-allowed;\n}\n.cl-export-wrap {\n  position: relative;\n}\n.cl-export-btn {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 8px 16px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 8px;\n  color: var(--cl-text-2);\n  font-size: 13px;\n  font-weight: 500;\n  cursor: pointer;\n  transition: background 0.15s;\n}\n.cl-export-btn:hover:not(:disabled) {\n  background: var(--cl-border-2);\n}\n.cl-export-btn:disabled {\n  opacity: 0.4;\n  cursor: not-allowed;\n}\n.cl-export-menu {\n  position: absolute;\n  right: 0;\n  top: calc(100% + 6px);\n  z-index: 50;\n  background: var(--cl-surface);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 12px;\n  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);\n  width: 240px;\n  overflow: hidden;\n}\n.cl-export-menu-header {\n  padding: 12px 16px;\n  border-bottom: 1px solid var(--cl-border);\n}\n.cl-export-menu-title {\n  font-size: 12px;\n  font-weight: 600;\n  color: var(--cl-text-2);\n}\n.cl-export-menu-sub {\n  font-size: 11px;\n  color: var(--cl-text-4);\n  margin-top: 2px;\n}\n.cl-export-menu-body {\n  padding: 12px 16px;\n}\n.cl-export-dl-btn {\n  width: 100%;\n  padding: 8px;\n  background: var(--cl-accent);\n  border: none;\n  border-radius: 8px;\n  color: white;\n  font-size: 13px;\n  font-weight: 600;\n  cursor: pointer;\n  transition: background 0.15s;\n}\n.cl-export-dl-btn:hover {\n  background: var(--cl-accent-dark);\n}\n.cl-day-week-pick {\n  display: inline-flex;\n  align-items: center;\n  gap: 3px;\n}\n.cl-week-dropdown {\n  position: absolute;\n  left: 0;\n  top: calc(100% + 4px);\n  z-index: 200;\n  background: var(--cl-surface);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 12px;\n  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);\n  width: 232px;\n  overflow: hidden;\n}\n.cl-wcal {\n  padding: 10px 10px 0;\n}\n.cl-wcal-nav {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  margin-bottom: 8px;\n}\n.cl-wcal-month {\n  font-size: 11px;\n  font-weight: 600;\n  color: var(--cl-text-2);\n}\n.cl-wcal-nav-btn {\n  background: none;\n  border: none;\n  cursor: pointer;\n  color: var(--cl-text-4);\n  font-size: 14px;\n  line-height: 1;\n  padding: 2px 6px;\n  border-radius: 4px;\n  transition: background 0.1s, color 0.1s;\n}\n.cl-wcal-nav-btn:hover {\n  background: var(--cl-border-2);\n  color: var(--cl-text-1);\n}\n.cl-wcal-grid {\n  display: grid;\n  grid-template-columns: repeat(7, 1fr);\n  gap: 1px;\n  margin-bottom: 8px;\n}\n.cl-wcal-hdr {\n  font-size: 9px;\n  font-weight: 600;\n  color: var(--cl-text-5);\n  text-align: center;\n  padding-bottom: 3px;\n  text-transform: uppercase;\n}\n.cl-wcal-day {\n  background: none;\n  border: none;\n  cursor: pointer;\n  font-size: 10px;\n  color: var(--cl-text-4);\n  padding: 4px 2px;\n  border-radius: 4px;\n  text-align: center;\n  line-height: 1;\n  transition: background 0.1s, color 0.1s;\n  position: relative;\n}\n.cl-wcal-day:hover {\n  background: var(--cl-border-2);\n  color: var(--cl-text-1);\n}\n.cl-wcal-day.out {\n  color: var(--cl-text-6, #444);\n}\n.cl-wcal-day.today {\n  font-weight: 700;\n  color: var(--cl-accent);\n}\n.cl-wcal-day.has-data::after {\n  content: "";\n  position: absolute;\n  bottom: 2px;\n  left: 50%;\n  transform: translateX(-50%);\n  width: 3px;\n  height: 3px;\n  border-radius: 50%;\n  background: var(--cl-accent);\n  opacity: 0.5;\n}\n.cl-wcal-day.sel {\n  background: var(--cl-accent);\n  color: #fff;\n}\n.cl-wcal-day.sel.today {\n  background: var(--cl-accent);\n}\n.cl-export-btn.active {\n  background: var(--cl-border-2);\n}\n.cl-col-picker-menu {\n  width: 220px;\n}\n.cl-col-picker-body {\n  padding: 8px;\n  max-height: 320px;\n  overflow-y: auto;\n}\n.cl-col-picker-row {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  padding: 6px 8px;\n  border-radius: 6px;\n  cursor: pointer;\n  font-size: 13px;\n  color: var(--cl-text-2);\n  user-select: none;\n}\n.cl-col-picker-row:hover {\n  background: var(--cl-surface-2);\n}\n.cl-col-picker-row input[type=checkbox] {\n  accent-color: var(--cl-accent);\n  width: 14px;\n  height: 14px;\n  flex-shrink: 0;\n  cursor: pointer;\n}\n.cl-col-picker-reset {\n  background: none;\n  border: 1px solid var(--cl-border-2);\n  border-radius: 6px;\n  color: var(--cl-text-3);\n  font-size: 11px;\n  font-weight: 500;\n  padding: 3px 8px;\n  cursor: pointer;\n}\n.cl-col-picker-reset:hover {\n  background: var(--cl-surface-2);\n  color: var(--cl-text-2);\n}\n.cl-active-filters {\n  padding: 0 24px 16px;\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  flex-wrap: wrap;\n}\n.cl-active-filters-label {\n  font-size: 11px;\n  color: var(--cl-text-4);\n}\n.cl-filter-chip {\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  padding: 2px 8px;\n  background: color-mix(in srgb, #1e3a5f 80%, transparent);\n  border: 1px solid color-mix(in srgb, #1d4ed8 50%, transparent);\n  border-radius: 9999px;\n  font-size: 11px;\n  color: #93c5fd;\n  white-space: nowrap;\n}\n.cl-filter-chip-remove {\n  background: none;\n  border: none;\n  color: inherit;\n  cursor: pointer;\n  padding: 0;\n  line-height: 1;\n  margin-left: 2px;\n}\n.cl-filter-chip-remove:hover {\n  color: white;\n}\n.cl-filter-clear-all {\n  font-size: 11px;\n  color: var(--cl-text-4);\n  background: none;\n  border: none;\n  cursor: pointer;\n}\n.cl-filter-clear-all:hover {\n  color: var(--cl-red);\n}\n.cl-perm-btn {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  padding: 7px 12px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 8px;\n  color: var(--cl-text-3);\n  font-size: 12px;\n  font-weight: 500;\n  cursor: pointer;\n  transition: all 0.15s;\n  white-space: nowrap;\n}\n.cl-perm-btn:hover {\n  color: var(--cl-text);\n  border-color: var(--cl-text-4);\n}\n.cl-perm-btn.active {\n  background: color-mix(in srgb, var(--cl-indigo) 15%, transparent);\n  border-color: color-mix(in srgb, var(--cl-indigo) 60%, transparent);\n  color: var(--cl-indigo);\n}\n.cl-perm {\n  margin: 0 0 0 0;\n  border-bottom: 1px solid var(--cl-border);\n  background: var(--cl-surface);\n}\n.cl-perm-header {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 12px 24px;\n  border-bottom: 1px solid var(--cl-border);\n  background: color-mix(in srgb, var(--cl-surface-2) 50%, transparent);\n}\n.cl-perm-title {\n  font-size: 13px;\n  font-weight: 600;\n  color: var(--cl-text);\n  margin-right: 8px;\n}\n.cl-perm-subtitle {\n  font-size: 11px;\n  color: var(--cl-text-4);\n}\n.cl-perm-save {\n  padding: 6px 14px;\n  background: var(--cl-indigo);\n  border: none;\n  border-radius: 6px;\n  color: white;\n  font-size: 12px;\n  font-weight: 600;\n  cursor: pointer;\n  transition: background 0.15s;\n}\n.cl-perm-save:hover:not(:disabled) {\n  background: color-mix(in srgb, var(--cl-indigo) 80%, white);\n}\n.cl-perm-save:disabled {\n  opacity: 0.5;\n  cursor: default;\n}\n.cl-perm-close {\n  padding: 4px;\n  background: none;\n  border: none;\n  color: var(--cl-text-4);\n  cursor: pointer;\n  border-radius: 4px;\n  display: flex;\n  align-items: center;\n  transition: color 0.15s;\n}\n.cl-perm-close:hover {\n  color: var(--cl-text);\n}\n.cl-perm-scroll {\n  overflow-x: auto;\n  max-height: 420px;\n  overflow-y: auto;\n}\n.cl-perm-table {\n  width: 100%;\n  border-collapse: collapse;\n  font-size: 12px;\n}\n.cl-perm-th {\n  padding: 8px 12px;\n  text-align: center;\n  font-size: 11px;\n  font-weight: 600;\n  color: var(--cl-text-3);\n  background: var(--cl-surface);\n  border-bottom: 1px solid var(--cl-border);\n  position: sticky;\n  top: 0;\n  z-index: 2;\n}\n.cl-perm-th.cl-perm-col-label {\n  text-align: left;\n  min-width: 140px;\n}\n.cl-perm-th.cl-perm-role-group {\n  border-left: 1px solid var(--cl-border-2);\n  color: var(--cl-text-2);\n  font-size: 12px;\n}\n.cl-perm-th.cl-perm-sub {\n  font-weight: 400;\n  color: var(--cl-text-4);\n  font-size: 10px;\n}\n.cl-perm-th.cl-perm-sub:nth-child(odd) {\n  border-left: 1px solid var(--cl-border-2);\n}\n.cl-perm-tr {\n  border-bottom: 1px solid color-mix(in srgb, var(--cl-border) 40%, transparent);\n}\n.cl-perm-tr:hover {\n  background: color-mix(in srgb, var(--cl-surface-2) 30%, transparent);\n}\n.cl-perm-td {\n  padding: 7px 12px;\n}\n.cl-perm-td.cl-perm-col-name {\n  font-size: 12px;\n  color: var(--cl-text-2);\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.cl-perm-td.cl-perm-cell {\n  text-align: center;\n  border-left: 1px solid color-mix(in srgb, var(--cl-border) 40%, transparent);\n}\n.cl-perm-td.cl-perm-cell:nth-child(odd) {\n  border-left: 1px solid var(--cl-border-2);\n}\n.cl-perm-check {\n  width: 15px;\n  height: 15px;\n  accent-color: var(--cl-indigo);\n  cursor: pointer;\n  border-radius: 3px;\n}\n.cl-perm-check:disabled {\n  opacity: 0.25;\n  cursor: default;\n}\n.cl-perm-tag {\n  font-size: 9px;\n  font-weight: 600;\n  text-transform: uppercase;\n  padding: 1px 5px;\n  border-radius: 4px;\n  letter-spacing: 0.05em;\n  background: color-mix(in srgb, var(--cl-surface-2) 80%, transparent);\n  border: 1px solid var(--cl-border-2);\n  color: var(--cl-text-5);\n}\n.cl-search-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n.cl-search-row .cl-search-wrap {\n  flex: 1;\n}\n.cl-filter-toggle {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n  padding: 9px 14px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 10px;\n  color: var(--cl-text-3);\n  font-size: 13px;\n  font-weight: 500;\n  cursor: pointer;\n  transition: all 0.15s;\n  white-space: nowrap;\n}\n.cl-filter-toggle:hover {\n  color: var(--cl-text);\n  border-color: var(--cl-text-4);\n}\n.cl-filter-toggle.active {\n  background: color-mix(in srgb, var(--cl-accent) 15%, transparent);\n  border-color: color-mix(in srgb, var(--cl-accent) 60%, transparent);\n  color: var(--cl-accent);\n}\n.cl-filter-toggle-count {\n  background: var(--cl-accent);\n  color: white;\n  border-radius: 9999px;\n  padding: 0 5px;\n  font-size: 10px;\n  font-weight: 700;\n  line-height: 16px;\n}\n.cl-fb {\n  margin-top: 8px;\n  background: var(--cl-surface);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 10px;\n  overflow: hidden;\n}\n.cl-fb-empty {\n  padding: 12px 20px;\n  font-size: 12px;\n  color: var(--cl-text-4);\n  margin: 0;\n}\n.cl-fb-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 8px 20px;\n  border-bottom: 1px solid color-mix(in srgb, var(--cl-border) 60%, transparent);\n}\n.cl-fb-row:last-of-type {\n  border-bottom: none;\n}\n.cl-fb-where {\n  font-size: 11px;\n  font-weight: 600;\n  color: var(--cl-text-4);\n  text-transform: uppercase;\n  letter-spacing: 0.08em;\n  flex-shrink: 0;\n  width: 36px;\n  margin-right: 8px;\n}\n.cl-fb-select {\n  padding: 4px 6px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 6px;\n  color: var(--cl-text);\n  font-size: 10px;\n  outline: none;\n  cursor: pointer;\n  transition: border-color 0.15s;\n}\n.cl-fb-select:focus {\n  border-color: var(--cl-accent);\n}\n.cl-fb-select-op {\n  min-width: 72px;\n}\n.cl-fb-select-val {\n  flex: 1;\n}\n.cl-fb-input {\n  padding: 4px 6px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 6px;\n  color: var(--cl-text);\n  font-size: 10px;\n  outline: none;\n  transition: border-color 0.15s;\n  min-width: 64px;\n}\n.cl-fb-input:focus {\n  border-color: var(--cl-accent);\n}\n.cl-fb-input::placeholder {\n  color: var(--cl-text-4);\n}\n.cl-fb-input-wide {\n  flex: 1;\n}\n.cl-fb-and {\n  font-size: 11px;\n  color: var(--cl-text-4);\n  flex-shrink: 0;\n}\n.cl-fb-remove {\n  flex-shrink: 0;\n  background: none;\n  border: none;\n  color: var(--cl-text-5);\n  cursor: pointer;\n  padding: 4px;\n  border-radius: 4px;\n  display: flex;\n  align-items: center;\n  transition: color 0.15s;\n}\n.cl-fb-remove:hover {\n  color: var(--cl-red);\n}\n.cl-fb-footer {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  padding: 8px 20px;\n  border-top: 1px solid color-mix(in srgb, var(--cl-border) 60%, transparent);\n  background: color-mix(in srgb, var(--cl-surface-2) 40%, transparent);\n}\n.cl-fb-add {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  background: none;\n  border: none;\n  color: var(--cl-accent);\n  font-size: 12px;\n  font-weight: 500;\n  cursor: pointer;\n  padding: 0;\n}\n.cl-fb-add:hover {\n  color: color-mix(in srgb, var(--cl-accent) 80%, white);\n}\n.cl-fb-clear {\n  background: none;\n  border: none;\n  color: var(--cl-text-4);\n  font-size: 12px;\n  cursor: pointer;\n  margin-left: auto;\n  padding: 0;\n}\n.cl-fb-clear:hover {\n  color: var(--cl-red);\n}\n.cl-empty {\n  flex: 1;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  text-align: center;\n  padding: 40px 0;\n}\n.cl-empty-icon {\n  width: 56px;\n  height: 56px;\n  border-radius: 9999px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  margin: 0 auto 16px;\n}\n.cl-empty-title {\n  font-size: 18px;\n  font-weight: 600;\n  color: var(--cl-text);\n  margin-bottom: 4px;\n}\n.cl-empty-sub {\n  font-size: 13px;\n  color: var(--cl-text-4);\n}\n.cl-load-more {\n  display: flex;\n  justify-content: center;\n  padding-top: 16px;\n}\n.cl-load-more-btn {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 10px 24px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 12px;\n  color: var(--cl-text-2);\n  font-size: 13px;\n  font-weight: 500;\n  cursor: pointer;\n  transition: all 0.15s;\n}\n.cl-load-more-btn:hover:not(:disabled) {\n  background: var(--cl-border-2);\n  border-color: var(--cl-text-4);\n}\n.cl-load-more-btn:disabled {\n  opacity: 0.6;\n  cursor: not-allowed;\n}\n.cl-all-loaded {\n  text-align: center;\n  color: var(--cl-text-5);\n  font-size: 11px;\n  margin-top: 16px;\n}\n.cl-pagination {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 12px;\n  padding: 10px 0 12px;\n  flex-shrink: 0;\n}\n.cl-page-btn {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  padding: 6px 14px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 8px;\n  color: var(--cl-text-2);\n  font-size: 12px;\n  font-weight: 500;\n  cursor: pointer;\n  transition: all 0.15s;\n}\n.cl-page-btn:hover:not(:disabled) {\n  background: var(--cl-border-2);\n  border-color: var(--cl-text-4);\n  color: var(--cl-text);\n}\n.cl-page-btn:disabled {\n  opacity: 0.4;\n  cursor: not-allowed;\n}\n.cl-page-info {\n  font-size: 12px;\n  color: var(--cl-text-4);\n  min-width: 90px;\n  text-align: center;\n}\n.cl-meta-cell {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  position: relative;\n}\n.cl-info-btn {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  width: 16px;\n  height: 16px;\n  border-radius: 50%;\n  background: none;\n  border: none;\n  padding: 0;\n  color: var(--cl-text-4);\n  cursor: pointer;\n  flex-shrink: 0;\n  opacity: 0;\n  transition: opacity 0.15s, color 0.15s;\n}\n.cl-meta-cell:hover .cl-info-btn,\n.cl-info-btn:focus-visible {\n  opacity: 1;\n}\n.cl-info-btn:hover {\n  color: var(--cl-accent);\n}\n.cl-info-popover {\n  position: absolute;\n  top: calc(100% + 6px);\n  left: 0;\n  z-index: 200;\n  min-width: 220px;\n  background: var(--cl-surface-2);\n  border: 1px solid var(--cl-border-2);\n  border-radius: 10px;\n  padding: 10px 12px;\n  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);\n  font-size: 11px;\n  white-space: nowrap;\n}\n.cl-info-popover--log {\n  min-width: 280px;\n  max-height: 320px;\n  overflow-y: auto;\n  white-space: normal;\n}\n.cl-info-popover-row {\n  display: flex;\n  align-items: baseline;\n  gap: 8px;\n  padding: 2px 0;\n  color: var(--cl-text-2);\n}\n.cl-info-label {\n  font-weight: 600;\n  color: var(--cl-text-3);\n  min-width: 60px;\n  flex-shrink: 0;\n}\n.cl-info-divider {\n  border: none;\n  border-top: 1px solid var(--cl-border-2);\n  margin: 8px 0 6px;\n}\n.cl-info-log-header {\n  font-size: 10px;\n  font-weight: 700;\n  letter-spacing: 0.06em;\n  text-transform: uppercase;\n  color: var(--cl-text-4);\n  margin-bottom: 6px;\n}\n.cl-info-log-entry {\n  padding: 5px 0;\n  border-bottom: 1px solid var(--cl-border);\n}\n.cl-info-log-entry:last-child {\n  border-bottom: none;\n}\n.cl-info-log-meta {\n  font-size: 10px;\n  color: var(--cl-text-4);\n  margin-bottom: 3px;\n}\n.cl-info-log-change {\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  font-size: 11px;\n  flex-wrap: wrap;\n}\n.cl-info-field {\n  font-weight: 600;\n  color: var(--cl-text-3);\n  margin-right: 2px;\n}\n.cl-info-from {\n  color: var(--cl-red);\n  text-decoration: line-through;\n  opacity: 0.8;\n  max-width: 100px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n.cl-info-to {\n  color: var(--cl-green);\n  max-width: 100px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n.cl-info-log-empty {\n  font-size: 11px;\n  color: var(--cl-text-4);\n  font-style: italic;\n  padding: 4px 0;\n}\n.cl-loading {\n  flex: 1;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n.cl-loading-spinner {\n  width: 32px;\n  height: 32px;\n  border: 3px solid var(--cl-border-2);\n  border-top-color: var(--cl-accent);\n  border-radius: 50%;\n  animation: cl-spin 0.7s linear infinite;\n}\n');
 
 // ClientList.tsx
 import { Fragment, jsx as jsx2, jsxs as jsxs2 } from "react/jsx-runtime";
@@ -79,18 +79,37 @@ var COLUMNS = [
   { key: "agentStatus", label: "Agent Status", sortable: true, filterType: "enum" },
   { key: "adminStatus", label: "Admin Status", sortable: true, filterType: "enum" },
   { key: "notes", label: "Notes", filterType: "text" },
+  { key: "clientPaidDate", label: "Client Paid", sortable: true, filterType: "date" },
+  { key: "compDate", label: "Comp Date", sortable: true, filterType: "date" },
   { key: "createdAt", label: "Created", sortable: true, filterType: "date", meta: true },
   { key: "createdByName", label: "Created By", sortable: true, filterType: "enum", meta: true },
   { key: "updatedAt", label: "Updated", sortable: true, filterType: "date", meta: true },
   { key: "updatedByName", label: "Updated By", sortable: true, filterType: "enum", meta: true }
 ];
 var DEFAULT_COL_ORDER = COLUMNS.map((c) => c.key);
+var DEFAULT_VISIBLE_COLS = [
+  "agentName",
+  "date",
+  "clientName",
+  "phone",
+  "email",
+  "startDate",
+  "state",
+  "carrier",
+  "appNumber",
+  "annualPremium",
+  "agentStatus",
+  "adminStatus",
+  "clientPaidDate",
+  "compDate"
+];
 var DEFAULT_VIEW = {
   id: "default",
   name: "Default",
-  colOrder: DEFAULT_COL_ORDER,
-  sortField: null,
-  sortDir: "asc",
+  colOrder: DEFAULT_VISIBLE_COLS,
+  visibleCols: DEFAULT_VISIBLE_COLS,
+  sortField: "date",
+  sortDir: "desc",
   filterRows: [],
   builtIn: true
 };
@@ -107,7 +126,9 @@ var EDITABLE_COLS = /* @__PURE__ */ new Set([
   "startDate",
   "agentStatus",
   "adminStatus",
-  "notes"
+  "notes",
+  "clientPaidDate",
+  "compDate"
 ]);
 var DEFAULT_PERMISSIONS = (() => {
   const make = (viewFn, editFn) => Object.fromEntries(COLUMNS.map((c) => [c.key, { view: viewFn(c), edit: editFn(c) }]));
@@ -281,6 +302,90 @@ function CellInput({
     ] })
   ] });
 }
+var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function WeekCalendar({
+  availableWeeks,
+  dayFilter,
+  onSelect
+}) {
+  const today = /* @__PURE__ */ new Date();
+  today.setHours(12, 0, 0, 0);
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const weekSet = useMemo(() => new Set(availableWeeks), [availableWeeks]);
+  const gridDays = useMemo(() => {
+    const first = new Date(viewYear, viewMonth, 1, 12);
+    const off = (first.getDay() + 6) % 7;
+    const start = new Date(first);
+    start.setDate(1 - off);
+    return Array.from({ length: 42 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      return d;
+    });
+  }, [viewYear, viewMonth]);
+  function getMon(d) {
+    const copy = new Date(d);
+    const off = (copy.getDay() + 6) % 7;
+    copy.setDate(copy.getDate() - off);
+    return `${copy.getFullYear()}-${String(copy.getMonth() + 1).padStart(2, "0")}-${String(copy.getDate()).padStart(2, "0")}`;
+  }
+  function fmt(d) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }
+  const todayStr = fmt(today);
+  const selWeekStart = dayFilter?.startsWith("week:") ? dayFilter.slice(5) : null;
+  return /* @__PURE__ */ jsxs2("div", { className: "cl-wcal", children: [
+    /* @__PURE__ */ jsxs2("div", { className: "cl-wcal-nav", children: [
+      /* @__PURE__ */ jsx2("button", { className: "cl-wcal-nav-btn", onClick: () => {
+        if (viewMonth === 0) {
+          setViewYear((y) => y - 1);
+          setViewMonth(11);
+        } else setViewMonth((m) => m - 1);
+      }, children: "\u2039" }),
+      /* @__PURE__ */ jsxs2("span", { className: "cl-wcal-month", children: [
+        MONTHS[viewMonth],
+        " ",
+        viewYear
+      ] }),
+      /* @__PURE__ */ jsx2("button", { className: "cl-wcal-nav-btn", onClick: () => {
+        if (viewMonth === 11) {
+          setViewYear((y) => y + 1);
+          setViewMonth(0);
+        } else setViewMonth((m) => m + 1);
+      }, children: "\u203A" })
+    ] }),
+    /* @__PURE__ */ jsxs2("div", { className: "cl-wcal-grid", children: [
+      ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((d) => /* @__PURE__ */ jsx2("div", { className: "cl-wcal-hdr", children: d }, d)),
+      gridDays.map((d, i) => {
+        const ds = fmt(d);
+        const monStr = getMon(d);
+        const inMonth = d.getMonth() === viewMonth;
+        const isToday = ds === todayStr;
+        const hasData = weekSet.has(monStr);
+        const val = `week:${monStr}`;
+        const inSelWk = selWeekStart ? ds >= selWeekStart && ds <= (() => {
+          const e = /* @__PURE__ */ new Date(selWeekStart + "T12:00:00");
+          e.setDate(e.getDate() + 6);
+          return fmt(e);
+        })() : dayFilter === "week" && ds >= getMon(today) && ds <= (() => {
+          const e = /* @__PURE__ */ new Date(getMon(today) + "T12:00:00");
+          e.setDate(e.getDate() + 6);
+          return fmt(e);
+        })();
+        return /* @__PURE__ */ jsx2(
+          "button",
+          {
+            className: "cl-wcal-day" + (inSelWk ? " sel" : "") + (isToday ? " today" : "") + (!inMonth ? " out" : "") + (hasData ? " has-data" : ""),
+            onClick: () => onSelect(monStr === getMon(today) ? "week" : val),
+            children: d.getDate()
+          },
+          i
+        );
+      })
+    ] })
+  ] });
+}
 function ClientList({
   clients: clientsProp,
   uid,
@@ -305,20 +410,21 @@ function ClientList({
   onSaveView,
   onDeleteView,
   initialSortField = null,
-  initialSortDir = "asc"
+  initialSortDir = "desc"
 }) {
   const [clients, setClients] = useState(clientsProp);
   useEffect(() => {
     setClients(clientsProp);
   }, [clientsProp]);
-  const [sortField, setSortField] = useState(initialSortField);
-  const [sortDir, setSortDir] = useState(initialSortDir);
-  const [filterRows, setFilterRows] = useState([]);
+  const [sortField, setSortField] = useState(DEFAULT_VIEW.sortField ?? initialSortField);
+  const [sortDir, setSortDir] = useState(DEFAULT_VIEW.sortDir ?? initialSortDir);
+  const [filterRows, setFilterRows] = useState(() => DEFAULT_VIEW.filterRows ?? []);
   const [showFilterBuilder, setShowFilterBuilder] = useState(false);
   const filters = useMemo(() => filterRowsToSpecs(filterRows), [filterRows]);
   const [searchText, setSearchText] = useState("");
   const [showHistorical, setShowHistorical] = useState(false);
-  const [colOrder, setColOrder] = useState(DEFAULT_COL_ORDER);
+  const [colOrder, setColOrder] = useState(() => DEFAULT_VIEW.colOrder ?? DEFAULT_COL_ORDER);
+  const [colVisible, setColVisible] = useState(() => DEFAULT_VIEW.visibleCols ?? null);
   const [dragCol, setDragCol] = useState(null);
   const [dragOverCol, setDragOverCol] = useState(null);
   const [activeViewId, setActiveViewId] = useState("default");
@@ -337,10 +443,47 @@ function ClientList({
   const [saving, setSaving] = useState({});
   const [infoPopover, setInfoPopover] = useState(null);
   const infoPopoverRef = useRef(null);
+  const tableScrollRef = useRef(null);
+  const hScrollTrackRef = useRef(null);
+  const hDragData = useRef({ startX: 0, startScrollLeft: 0 });
+  const [hThumb, setHThumb] = useState({ left: 0, width: 0, show: false });
+  const PAGE_SIZE2 = 50;
+  const [page, setPage] = useState(0);
   const [busy, setBusy] = useState(/* @__PURE__ */ new Set());
   const [loadingMore, setLoadingMore] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const exportRef = useRef(null);
+  const [showColPicker, setShowColPicker] = useState(false);
+  const colPickerRef = useRef(null);
+  const [dayFilter, setDayFilter] = useState(null);
+  const [carrierFilter, setCarrierFilter] = useState(null);
+  const [showWeekPicker, setShowWeekPicker] = useState(false);
+  const weekPickerRef = useRef(null);
+  const uniqueCarriers = useMemo(
+    () => [...new Set(clients.map((c) => c.carrier).filter(Boolean))].sort(),
+    [clients]
+  );
+  const availableWeeks = useMemo(() => {
+    const getMonday = (dateStr) => {
+      const d = /* @__PURE__ */ new Date(dateStr + "T12:00:00");
+      const off = (d.getDay() + 6) % 7;
+      d.setDate(d.getDate() - off);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    };
+    const weeks = [...new Set(clients.map((c) => c.date ? getMonday(c.date) : null).filter(Boolean))];
+    return weeks.sort((a, b) => b.localeCompare(a)).slice(0, 7);
+  }, [clients]);
+  const weekDays = useMemo(() => {
+    const d = /* @__PURE__ */ new Date();
+    const off = (d.getDay() + 6) % 7;
+    const mon = new Date(d);
+    mon.setDate(d.getDate() - off);
+    return Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(mon);
+      day.setDate(mon.getDate() + i);
+      return `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
+    });
+  }, []);
   const [showPermissions, setShowPermissions] = useState(false);
   const [draftPermissions, setDraftPermissions] = useState(
     () => permissions ?? DEFAULT_PERMISSIONS
@@ -350,18 +493,23 @@ function ClientList({
     () => permissions ?? DEFAULT_PERMISSIONS
   );
   useEffect(() => {
-    setResolvedPermissions(permissions ?? DEFAULT_PERMISSIONS);
+    const base = permissions ?? DEFAULT_PERMISSIONS;
+    const merged = { rep: {}, manager: {}, admin: {} };
+    ["rep", "manager", "admin"].forEach((role) => {
+      merged[role] = { ...DEFAULT_PERMISSIONS[role], ...base[role] };
+    });
+    setResolvedPermissions(merged);
   }, [permissions]);
-  const isPrivileged = currentRole === "owner" || currentRole === "dev";
+  const isPrivileged = currentRole === "owner" || currentRole === "dev" || currentRole === "admin";
   function canView(colKey) {
     if (isPrivileged) return true;
     const role = currentRole;
-    return resolvedPermissions[role]?.[colKey]?.view ?? false;
+    return resolvedPermissions[role]?.[colKey]?.view ?? DEFAULT_PERMISSIONS[role]?.[colKey]?.view ?? false;
   }
   function canEdit(colKey) {
     if (isPrivileged) return true;
     const role = currentRole;
-    return resolvedPermissions[role]?.[colKey]?.edit ?? false;
+    return resolvedPermissions[role]?.[colKey]?.edit ?? DEFAULT_PERMISSIONS[role]?.[colKey]?.edit ?? false;
   }
   function openPermissionsEditor() {
     setDraftPermissions(JSON.parse(JSON.stringify(resolvedPermissions)));
@@ -392,8 +540,8 @@ function ClientList({
   const showSubmittedBy = isAdmin || isManager;
   const visibleColDefs = useMemo(() => {
     const merged = [...colOrder, ...DEFAULT_COL_ORDER.filter((k) => !colOrder.includes(k))];
-    return merged.map((key) => COLUMNS.find((c) => c.key === key)).filter((c) => !!c).filter((c) => !c.adminOnly || showSubmittedBy).filter((c) => phase !== "live" || c.key !== "claimed").filter((c) => canView(c.key));
-  }, [colOrder, showSubmittedBy, phase, currentRole, resolvedPermissions]);
+    return merged.map((key) => COLUMNS.find((c) => c.key === key)).filter((c) => !!c).filter((c) => !c.adminOnly || showSubmittedBy).filter((c) => phase !== "live" || c.key !== "claimed").filter((c) => canView(c.key)).filter((c) => colVisible === null || colVisible.includes(c.key));
+  }, [colOrder, colVisible, showSubmittedBy, phase, currentRole, resolvedPermissions]);
   const distinctValues = useMemo(() => {
     const map = {
       agentStatus: AGENT_STATUSES,
@@ -422,6 +570,34 @@ function ClientList({
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
   }, [showExport]);
+  useEffect(() => {
+    if (!showColPicker) return;
+    const h = (e) => {
+      if (colPickerRef.current && !colPickerRef.current.contains(e.target)) setShowColPicker(false);
+    };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [showColPicker]);
+  useEffect(() => {
+    if (!showWeekPicker) return;
+    const h = (e) => {
+      if (weekPickerRef.current && !weekPickerRef.current.contains(e.target)) setShowWeekPicker(false);
+    };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [showWeekPicker]);
+  const pickableCols = useMemo(
+    () => COLUMNS.filter((c) => c.key !== "claimed" && (!c.adminOnly || showSubmittedBy) && canView(c.key)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [showSubmittedBy, currentRole, resolvedPermissions]
+  );
+  function togglePickerCol(key) {
+    const allKeys = pickableCols.map((c) => c.key);
+    const current = colVisible ?? allKeys;
+    const next = current.includes(key) ? current.filter((k) => k !== key) : [...current, key];
+    if (next.length === 0) return;
+    setColVisible(next.length === allKeys.length ? null : next);
+  }
   useEffect(() => {
     if (!infoPopover) return;
     const h = (e) => {
@@ -485,6 +661,22 @@ function ClientList({
         });
       }
     }
+    if (dayFilter) {
+      if (dayFilter === "week") {
+        result = result.filter((c) => c.date && c.date >= weekDays[0] && c.date <= weekDays[6]);
+      } else if (dayFilter.startsWith("week:")) {
+        const weekStart = dayFilter.slice(5);
+        const d = /* @__PURE__ */ new Date(weekStart + "T12:00:00");
+        d.setDate(d.getDate() + 6);
+        const weekEnd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        result = result.filter((c) => c.date && c.date >= weekStart && c.date <= weekEnd);
+      } else {
+        result = result.filter((c) => c.date === dayFilter);
+      }
+    }
+    if (carrierFilter) {
+      result = result.filter((c) => c.carrier === carrierFilter);
+    }
     if (sortField) {
       result.sort((a, b) => {
         const av = a[sortField] ?? "", bv = b[sortField] ?? "";
@@ -495,9 +687,14 @@ function ClientList({
       });
     }
     return result;
-  }, [clients, showHistorical, historicalCutoff, searchText, filters, sortField, sortDir]);
-  const pendingRows = displayedClients.filter(isPending);
-  const claimedRows = displayedClients.filter((c) => !isPending(c));
+  }, [clients, showHistorical, historicalCutoff, searchText, filters, sortField, sortDir, dayFilter, carrierFilter, weekDays]);
+  useEffect(() => {
+    setPage(0);
+  }, [searchText, filterRows, sortField, sortDir, showHistorical, dayFilter, carrierFilter]);
+  const totalPages = Math.max(1, Math.ceil(displayedClients.length / PAGE_SIZE2));
+  const pagedClients = displayedClients.slice(page * PAGE_SIZE2, (page + 1) * PAGE_SIZE2);
+  const pendingRows = pagedClients.filter(isPending);
+  const claimedRows = pagedClients.filter((c) => !isPending(c));
   const totalColSpan = visibleColDefs.length + (showActions ? 1 : 0);
   const historicalCount = useMemo(
     () => clients.filter((c) => c.historical === true || c.date && c.date < historicalCutoff).length,
@@ -516,8 +713,9 @@ function ClientList({
   }
   function applyView(view) {
     if (view.colOrder) setColOrder(view.colOrder);
+    setColVisible(view.visibleCols ?? null);
     setSortField(view.sortField ?? null);
-    setSortDir(view.sortDir ?? "asc");
+    setSortDir(view.sortDir ?? "desc");
     setFilterRows(view.filterRows ?? []);
     setActiveViewId(view.id);
     setShowFilterBuilder(false);
@@ -529,6 +727,7 @@ function ClientList({
       const id = await onSaveView({
         name: newViewName.trim(),
         colOrder: [...colOrder],
+        visibleCols: colVisible ?? void 0,
         sortField,
         sortDir,
         filterRows: [...filterRows]
@@ -626,6 +825,33 @@ function ClientList({
       });
     }
   }
+  async function handleSelectChange(client, field, newValue) {
+    const orig = String(client[field] ?? "");
+    if (newValue === orig) return;
+    const changeEntry = {
+      at: { seconds: Math.floor(Date.now() / 1e3) },
+      by: userName,
+      field,
+      from: orig,
+      to: newValue
+    };
+    setClients((prev) => prev.map((c) => {
+      if (c.id !== client.id) return c;
+      return { ...c, [field]: newValue, updatedByName: userName, updatedAt: changeEntry.at, changeLog: [...c.changeLog ?? [], changeEntry] };
+    }));
+    setSaving((prev) => ({ ...prev, [client.id]: field }));
+    try {
+      await onSave?.(client.id, field, newValue, userName, orig);
+    } catch {
+      setClients(clientsProp);
+    } finally {
+      setSaving((prev) => {
+        const n = { ...prev };
+        delete n[client.id];
+        return n;
+      });
+    }
+  }
   async function handleClaim(client) {
     if (!onClaim) return;
     setBusy((prev) => new Set(prev).add(client.id));
@@ -652,6 +878,59 @@ function ClientList({
       });
     }
   }
+  const syncHThumb = useCallback(() => {
+    const el = tableScrollRef.current;
+    if (!el) return;
+    const hasScroll = el.scrollWidth > el.clientWidth + 1;
+    if (!hasScroll) {
+      setHThumb((p) => p.show ? { left: 0, width: 0, show: false } : p);
+      return;
+    }
+    const ratio = el.clientWidth / el.scrollWidth;
+    const thumbW = Math.max(40, ratio * el.clientWidth);
+    const maxLeft = el.clientWidth - thumbW;
+    const scrollR = el.scrollLeft / (el.scrollWidth - el.clientWidth);
+    setHThumb({ left: scrollR * maxLeft, width: thumbW, show: true });
+  }, []);
+  useEffect(() => {
+    const el = tableScrollRef.current;
+    if (!el) return;
+    syncHThumb();
+    const ro = new ResizeObserver(syncHThumb);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [syncHThumb, displayedClients.length]);
+  const onThumbMouseDown = useCallback((e) => {
+    e.preventDefault();
+    const el = tableScrollRef.current;
+    if (!el) return;
+    hDragData.current = { startX: e.clientX, startScrollLeft: el.scrollLeft };
+    const onMove = (mv) => {
+      const scrollRange = el.scrollWidth - el.clientWidth;
+      const trackW = el.clientWidth;
+      const thumbW = Math.max(40, el.clientWidth / el.scrollWidth * trackW);
+      const thumbRange = trackW - thumbW;
+      const dx = mv.clientX - hDragData.current.startX;
+      el.scrollLeft = hDragData.current.startScrollLeft + dx / thumbRange * scrollRange;
+    };
+    const onUp = () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  }, []);
+  const onTrackClick = useCallback((e) => {
+    const track = hScrollTrackRef.current;
+    const el = tableScrollRef.current;
+    if (!track || !el) return;
+    const rect = track.getBoundingClientRect();
+    const ratio = (e.clientX - rect.left) / rect.width;
+    el.scrollLeft = ratio * (el.scrollWidth - el.clientWidth);
+  }, []);
+  const scrollToLeft = useCallback(() => {
+    if (tableScrollRef.current) tableScrollRef.current.scrollLeft = 0;
+  }, []);
   const handleLoadMore = useCallback(async () => {
     if (!onLoadMore || loadingMore) return;
     setLoadingMore(true);
@@ -682,6 +961,8 @@ function ClientList({
       "Agent Status",
       "Admin Status",
       "Notes",
+      "Client Paid",
+      "Comp Date",
       "Created",
       "Created By",
       "Updated",
@@ -704,6 +985,8 @@ function ClientList({
       c.agentStatus ?? "",
       c.adminStatus ?? "",
       c.notes ?? "",
+      c.clientPaidDate ?? "",
+      c.compDate ?? "",
       fmtTimestamp(c.createdAt),
       c.createdByName ?? "",
       fmtTimestamp(c.updatedAt),
@@ -759,10 +1042,7 @@ function ClientList({
           isSaving ? /* @__PURE__ */ jsx2(Spinner, {}) : /* @__PURE__ */ jsx2(PencilIcon, {})
         ] }) }, col.key);
       case "carrier":
-        return /* @__PURE__ */ jsx2("td", { className: "cl-td", children: isEditing ? /* @__PURE__ */ jsx2(CellInput, { type: "select", initialValue: client.carrier ?? "", options: CARRIERS, onSave: confirmEdit, onCancel: cancelEdit }) : /* @__PURE__ */ jsxs2("div", { className: "cl-cell-edit", onClick: () => startE(client.carrier ?? ""), children: [
-          /* @__PURE__ */ jsx2("span", { children: client.carrier || "\u2014" }),
-          isSaving ? /* @__PURE__ */ jsx2(Spinner, {}) : /* @__PURE__ */ jsx2(PencilIcon, {})
-        ] }) }, col.key);
+        return /* @__PURE__ */ jsx2("td", { className: "cl-td", children: canEdit("carrier") ? /* @__PURE__ */ jsx2("div", { className: "cl-inline-select-wrap", children: isSaving ? /* @__PURE__ */ jsx2(Spinner, {}) : /* @__PURE__ */ jsx2("select", { className: "cl-cell-select-plain", value: client.carrier ?? "", onChange: (e) => handleSelectChange(client, "carrier", e.target.value), children: CARRIERS.map((o) => /* @__PURE__ */ jsx2("option", { value: o, children: o }, o)) }) }) : /* @__PURE__ */ jsx2("span", { children: client.carrier || "\u2014" }) }, col.key);
       case "appNumber":
         return /* @__PURE__ */ jsx2("td", { className: "cl-td", children: isEditing ? /* @__PURE__ */ jsx2(CellInput, { type: "text", initialValue: client.appNumber ?? "", onSave: confirmEdit, onCancel: cancelEdit }) : /* @__PURE__ */ jsxs2("div", { className: "cl-cell-edit", onClick: () => startE(client.appNumber ?? ""), children: [
           /* @__PURE__ */ jsx2("span", { children: client.appNumber || "\u2014" }),
@@ -772,7 +1052,7 @@ function ClientList({
         return /* @__PURE__ */ jsx2("td", { className: "cl-td", children: isEditing ? /* @__PURE__ */ jsx2(CellInput, { type: "number", initialValue: String(client.annualPremium ?? ""), onSave: confirmEdit, onCancel: cancelEdit }) : /* @__PURE__ */ jsxs2("div", { className: "cl-cell-edit", onClick: () => startE(String(client.annualPremium ?? "")), children: [
           /* @__PURE__ */ jsx2("span", { className: "cl-premium", children: client.annualPremium ? fmtCurrency(client.annualPremium) : "\u2014" }),
           !!client.splitPercent && /* @__PURE__ */ jsx2("span", { className: "cl-badge split", title: `Split ${client.splitPercent}%`, children: "Split" }),
-          (client.annualPremium ?? 0) > 0 && (client.annualPremium ?? 0) <= 600 && /* @__PURE__ */ jsx2("span", { className: "cl-badge alp", title: "\u2264 $600 ALP \u2014 team gets 50% credit", children: "\xBD ALP" }),
+          (client.annualPremium ?? 0) > 0 && (client.annualPremium ?? 0) < 600 && /* @__PURE__ */ jsx2("span", { className: "cl-badge alp", title: "< $600 ALP \u2014 team gets 50% credit", children: "\xBD ALP" }),
           isSaving ? /* @__PURE__ */ jsx2(Spinner, {}) : /* @__PURE__ */ jsx2(PencilIcon, {})
         ] }) }, col.key);
       case "splitPercent":
@@ -790,16 +1070,36 @@ function ClientList({
           /* @__PURE__ */ jsx2("span", { children: fmtDate(client.startDate) }),
           isSaving ? /* @__PURE__ */ jsx2(Spinner, {}) : /* @__PURE__ */ jsx2(PencilIcon, {})
         ] }) }, col.key);
+      case "clientPaidDate":
+        return /* @__PURE__ */ jsx2("td", { className: "cl-td", children: isEditing ? /* @__PURE__ */ jsx2(CellInput, { type: "date", initialValue: client.clientPaidDate ?? "", onSave: confirmEdit, onCancel: cancelEdit }) : /* @__PURE__ */ jsxs2("div", { className: "cl-cell-edit", onClick: () => startE(client.clientPaidDate ?? ""), children: [
+          /* @__PURE__ */ jsx2("span", { children: fmtDate(client.clientPaidDate) }),
+          isSaving ? /* @__PURE__ */ jsx2(Spinner, {}) : /* @__PURE__ */ jsx2(PencilIcon, {})
+        ] }) }, col.key);
+      case "compDate":
+        return /* @__PURE__ */ jsx2("td", { className: "cl-td", children: isEditing ? /* @__PURE__ */ jsx2(CellInput, { type: "date", initialValue: client.compDate ?? "", onSave: confirmEdit, onCancel: cancelEdit }) : /* @__PURE__ */ jsxs2("div", { className: "cl-cell-edit", onClick: () => startE(client.compDate ?? ""), children: [
+          /* @__PURE__ */ jsx2("span", { children: fmtDate(client.compDate) }),
+          isSaving ? /* @__PURE__ */ jsx2(Spinner, {}) : /* @__PURE__ */ jsx2(PencilIcon, {})
+        ] }) }, col.key);
       case "agentStatus":
-        return /* @__PURE__ */ jsx2("td", { className: "cl-td", children: isEditing ? /* @__PURE__ */ jsx2(CellInput, { type: "select", initialValue: client.agentStatus ?? "", options: AGENT_STATUSES, onSave: confirmEdit, onCancel: cancelEdit }) : /* @__PURE__ */ jsxs2("div", { className: "cl-cell-edit", onClick: () => startE(client.agentStatus ?? ""), children: [
-          /* @__PURE__ */ jsx2("span", { className: `cl-badge ${AGENT_STATUS_CLASS[client.agentStatus ?? ""] ?? ""}`, children: client.agentStatus || "\u2014" }),
-          isSaving ? /* @__PURE__ */ jsx2(Spinner, {}) : /* @__PURE__ */ jsx2(PencilIcon, {})
-        ] }) }, col.key);
+        return /* @__PURE__ */ jsx2("td", { className: "cl-td", children: canEdit("agentStatus") ? isSaving ? /* @__PURE__ */ jsx2(Spinner, {}) : /* @__PURE__ */ jsx2(
+          "select",
+          {
+            className: `cl-badge cl-badge-select ${AGENT_STATUS_CLASS[client.agentStatus ?? ""] ?? ""}`,
+            value: client.agentStatus ?? "",
+            onChange: (e) => handleSelectChange(client, "agentStatus", e.target.value),
+            children: AGENT_STATUSES.map((o) => /* @__PURE__ */ jsx2("option", { value: o, children: o }, o))
+          }
+        ) : /* @__PURE__ */ jsx2("span", { className: `cl-badge ${AGENT_STATUS_CLASS[client.agentStatus ?? ""] ?? ""}`, children: client.agentStatus || "\u2014" }) }, col.key);
       case "adminStatus":
-        return /* @__PURE__ */ jsx2("td", { className: "cl-td", children: isEditing ? /* @__PURE__ */ jsx2(CellInput, { type: "select", initialValue: client.adminStatus ?? "", options: ADMIN_STATUSES, onSave: confirmEdit, onCancel: cancelEdit }) : /* @__PURE__ */ jsxs2("div", { className: "cl-cell-edit", onClick: () => startE(client.adminStatus ?? ""), children: [
-          /* @__PURE__ */ jsx2("span", { children: client.adminStatus || "\u2014" }),
-          isSaving ? /* @__PURE__ */ jsx2(Spinner, {}) : /* @__PURE__ */ jsx2(PencilIcon, {})
-        ] }) }, col.key);
+        return /* @__PURE__ */ jsx2("td", { className: "cl-td", children: canEdit("adminStatus") ? isSaving ? /* @__PURE__ */ jsx2(Spinner, {}) : /* @__PURE__ */ jsx2(
+          "select",
+          {
+            className: "cl-cell-select-plain",
+            value: client.adminStatus ?? "",
+            onChange: (e) => handleSelectChange(client, "adminStatus", e.target.value),
+            children: ADMIN_STATUSES.map((o) => /* @__PURE__ */ jsx2("option", { value: o, children: o }, o))
+          }
+        ) : /* @__PURE__ */ jsx2("span", { children: client.adminStatus || "\u2014" }) }, col.key);
       case "notes":
         return /* @__PURE__ */ jsx2("td", { className: "cl-td", style: { maxWidth: 160 }, children: isEditing ? /* @__PURE__ */ jsx2(CellInput, { type: "text", initialValue: client.notes ?? "", onSave: confirmEdit, onCancel: cancelEdit }) : /* @__PURE__ */ jsxs2("div", { className: "cl-cell-edit", onClick: () => startE(client.notes ?? ""), children: [
           client.notes ? /* @__PURE__ */ jsx2("span", { className: "cl-note-text", title: client.notes, children: client.notes }) : /* @__PURE__ */ jsx2("span", { className: "cl-note-add", children: "+ add" }),
@@ -1076,82 +1376,134 @@ function ClientList({
     (v) => v.kind === "enum" ? v.values.length > 0 : v.kind === "text" ? !!v.q : !!(v.min || v.max)
   ).length;
   return /* @__PURE__ */ jsxs2("div", { className: "cl-root", children: [
-    /* @__PURE__ */ jsx2("div", { className: "cl-header", children: /* @__PURE__ */ jsxs2("div", { className: "cl-header-row", children: [
-      /* @__PURE__ */ jsxs2("div", { className: "cl-header-left", children: [
-        /* @__PURE__ */ jsx2("div", { className: "cl-header-accent" }),
-        /* @__PURE__ */ jsxs2("div", { children: [
-          isRenaming ? /* @__PURE__ */ jsx2(
+    /* @__PURE__ */ jsx2("div", { className: "cl-header", children: /* @__PURE__ */ jsx2("div", { className: "cl-header-row", children: /* @__PURE__ */ jsxs2("div", { className: "cl-header-left", children: [
+      /* @__PURE__ */ jsx2("div", { className: "cl-header-accent" }),
+      /* @__PURE__ */ jsxs2("div", { children: [
+        isRenaming ? /* @__PURE__ */ jsx2(
+          "input",
+          {
+            autoFocus: true,
+            className: "cl-rename-input",
+            value: renameValue,
+            onChange: (e) => setRenameValue(e.target.value),
+            onBlur: confirmRename,
+            onKeyDown: (e) => {
+              if (e.key === "Enter") confirmRename();
+              if (e.key === "Escape") {
+                setIsRenaming(false);
+                setRenameValue(localTitle);
+              }
+            }
+          }
+        ) : /* @__PURE__ */ jsx2(
+          "h1",
+          {
+            className: "cl-title" + (isPrivileged || canView("rename") ? " cl-title-editable" : ""),
+            onClick: () => {
+              if (isPrivileged || canView("rename")) {
+                setIsRenaming(true);
+                setRenameValue(localTitle);
+              }
+            },
+            title: isPrivileged || canView("rename") ? "Click to rename" : void 0,
+            children: localTitle
+          }
+        ),
+        /* @__PURE__ */ jsx2("p", { className: "cl-subtitle", children: displayedClients.length > PAGE_SIZE2 ? `${(page * PAGE_SIZE2 + 1).toLocaleString()}\u2013${Math.min((page + 1) * PAGE_SIZE2, displayedClients.length).toLocaleString()} of ${displayedClients.length.toLocaleString()} records` : `${displayedClients.length.toLocaleString()} record${displayedClients.length !== 1 ? "s" : ""}` })
+      ] })
+    ] }) }) }),
+    /* @__PURE__ */ jsxs2("div", { className: "cl-toolbar-row", children: [
+      /* @__PURE__ */ jsxs2("div", { className: "cl-toolbar", children: [
+        /* @__PURE__ */ jsx2("div", { className: "cl-toolbar-seg", children: allViews.map((view) => /* @__PURE__ */ jsxs2("div", { className: "cl-toolbar-view-item", children: [
+          /* @__PURE__ */ jsx2(
+            "button",
+            {
+              className: "cl-seg-btn" + (activeViewId === view.id ? " active" : ""),
+              onClick: () => applyView(view),
+              children: view.name
+            }
+          ),
+          !view.builtIn && /* @__PURE__ */ jsx2(
+            "button",
+            {
+              className: "cl-seg-delete",
+              title: "Delete view",
+              onClick: () => handleDeleteView(view.id),
+              children: /* @__PURE__ */ jsx2("svg", { width: "8", height: "8", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 3, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }) })
+            }
+          )
+        ] }, view.id)) }),
+        showSaveView ? /* @__PURE__ */ jsxs2("div", { className: "cl-toolbar-save-wrap", children: [
+          /* @__PURE__ */ jsx2(
             "input",
             {
               autoFocus: true,
-              className: "cl-rename-input",
-              value: renameValue,
-              onChange: (e) => setRenameValue(e.target.value),
-              onBlur: confirmRename,
+              className: "cl-toolbar-save-input",
+              type: "text",
+              placeholder: "View name\u2026",
+              value: newViewName,
+              onChange: (e) => setNewViewName(e.target.value),
               onKeyDown: (e) => {
-                if (e.key === "Enter") confirmRename();
+                if (e.key === "Enter") handleSaveView();
                 if (e.key === "Escape") {
-                  setIsRenaming(false);
-                  setRenameValue(localTitle);
+                  setShowSaveView(false);
+                  setNewViewName("");
                 }
               }
             }
-          ) : /* @__PURE__ */ jsx2(
-            "h1",
-            {
-              className: "cl-title" + (isPrivileged || canView("rename") ? " cl-title-editable" : ""),
-              onClick: () => {
-                if (isPrivileged || canView("rename")) {
-                  setIsRenaming(true);
-                  setRenameValue(localTitle);
-                }
-              },
-              title: isPrivileged || canView("rename") ? "Click to rename" : void 0,
-              children: localTitle
-            }
           ),
-          /* @__PURE__ */ jsxs2("p", { className: "cl-subtitle", children: [
-            displayedClients.length.toLocaleString(),
-            " record",
-            displayedClients.length !== 1 ? "s" : ""
-          ] })
+          /* @__PURE__ */ jsx2("button", { className: "cl-toolbar-save-confirm", onClick: handleSaveView, disabled: savingView || !newViewName.trim(), children: savingView ? "\u2026" : "Save" }),
+          /* @__PURE__ */ jsx2("button", { className: "cl-toolbar-save-cancel", onClick: () => {
+            setShowSaveView(false);
+            setNewViewName("");
+          }, children: "Cancel" })
+        ] }) : onSaveView && /* @__PURE__ */ jsxs2("button", { className: "cl-seg-add", onClick: () => setShowSaveView(true), children: [
+          /* @__PURE__ */ jsx2("svg", { width: "10", height: "10", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2.5, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M12 4.5v15m7.5-7.5h-15" }) }),
+          "Save view"
         ] })
       ] }),
-      /* @__PURE__ */ jsxs2("div", { className: "cl-header-right", children: [
-        isPrivileged && /* @__PURE__ */ jsxs2(
-          "button",
-          {
-            className: "cl-perm-btn" + (showPermissions ? " active" : ""),
-            onClick: openPermissionsEditor,
-            title: "Manage column permissions",
-            children: [
-              /* @__PURE__ */ jsxs2("svg", { width: "15", height: "15", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: [
-                /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" }),
-                /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15 12a3 3 0 11-6 0 3 3 0 016 0z" })
-              ] }),
-              "Permissions"
-            ]
-          }
-        ),
-        historicalCount > 0 && /* @__PURE__ */ jsx2(
-          "button",
-          {
-            className: "cl-pill" + (showHistorical ? " active" : ""),
-            onClick: () => setShowHistorical((p) => !p),
-            children: showHistorical ? `${historicalCount} historical shown` : `${historicalCount} historical hidden`
-          }
-        ),
-        (isPrivileged || canView("export")) && /* @__PURE__ */ jsxs2("div", { className: "cl-export-wrap", ref: exportRef, children: [
-          /* @__PURE__ */ jsxs2(
+      /* @__PURE__ */ jsxs2("div", { className: "cl-action-bar", children: [
+        /* @__PURE__ */ jsxs2("div", { className: "cl-action-wrap", ref: colPickerRef, children: [
+          /* @__PURE__ */ jsx2(
             "button",
             {
-              className: "cl-export-btn",
+              className: "cl-action-btn" + (showColPicker ? " active" : ""),
+              onClick: () => setShowColPicker((p) => !p),
+              title: "Show / hide columns",
+              children: /* @__PURE__ */ jsx2("svg", { width: "15", height: "15", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 4H5a1 1 0 00-1 1v14a1 1 0 001 1h4M9 4v16M9 4h6M9 20h6m0-16h4a1 1 0 011 1v14a1 1 0 01-1 1h-4M15 4v16" }) })
+            }
+          ),
+          showColPicker && /* @__PURE__ */ jsxs2("div", { className: "cl-export-menu cl-col-picker-menu", children: [
+            /* @__PURE__ */ jsxs2("div", { className: "cl-export-menu-header", style: { display: "flex", alignItems: "center", justifyContent: "space-between" }, children: [
+              /* @__PURE__ */ jsxs2("div", { children: [
+                /* @__PURE__ */ jsx2("div", { className: "cl-export-menu-title", children: "Show / Hide Columns" }),
+                /* @__PURE__ */ jsxs2("div", { className: "cl-export-menu-sub", children: [
+                  colVisible === null ? pickableCols.length : colVisible.length,
+                  " of ",
+                  pickableCols.length,
+                  " shown"
+                ] })
+              ] }),
+              /* @__PURE__ */ jsx2("button", { className: "cl-col-picker-reset", onClick: () => setColVisible(null), children: "Reset" })
+            ] }),
+            /* @__PURE__ */ jsx2("div", { className: "cl-col-picker-body", children: pickableCols.map((col) => {
+              const checked = colVisible === null || colVisible.includes(col.key);
+              return /* @__PURE__ */ jsxs2("label", { className: "cl-col-picker-row", children: [
+                /* @__PURE__ */ jsx2("input", { type: "checkbox", checked, onChange: () => togglePickerCol(col.key) }),
+                /* @__PURE__ */ jsx2("span", { children: col.label })
+              ] }, col.key);
+            }) })
+          ] })
+        ] }),
+        (isPrivileged || canView("export")) && /* @__PURE__ */ jsxs2("div", { className: "cl-action-wrap", ref: exportRef, children: [
+          /* @__PURE__ */ jsx2(
+            "button",
+            {
+              className: "cl-action-btn" + (showExport ? " active" : ""),
               onClick: () => setShowExport((p) => !p),
               disabled: displayedClients.length === 0,
-              children: [
-                /* @__PURE__ */ jsx2("svg", { width: "16", height: "16", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" }) }),
-                "Export"
-              ]
+              title: "Export to CSV",
+              children: /* @__PURE__ */ jsx2("svg", { width: "15", height: "15", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" }) })
             }
           ),
           showExport && /* @__PURE__ */ jsxs2("div", { className: "cl-export-menu", children: [
@@ -1161,56 +1513,19 @@ function ClientList({
             ] }),
             /* @__PURE__ */ jsx2("div", { className: "cl-export-menu-body", children: /* @__PURE__ */ jsx2("button", { className: "cl-export-dl-btn", onClick: exportCSV, children: "Download" }) })
           ] })
-        ] })
-      ] })
-    ] }) }),
-    /* @__PURE__ */ jsxs2("div", { className: "cl-toolbar", children: [
-      /* @__PURE__ */ jsx2("div", { className: "cl-toolbar-seg", children: allViews.map((view) => /* @__PURE__ */ jsxs2("div", { className: "cl-toolbar-view-item", children: [
-        /* @__PURE__ */ jsx2(
+        ] }),
+        isPrivileged && /* @__PURE__ */ jsx2(
           "button",
           {
-            className: "cl-seg-btn" + (activeViewId === view.id ? " active" : ""),
-            onClick: () => applyView(view),
-            children: view.name
-          }
-        ),
-        !view.builtIn && /* @__PURE__ */ jsx2(
-          "button",
-          {
-            className: "cl-seg-delete",
-            title: "Delete view",
-            onClick: () => handleDeleteView(view.id),
-            children: /* @__PURE__ */ jsx2("svg", { width: "8", height: "8", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 3, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }) })
+            className: "cl-action-btn" + (showPermissions ? " active" : ""),
+            onClick: openPermissionsEditor,
+            title: "Manage column permissions",
+            children: /* @__PURE__ */ jsxs2("svg", { width: "15", height: "15", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: [
+              /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" }),
+              /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15 12a3 3 0 11-6 0 3 3 0 016 0z" })
+            ] })
           }
         )
-      ] }, view.id)) }),
-      showSaveView ? /* @__PURE__ */ jsxs2("div", { className: "cl-toolbar-save-wrap", children: [
-        /* @__PURE__ */ jsx2(
-          "input",
-          {
-            autoFocus: true,
-            className: "cl-toolbar-save-input",
-            type: "text",
-            placeholder: "View name\u2026",
-            value: newViewName,
-            onChange: (e) => setNewViewName(e.target.value),
-            onKeyDown: (e) => {
-              if (e.key === "Enter") handleSaveView();
-              if (e.key === "Escape") {
-                setShowSaveView(false);
-                setNewViewName("");
-              }
-            }
-          }
-        ),
-        /* @__PURE__ */ jsx2("button", { className: "cl-toolbar-save-confirm", onClick: handleSaveView, disabled: savingView || !newViewName.trim(), children: savingView ? "\u2026" : "Save" }),
-        /* @__PURE__ */ jsx2("button", { className: "cl-toolbar-save-cancel", onClick: () => {
-          setShowSaveView(false);
-          setNewViewName("");
-        }, children: "Cancel" })
-      ] }) : onSaveView && /* @__PURE__ */ jsxs2("button", { className: "cl-seg-add", onClick: () => setShowSaveView(true), children: [
-        /* @__PURE__ */ jsx2("svg", { width: "10", height: "10", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2.5, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M12 4.5v15m7.5-7.5h-15" }) }),
-        "Save view"
       ] })
     ] }),
     renderPermissionsEditor(),
@@ -1243,6 +1558,65 @@ function ClientList({
           }
         )
       ] }),
+      /* @__PURE__ */ jsxs2("div", { className: "cl-day-seg", children: [
+        ["M", "T", "W", "T", "F", "S", "S"].map((label, i) => /* @__PURE__ */ jsx2(
+          "button",
+          {
+            className: "cl-day-btn" + (dayFilter === weekDays[i] ? " active" : ""),
+            onClick: () => setDayFilter(dayFilter === weekDays[i] ? null : weekDays[i]),
+            title: weekDays[i],
+            children: label
+          },
+          weekDays[i]
+        )),
+        /* @__PURE__ */ jsx2("div", { className: "cl-day-sep" }),
+        /* @__PURE__ */ jsxs2("div", { ref: weekPickerRef, style: { position: "relative" }, children: [
+          /* @__PURE__ */ jsxs2(
+            "button",
+            {
+              className: "cl-day-btn cl-day-week-btn cl-day-week-pick" + (dayFilter === "week" || (dayFilter?.startsWith("week:") ?? false) ? " active" : ""),
+              onClick: () => setShowWeekPicker((p) => !p),
+              children: [
+                /* @__PURE__ */ jsx2("span", { children: dayFilter?.startsWith("week:") ? (() => {
+                  const [, mo, da] = dayFilter.slice(5).split("-");
+                  return `${mo}/${da}`;
+                })() : "Week" }),
+                /* @__PURE__ */ jsx2("svg", { width: "9", height: "9", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 3, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19 9l-7 7-7-7" }) })
+              ]
+            }
+          ),
+          showWeekPicker && /* @__PURE__ */ jsx2("div", { className: "cl-week-dropdown", children: /* @__PURE__ */ jsx2(
+            WeekCalendar,
+            {
+              availableWeeks,
+              dayFilter,
+              onSelect: (val) => {
+                setDayFilter(val);
+                setShowWeekPicker(false);
+              }
+            }
+          ) })
+        ] }),
+        /* @__PURE__ */ jsx2(
+          "button",
+          {
+            className: "cl-day-btn cl-day-week-btn" + (dayFilter === null ? " active" : ""),
+            onClick: () => setDayFilter(null),
+            children: "All"
+          }
+        ),
+        uniqueCarriers.length > 0 && /* @__PURE__ */ jsx2("div", { className: "cl-day-sep" }),
+        uniqueCarriers.map((carrier) => /* @__PURE__ */ jsx2(
+          "button",
+          {
+            className: "cl-day-btn" + (carrierFilter === carrier ? " active" : ""),
+            title: carrier,
+            onClick: () => setCarrierFilter(carrierFilter === carrier ? null : carrier),
+            children: carrier.slice(0, 4).toUpperCase()
+          },
+          carrier
+        ))
+      ] }),
       renderFilterBuilder()
     ] }),
     showFilterBuilder && activeFilterCount > 0 && /* @__PURE__ */ jsxs2("div", { className: "cl-active-filters", children: [
@@ -1263,116 +1637,150 @@ function ClientList({
       /* @__PURE__ */ jsx2("button", { className: "cl-filter-clear-all", onClick: () => setFilterRows([]), children: "Clear all" })
     ] }),
     /* @__PURE__ */ jsxs2("div", { className: "cl-table-area", children: [
-      displayedClients.length > 0 ? /* @__PURE__ */ jsx2("div", { className: "cl-table-wrap", children: /* @__PURE__ */ jsx2("div", { className: "cl-table-scroll", children: /* @__PURE__ */ jsxs2("table", { className: "cl-table", children: [
-        /* @__PURE__ */ jsx2("thead", { className: "cl-thead", children: /* @__PURE__ */ jsxs2("tr", { children: [
-          visibleColDefs.map((col) => {
-            const isSorted = sortField === col.key;
-            const isDragging = dragCol === col.key;
-            const isDragOver = dragOverCol === col.key && dragCol !== col.key;
-            const spec = filters[col.key];
-            const isFiltered = spec ? spec.kind === "enum" ? spec.values.length > 0 : spec.kind === "text" ? !!spec.q : !!(spec.min || spec.max) : false;
-            return /* @__PURE__ */ jsx2(
-              "th",
-              {
-                className: [
-                  "cl-th",
-                  col.meta ? "meta" : "",
-                  isDragging ? "dragging" : "",
-                  isDragOver ? "drag-over" : ""
-                ].filter(Boolean).join(" "),
-                onDragOver: (e) => {
-                  e.preventDefault();
-                  if (dragCol && dragCol !== col.key) setDragOverCol(col.key);
+      displayedClients.length > 0 ? /* @__PURE__ */ jsxs2("div", { className: "cl-table-wrap", children: [
+        /* @__PURE__ */ jsx2("div", { className: "cl-table-scroll", ref: tableScrollRef, onScroll: syncHThumb, children: /* @__PURE__ */ jsxs2("table", { className: "cl-table", children: [
+          /* @__PURE__ */ jsx2("thead", { className: "cl-thead", children: /* @__PURE__ */ jsxs2("tr", { children: [
+            visibleColDefs.map((col) => {
+              const isSorted = sortField === col.key;
+              const isDragging = dragCol === col.key;
+              const isDragOver = dragOverCol === col.key && dragCol !== col.key;
+              const spec = filters[col.key];
+              const isFiltered = spec ? spec.kind === "enum" ? spec.values.length > 0 : spec.kind === "text" ? !!spec.q : !!(spec.min || spec.max) : false;
+              return /* @__PURE__ */ jsx2(
+                "th",
+                {
+                  className: [
+                    "cl-th",
+                    col.meta ? "meta" : "",
+                    isDragging ? "dragging" : "",
+                    isDragOver ? "drag-over" : ""
+                  ].filter(Boolean).join(" "),
+                  onDragOver: (e) => {
+                    e.preventDefault();
+                    if (dragCol && dragCol !== col.key) setDragOverCol(col.key);
+                  },
+                  onDrop: () => {
+                    if (dragCol && dragCol !== col.key) reorderCol(dragCol, col.key);
+                    setDragOverCol(null);
+                  },
+                  children: /* @__PURE__ */ jsxs2("div", { className: "cl-th-inner", children: [
+                    /* @__PURE__ */ jsx2(
+                      "span",
+                      {
+                        className: "cl-drag-grip",
+                        draggable: true,
+                        onDragStart: (e) => {
+                          e.stopPropagation();
+                          setDragCol(col.key);
+                        },
+                        onDragEnd: () => {
+                          setDragCol(null);
+                          setDragOverCol(null);
+                        },
+                        title: "Drag to reorder",
+                        children: /* @__PURE__ */ jsxs2("svg", { width: "12", height: "12", fill: "currentColor", viewBox: "0 0 16 16", children: [
+                          /* @__PURE__ */ jsx2("circle", { cx: "5", cy: "4", r: "1.5" }),
+                          /* @__PURE__ */ jsx2("circle", { cx: "11", cy: "4", r: "1.5" }),
+                          /* @__PURE__ */ jsx2("circle", { cx: "5", cy: "8", r: "1.5" }),
+                          /* @__PURE__ */ jsx2("circle", { cx: "11", cy: "8", r: "1.5" }),
+                          /* @__PURE__ */ jsx2("circle", { cx: "5", cy: "12", r: "1.5" }),
+                          /* @__PURE__ */ jsx2("circle", { cx: "11", cy: "12", r: "1.5" })
+                        ] })
+                      }
+                    ),
+                    col.sortable ? /* @__PURE__ */ jsxs2("button", { className: "cl-sort-btn" + (isSorted ? " sorted" : ""), onClick: () => handleSort(col.key), children: [
+                      col.label,
+                      /* @__PURE__ */ jsx2("span", { className: "cl-sort-arrow" + (isSorted ? "" : " unsorted"), children: isSorted ? sortDir === "asc" ? "\u2191" : "\u2193" : "\u2195" })
+                    ] }) : /* @__PURE__ */ jsx2("span", { children: col.label }),
+                    isFiltered && /* @__PURE__ */ jsx2("span", { className: "cl-filter-count", children: "\u25CF" })
+                  ] })
                 },
-                onDrop: () => {
-                  if (dragCol && dragCol !== col.key) reorderCol(dragCol, col.key);
-                  setDragOverCol(null);
-                },
-                children: /* @__PURE__ */ jsxs2("div", { className: "cl-th-inner", children: [
-                  /* @__PURE__ */ jsx2(
-                    "span",
-                    {
-                      className: "cl-drag-grip",
-                      draggable: true,
-                      onDragStart: (e) => {
-                        e.stopPropagation();
-                        setDragCol(col.key);
-                      },
-                      onDragEnd: () => {
-                        setDragCol(null);
-                        setDragOverCol(null);
-                      },
-                      title: "Drag to reorder",
-                      children: /* @__PURE__ */ jsxs2("svg", { width: "12", height: "12", fill: "currentColor", viewBox: "0 0 16 16", children: [
-                        /* @__PURE__ */ jsx2("circle", { cx: "5", cy: "4", r: "1.5" }),
-                        /* @__PURE__ */ jsx2("circle", { cx: "11", cy: "4", r: "1.5" }),
-                        /* @__PURE__ */ jsx2("circle", { cx: "5", cy: "8", r: "1.5" }),
-                        /* @__PURE__ */ jsx2("circle", { cx: "11", cy: "8", r: "1.5" }),
-                        /* @__PURE__ */ jsx2("circle", { cx: "5", cy: "12", r: "1.5" }),
-                        /* @__PURE__ */ jsx2("circle", { cx: "11", cy: "12", r: "1.5" })
-                      ] })
-                    }
-                  ),
-                  col.sortable ? /* @__PURE__ */ jsxs2("button", { className: "cl-sort-btn" + (isSorted ? " sorted" : ""), onClick: () => handleSort(col.key), children: [
-                    col.label,
-                    /* @__PURE__ */ jsx2("span", { className: "cl-sort-arrow" + (isSorted ? "" : " unsorted"), children: isSorted ? sortDir === "asc" ? "\u2191" : "\u2193" : "\u2195" })
-                  ] }) : /* @__PURE__ */ jsx2("span", { children: col.label }),
-                  isFiltered && /* @__PURE__ */ jsx2("span", { className: "cl-filter-count", children: "\u25CF" })
-                ] })
-              },
-              col.key
-            );
-          }),
-          showActions && /* @__PURE__ */ jsx2("th", { className: "cl-th-actions", children: "Actions" })
+                col.key
+              );
+            }),
+            showActions && /* @__PURE__ */ jsx2("th", { className: "cl-th-actions", children: "Actions" })
+          ] }) }),
+          /* @__PURE__ */ jsxs2("tbody", { children: [
+            pendingRows.length > 0 && /* @__PURE__ */ jsx2("tr", { className: "cl-tr-section pending-section", children: /* @__PURE__ */ jsx2("td", { colSpan: totalColSpan, children: /* @__PURE__ */ jsxs2("div", { className: "cl-section-label", children: [
+              /* @__PURE__ */ jsx2("span", { className: "cl-section-dot pulse", style: { background: "var(--cl-amber)" } }),
+              /* @__PURE__ */ jsx2("span", { className: "cl-section-title", style: { color: "var(--cl-amber)" }, children: "Unclaimed" }),
+              /* @__PURE__ */ jsxs2("span", { className: "cl-section-count", children: [
+                pendingRows.length,
+                " waiting"
+              ] })
+            ] }) }) }),
+            pendingRows.map((client) => /* @__PURE__ */ jsxs2("tr", { className: "cl-tr pending", children: [
+              visibleColDefs.map((col) => renderCell(col, client)),
+              showActions && /* @__PURE__ */ jsx2("td", { className: "cl-td-actions", children: /* @__PURE__ */ jsxs2("button", { className: "cl-btn-claim", onClick: () => handleClaim(client), disabled: busy.has(client.id), children: [
+                busy.has(client.id) ? /* @__PURE__ */ jsx2(Spinner, {}) : /* @__PURE__ */ jsx2("svg", { width: "12", height: "12", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2.5, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" }) }),
+                busy.has(client.id) ? "\u2026" : "Claim"
+              ] }) })
+            ] }, client.id)),
+            claimedRows.length > 0 && pendingRows.length > 0 && /* @__PURE__ */ jsx2("tr", { className: "cl-tr-section claimed-section", children: /* @__PURE__ */ jsx2("td", { colSpan: totalColSpan, children: /* @__PURE__ */ jsxs2("div", { className: "cl-section-label", children: [
+              /* @__PURE__ */ jsx2("span", { className: "cl-section-dot", style: { background: "var(--cl-green)" } }),
+              /* @__PURE__ */ jsx2("span", { className: "cl-section-title", style: { color: "var(--cl-green)" }, children: "Claimed" }),
+              /* @__PURE__ */ jsxs2("span", { className: "cl-section-count", children: [
+                claimedRows.length,
+                hasMore ? "+" : ""
+              ] })
+            ] }) }) }),
+            claimedRows.map((client) => /* @__PURE__ */ jsxs2("tr", { className: "cl-tr", children: [
+              visibleColDefs.map((col) => renderCell(col, client)),
+              showActions && /* @__PURE__ */ jsx2("td", { className: "cl-td-actions", children: /* @__PURE__ */ jsxs2("button", { className: "cl-btn-unclaim", onClick: () => handleUnclaim(client), disabled: busy.has(client.id), children: [
+                busy.has(client.id) ? /* @__PURE__ */ jsx2(Spinner, {}) : /* @__PURE__ */ jsx2("svg", { width: "12", height: "12", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }) }),
+                busy.has(client.id) ? "\u2026" : "Unclaim"
+              ] }) })
+            ] }, client.id))
+          ] })
         ] }) }),
-        /* @__PURE__ */ jsxs2("tbody", { children: [
-          pendingRows.length > 0 && /* @__PURE__ */ jsx2("tr", { className: "cl-tr-section pending-section", children: /* @__PURE__ */ jsx2("td", { colSpan: totalColSpan, children: /* @__PURE__ */ jsxs2("div", { className: "cl-section-label", children: [
-            /* @__PURE__ */ jsx2("span", { className: "cl-section-dot pulse", style: { background: "var(--cl-amber)" } }),
-            /* @__PURE__ */ jsx2("span", { className: "cl-section-title", style: { color: "var(--cl-amber)" }, children: "Unclaimed" }),
-            /* @__PURE__ */ jsxs2("span", { className: "cl-section-count", children: [
-              pendingRows.length,
-              " waiting"
-            ] })
-          ] }) }) }),
-          pendingRows.map((client) => /* @__PURE__ */ jsxs2("tr", { className: "cl-tr pending", children: [
-            visibleColDefs.map((col) => renderCell(col, client)),
-            showActions && /* @__PURE__ */ jsx2("td", { className: "cl-td-actions", children: /* @__PURE__ */ jsxs2("button", { className: "cl-btn-claim", onClick: () => handleClaim(client), disabled: busy.has(client.id), children: [
-              busy.has(client.id) ? /* @__PURE__ */ jsx2(Spinner, {}) : /* @__PURE__ */ jsx2("svg", { width: "12", height: "12", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2.5, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" }) }),
-              busy.has(client.id) ? "\u2026" : "Claim"
-            ] }) })
-          ] }, client.id)),
-          claimedRows.length > 0 && pendingRows.length > 0 && /* @__PURE__ */ jsx2("tr", { className: "cl-tr-section claimed-section", children: /* @__PURE__ */ jsx2("td", { colSpan: totalColSpan, children: /* @__PURE__ */ jsxs2("div", { className: "cl-section-label", children: [
-            /* @__PURE__ */ jsx2("span", { className: "cl-section-dot", style: { background: "var(--cl-green)" } }),
-            /* @__PURE__ */ jsx2("span", { className: "cl-section-title", style: { color: "var(--cl-green)" }, children: "Claimed" }),
-            /* @__PURE__ */ jsxs2("span", { className: "cl-section-count", children: [
-              claimedRows.length,
-              hasMore ? "+" : ""
-            ] })
-          ] }) }) }),
-          claimedRows.map((client) => /* @__PURE__ */ jsxs2("tr", { className: "cl-tr", children: [
-            visibleColDefs.map((col) => renderCell(col, client)),
-            showActions && /* @__PURE__ */ jsx2("td", { className: "cl-td-actions", children: /* @__PURE__ */ jsxs2("button", { className: "cl-btn-unclaim", onClick: () => handleUnclaim(client), disabled: busy.has(client.id), children: [
-              busy.has(client.id) ? /* @__PURE__ */ jsx2(Spinner, {}) : /* @__PURE__ */ jsx2("svg", { width: "12", height: "12", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }) }),
-              busy.has(client.id) ? "\u2026" : "Unclaim"
-            ] }) })
-          ] }, client.id))
+        hThumb.show && /* @__PURE__ */ jsxs2("div", { className: "cl-hscroll-bar", children: [
+          /* @__PURE__ */ jsx2("button", { className: "cl-scroll-left-btn", onClick: scrollToLeft, title: "Scroll to start", children: "\u2039" }),
+          /* @__PURE__ */ jsx2("div", { className: "cl-hscroll-track", ref: hScrollTrackRef, onMouseDown: onTrackClick, children: /* @__PURE__ */ jsx2(
+            "div",
+            {
+              className: "cl-hscroll-thumb",
+              style: { left: hThumb.left, width: hThumb.width },
+              onMouseDown: onThumbMouseDown,
+              onClick: (e) => e.stopPropagation()
+            }
+          ) })
         ] })
-      ] }) }) }) : /* @__PURE__ */ jsxs2("div", { className: "cl-empty", children: [
+      ] }) : /* @__PURE__ */ jsxs2("div", { className: "cl-empty", children: [
         /* @__PURE__ */ jsx2("div", { className: "cl-empty-icon", children: /* @__PURE__ */ jsx2("svg", { width: "28", height: "28", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 1.5, style: { color: "var(--cl-text-4)" }, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" }) }) }),
         /* @__PURE__ */ jsx2("p", { className: "cl-empty-title", children: "No records found" }),
         /* @__PURE__ */ jsx2("p", { className: "cl-empty-sub", children: "Try adjusting your search or filters." })
       ] }),
-      hasMore && /* @__PURE__ */ jsx2("div", { className: "cl-load-more", children: /* @__PURE__ */ jsx2("button", { className: "cl-load-more-btn", onClick: handleLoadMore, disabled: loadingMore, children: loadingMore ? /* @__PURE__ */ jsxs2(Fragment, { children: [
-        /* @__PURE__ */ jsx2(Spinner, {}),
-        "Loading\u2026"
-      ] }) : /* @__PURE__ */ jsxs2(Fragment, { children: [
-        /* @__PURE__ */ jsx2("svg", { width: "16", height: "16", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19 9l-7 7-7-7" }) }),
-        "Load more records"
-      ] }) }) }),
-      !hasMore && clients.length > 0 && /* @__PURE__ */ jsxs2("p", { className: "cl-all-loaded", children: [
-        "All ",
-        clients.length,
-        " records loaded"
+      totalPages > 1 && /* @__PURE__ */ jsxs2("div", { className: "cl-pagination", children: [
+        /* @__PURE__ */ jsxs2(
+          "button",
+          {
+            className: "cl-page-btn",
+            onClick: () => setPage((p) => p - 1),
+            disabled: page === 0,
+            children: [
+              /* @__PURE__ */ jsx2("svg", { width: "12", height: "12", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2.5, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15 19l-7-7 7-7" }) }),
+              "Prev"
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxs2("span", { className: "cl-page-info", children: [
+          "Page ",
+          page + 1,
+          " of ",
+          totalPages
+        ] }),
+        /* @__PURE__ */ jsxs2(
+          "button",
+          {
+            className: "cl-page-btn",
+            onClick: () => setPage((p) => p + 1),
+            disabled: page >= totalPages - 1,
+            children: [
+              "Next",
+              /* @__PURE__ */ jsx2("svg", { width: "12", height: "12", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2.5, children: /* @__PURE__ */ jsx2("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 5l7 7-7 7" }) })
+            ]
+          }
+        )
       ] })
     ] })
   ] });
