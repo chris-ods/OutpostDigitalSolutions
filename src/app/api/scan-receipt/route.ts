@@ -1,48 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+// gemini-1.5-flash: fast, stable, excellent vision — works with images and PDFs
 const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
-const SYSTEM_PROMPT = `You are a receipt parser. Analyze the receipt image and extract the following fields.
-Return ONLY a valid JSON object — no markdown, no prose, no code fences.
+const SYSTEM_PROMPT = `You are a receipt data extractor. Analyze the receipt image or document and extract structured data.
 
-Required fields:
+Return ONLY a raw JSON object with no markdown, no code fences, no prose — just the JSON.
+
+Schema:
 {
-  "merchant": "string — store or vendor name",
-  "date": "string — YYYY-MM-DD format. If year is missing, assume current year.",
+  "merchant": "store or vendor name (string)",
+  "date": "YYYY-MM-DD (string, assume current year if missing)",
   "subtotal": number,
   "tax": number,
   "tip": number,
   "total": number,
-  "currency": "string — 3-letter ISO code, default USD",
-  "category": "one of: Food & Dining | Travel | Transportation | Office Supplies | Utilities | Entertainment | Healthcare | Shopping | Other",
-  "paymentMethod": "one of: Credit Card | Debit Card | Cash | Check | Apple Pay | Google Pay | Other",
+  "currency": "3-letter ISO code, default USD (string)",
+  "category": "exactly one of: Food & Dining, Travel, Transportation, Office Supplies, Utilities, Entertainment, Healthcare, Shopping, Other",
+  "paymentMethod": "exactly one of: Credit Card, Debit Card, Cash, Check, Apple Pay, Google Pay, Other",
   "items": [
-    {
-      "description": "string",
-      "qty": number,
-      "unitPrice": number,
-      "total": number
-    }
+    { "description": "string", "qty": number, "unitPrice": number, "total": number }
   ],
-  "notes": "string — any relevant info not captured above, or empty string"
+  "notes": "any extra context not captured above, or empty string"
 }
 
 Rules:
-- All numeric fields must be numbers (not strings).
-- If a field cannot be determined, use 0 for numbers, "" for strings, [] for arrays.
-- Do not invent data. Only extract what is visible on the receipt.
-- For category, infer from the merchant type if the category is not explicit.`;
+- All number fields must be numbers, not strings.
+- Use 0 for unknown numbers, "" for unknown strings, [] for unknown arrays.
+- Only extract what is actually visible on the receipt — do not invent data.
+- Infer category from the merchant type if not explicit.`;
 
 export async function POST(req: NextRequest) {
   if (!GEMINI_API_KEY) {
     return NextResponse.json(
-      { error: "GEMINI_API_KEY is not configured on the server." },
+      { error: "GEMINI_API_KEY is not set on the server. Add it to your .env.local or Firebase environment variables." },
       { status: 500 }
     );
   }
 
+  // ── Parse the uploaded file ────────────────────────────────────────────────
   let fileData: string;
   let mimeType: string;
 
@@ -63,7 +62,7 @@ export async function POST(req: NextRequest) {
     ];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: "Unsupported file type. Use JPG, PNG, WebP, or PDF." },
+        { error: "Unsupported file type. Please upload a JPG, PNG, WebP, or PDF." },
         { status: 400 }
       );
     }
@@ -73,11 +72,12 @@ export async function POST(req: NextRequest) {
     mimeType = file.type;
   } catch {
     return NextResponse.json(
-      { error: "Failed to read uploaded file." },
+      { error: "Could not read the uploaded file." },
       { status: 400 }
     );
   }
 
+  // ── Call Gemini ────────────────────────────────────────────────────────────
   try {
     const geminiRes = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
       method: "POST",
@@ -87,59 +87,64 @@ export async function POST(req: NextRequest) {
           {
             parts: [
               { text: SYSTEM_PROMPT },
-              {
-                inline_data: {
-                  mime_type: mimeType,
-                  data: fileData,
-                },
-              },
+              { inline_data: { mime_type: mimeType, data: fileData } },
             ],
           },
         ],
         generationConfig: {
           temperature: 0.1,
-          responseMimeType: "application/json",
         },
       }),
     });
 
     if (!geminiRes.ok) {
-      const errText = await geminiRes.text();
-      console.error("Gemini API error:", errText);
-      return NextResponse.json(
-        { error: "Gemini API returned an error. Check server logs." },
-        { status: 502 }
-      );
+      // Surface the real Gemini error so it's visible in the UI
+      let detail = `Gemini ${geminiRes.status}`;
+      try {
+        const body = await geminiRes.json();
+        detail = body?.error?.message ?? JSON.stringify(body);
+      } catch {
+        detail = await geminiRes.text().catch(() => detail);
+      }
+      console.error("Gemini API error:", detail);
+      return NextResponse.json({ error: `Gemini error: ${detail}` }, { status: 502 });
     }
 
     const geminiData = await geminiRes.json();
     const rawText: string =
       geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
-    // Strip any accidental markdown fences
+    if (!rawText) {
+      const finishReason = geminiData?.candidates?.[0]?.finishReason ?? "unknown";
+      console.error("Gemini returned empty text. finishReason:", finishReason, JSON.stringify(geminiData));
+      return NextResponse.json(
+        { error: `Gemini returned no content (finishReason: ${finishReason}). Try a clearer image.` },
+        { status: 422 }
+      );
+    }
+
+    // Strip any accidental markdown code fences
     const cleaned = rawText
       .trim()
-      .replace(/^```(?:json)?/i, "")
-      .replace(/```$/i, "")
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/i, "")
       .trim();
 
     let parsed: Record<string, unknown>;
     try {
       parsed = JSON.parse(cleaned);
     } catch {
-      console.error("Failed to parse Gemini JSON response:", rawText);
+      console.error("Failed to parse Gemini response as JSON:", rawText);
       return NextResponse.json(
-        { error: "Gemini returned unparseable JSON. Try a clearer image." },
+        { error: "Gemini response could not be parsed as JSON. Try a clearer or higher-resolution image." },
         { status: 422 }
       );
     }
 
     return NextResponse.json(parsed);
   } catch (err) {
-    console.error("scan-receipt error:", err);
-    return NextResponse.json(
-      { error: "Unexpected server error." },
-      { status: 500 }
-    );
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("scan-receipt unexpected error:", msg);
+    return NextResponse.json({ error: `Server error: ${msg}` }, { status: 500 });
   }
 }
