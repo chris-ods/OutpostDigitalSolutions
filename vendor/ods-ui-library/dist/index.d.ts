@@ -217,7 +217,7 @@ interface ReceiptItem {
     unitPrice: number;
     total: number;
 }
-type ReceiptCategory = "Food & Dining" | "Travel" | "Transportation" | "Office Supplies" | "Utilities" | "Entertainment" | "Healthcare" | "Shopping" | "Other";
+type ReceiptCategory = "AI & API Services" | "Software & Subscriptions" | "Cloud & Infrastructure" | "Hardware & Equipment" | "Contractors & Freelancers" | "Marketing & Advertising" | "Travel & Lodging" | "Meals & Entertainment" | "Education & Training" | "Legal & Professional" | "Office & Supplies" | "Utilities & Internet" | "Other";
 interface ReceiptRecord {
     id: string;
     merchant: string;

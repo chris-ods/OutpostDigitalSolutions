@@ -1873,7 +1873,7 @@ function useClientList(collectionId) {
     return () => unsub();
   }, [collectionId, firestore, pageLimit]);
   useEffect2(() => {
-    const viewsRef = collection(firestore, collectionId, "_views");
+    const viewsRef = collection(firestore, collectionId, "_meta", "_views");
     const unsub = onSnapshot(viewsRef, (snap) => {
       const saved = snap.docs.map((d) => ({
         id: d.id,
@@ -1912,12 +1912,12 @@ function useClientList(collectionId) {
     });
   }, [collectionId, firestore]);
   const onSaveView = useCallback2(async (view) => {
-    const viewsRef = collection(firestore, collectionId, "_views");
+    const viewsRef = collection(firestore, collectionId, "_meta", "_views");
     const docRef = await addDoc(viewsRef, { ...view, createdAt: serverTimestamp() });
     return docRef.id;
   }, [collectionId, firestore]);
   const onDeleteView = useCallback2(async (id) => {
-    const viewRef = doc(firestore, collectionId, "_views", id);
+    const viewRef = doc(firestore, collectionId, "_meta", "_views", id);
     await deleteDoc(viewRef);
   }, [collectionId, firestore]);
   const onRenameList = useCallback2(async (name) => {
@@ -2351,14 +2351,18 @@ import {
 } from "react";
 import { Fragment as Fragment2, jsx as jsx4, jsxs as jsxs4 } from "react/jsx-runtime";
 var CATEGORIES = [
-  "Food & Dining",
-  "Travel",
-  "Transportation",
-  "Office Supplies",
-  "Utilities",
-  "Entertainment",
-  "Healthcare",
-  "Shopping",
+  "AI & API Services",
+  "Software & Subscriptions",
+  "Cloud & Infrastructure",
+  "Hardware & Equipment",
+  "Contractors & Freelancers",
+  "Marketing & Advertising",
+  "Travel & Lodging",
+  "Meals & Entertainment",
+  "Education & Training",
+  "Legal & Professional",
+  "Office & Supplies",
+  "Utilities & Internet",
   "Other"
 ];
 var PAYMENT_METHODS = [
@@ -2371,14 +2375,18 @@ var PAYMENT_METHODS = [
   "Other"
 ];
 var CATEGORY_COLORS = {
-  "Food & Dining": "bg-orange-900/40 text-orange-400 border-orange-800",
-  Travel: "bg-blue-900/40 text-blue-400 border-blue-800",
-  Transportation: "bg-purple-900/40 text-purple-400 border-purple-800",
-  "Office Supplies": "bg-cyan-900/40 text-cyan-400 border-cyan-800",
-  Utilities: "bg-yellow-900/40 text-yellow-400 border-yellow-800",
-  Entertainment: "bg-pink-900/40 text-pink-400 border-pink-800",
-  Healthcare: "bg-green-900/40 text-green-400 border-green-800",
-  Shopping: "bg-violet-900/40 text-violet-400 border-violet-800",
+  "AI & API Services": "bg-violet-900/40 text-violet-400 border-violet-800",
+  "Software & Subscriptions": "bg-blue-900/40 text-blue-400 border-blue-800",
+  "Cloud & Infrastructure": "bg-cyan-900/40 text-cyan-400 border-cyan-800",
+  "Hardware & Equipment": "bg-slate-800/60 text-slate-300 border-slate-700",
+  "Contractors & Freelancers": "bg-amber-900/40 text-amber-400 border-amber-800",
+  "Marketing & Advertising": "bg-pink-900/40 text-pink-400 border-pink-800",
+  "Travel & Lodging": "bg-sky-900/40 text-sky-400 border-sky-800",
+  "Meals & Entertainment": "bg-orange-900/40 text-orange-400 border-orange-800",
+  "Education & Training": "bg-green-900/40 text-green-400 border-green-800",
+  "Legal & Professional": "bg-rose-900/40 text-rose-400 border-rose-800",
+  "Office & Supplies": "bg-teal-900/40 text-teal-400 border-teal-800",
+  "Utilities & Internet": "bg-yellow-900/40 text-yellow-400 border-yellow-800",
   Other: "bg-gray-800 text-gray-400 border-gray-700"
 };
 function uid() {

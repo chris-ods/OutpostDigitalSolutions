@@ -27,7 +27,7 @@ Schema:
   "tip": number,
   "total": number,
   "currency": "3-letter ISO code, default USD (string)",
-  "category": "exactly one of: Food & Dining, Travel, Transportation, Office Supplies, Utilities, Entertainment, Healthcare, Shopping, Other",
+  "category": "exactly one of: AI & API Services, Software & Subscriptions, Cloud & Infrastructure, Hardware & Equipment, Contractors & Freelancers, Marketing & Advertising, Travel & Lodging, Meals & Entertainment, Education & Training, Legal & Professional, Office & Supplies, Utilities & Internet, Other",
   "paymentMethod": "exactly one of: Credit Card, Debit Card, Cash, Check, Apple Pay, Google Pay, Other",
   "items": [
     { "description": "string", "qty": number, "unitPrice": number, "total": number }
