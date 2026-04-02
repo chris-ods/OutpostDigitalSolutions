@@ -91,12 +91,20 @@ export default function Products() {
               </div>
               <h2 className="text-4xl sm:text-5xl font-bold tracking-tight">ClientList</h2>
             </div>
-            <Link
-              href="/contact"
-              className="shrink-0 border border-white/20 hover:border-white/40 text-white font-semibold px-6 py-3 rounded-full transition-colors text-sm"
-            >
-              Get in touch
-            </Link>
+            <div className="flex gap-3">
+              <Link
+                href="/design"
+                className="shrink-0 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold px-6 py-3 rounded-full transition-colors text-sm"
+              >
+                Live demo
+              </Link>
+              <Link
+                href="/contact"
+                className="shrink-0 border border-white/20 hover:border-white/40 text-white font-semibold px-6 py-3 rounded-full transition-colors text-sm"
+              >
+                Get in touch
+              </Link>
+            </div>
           </div>
 
           <p className="text-white/50 text-lg leading-relaxed max-w-3xl mb-16">
