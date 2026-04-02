@@ -2096,8 +2096,8 @@ function getStore() {
   return getStorage(getApp());
 }
 async function seedPermissionsIfAbsent(collectionId) {
-  const db2 = getDB2();
-  const permRef = doc2(db2, "permissions", collectionId);
+  const db3 = getDB2();
+  const permRef = doc2(db3, "permissions", collectionId);
   const snap = await getDoc2(permRef);
   if (!snap.exists()) {
     const matrix = {
@@ -2287,7 +2287,7 @@ function OdsPanel({
     seedPermissionsIfAbsent(collectionId).catch(console.error);
   }, [collectionId]);
   const handleAdd = useCallback3(async (values, files) => {
-    const db2 = getDB2();
+    const db3 = getDB2();
     const storage = getStore();
     const fileUrls = {};
     for (const [key, file] of Object.entries(files)) {
@@ -2304,7 +2304,7 @@ function OdsPanel({
       }
     }
     const base = transformRecord ? transformRecord(values, fileUrls) : { ...coerced, ...fileUrls };
-    await addDoc2(collection2(db2, collectionId), {
+    await addDoc2(collection2(db3, collectionId), {
       ...base,
       date: base.date ?? (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
       createdAt: serverTimestamp2(),
@@ -3142,6 +3142,87 @@ function useReceiptListMock(options = {}) {
   }, []);
   return { receipts, onSave, onDelete };
 }
+
+// hooks/useReceiptList.ts
+import { useEffect as useEffect4, useState as useState7, useCallback as useCallback7 } from "react";
+import { getApps as getApps2, initializeApp as initializeApp2 } from "firebase/app";
+import {
+  getFirestore as getFirestore3,
+  collection as collection3,
+  doc as doc3,
+  query as query2,
+  where,
+  orderBy as orderBy2,
+  onSnapshot as onSnapshot2,
+  addDoc as addDoc3,
+  deleteDoc as deleteDoc2,
+  serverTimestamp as serverTimestamp3
+} from "firebase/firestore";
+var app2;
+var db2;
+function getDB3() {
+  if (!db2) {
+    app2 = getApps2().length === 0 ? initializeApp2(firebaseConfig) : getApps2()[0];
+    db2 = getFirestore3(app2);
+  }
+  return db2;
+}
+var RECEIPTS_COLLECTION = "receipts";
+function useReceiptList(uid3) {
+  const firestore = getDB3();
+  const [receipts, setReceipts] = useState7([]);
+  const [loading, setLoading] = useState7(true);
+  useEffect4(() => {
+    if (!uid3) {
+      setReceipts([]);
+      setLoading(false);
+      return;
+    }
+    const q = query2(
+      collection3(firestore, RECEIPTS_COLLECTION),
+      where("uid", "==", uid3),
+      orderBy2("createdAt", "desc")
+    );
+    const unsub = onSnapshot2(
+      q,
+      (snap) => {
+        const records = snap.docs.map((d) => {
+          const data = d.data();
+          return {
+            ...data,
+            id: d.id,
+            // Convert Firestore Timestamp to ISO string for ReceiptRecord
+            createdAt: typeof data.createdAt?.toDate === "function" ? data.createdAt.toDate().toISOString() : String(data.createdAt ?? "")
+          };
+        });
+        setReceipts(records);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("[useReceiptList] onSnapshot error:", err);
+        setLoading(false);
+      }
+    );
+    return () => unsub();
+  }, [uid3, firestore]);
+  const onSave = useCallback7(
+    async (record) => {
+      await addDoc3(collection3(firestore, RECEIPTS_COLLECTION), {
+        ...record,
+        uid: uid3,
+        createdAt: serverTimestamp3()
+      });
+    },
+    [uid3, firestore]
+  );
+  const onDelete = useCallback7(
+    async (id) => {
+      await deleteDoc2(doc3(firestore, RECEIPTS_COLLECTION, id));
+    },
+    [firestore]
+  );
+  return { receipts, loading, onSave, onDelete };
+}
 export {
   ClientList,
   DEFAULT_PERMISSIONS,
@@ -3149,6 +3230,7 @@ export {
   ReceiptScanner,
   useClientList,
   useClientListMock,
+  useReceiptList,
   useReceiptListMock
 };
 //# sourceMappingURL=index.js.map

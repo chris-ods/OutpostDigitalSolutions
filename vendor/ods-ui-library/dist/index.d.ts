@@ -330,7 +330,7 @@ declare function useClientListMock(_collectionId: string, options?: MockOptions)
  *   const props = useReceiptListMock();
  */
 
-interface UseReceiptListResult {
+interface UseReceiptListResult$1 {
     receipts: ReceiptRecord[];
     onSave: (record: Omit<ReceiptRecord, "id" | "createdAt">) => Promise<void>;
     onDelete: (id: string) => Promise<void>;
@@ -339,6 +339,30 @@ interface ReceiptMockOptions {
     /** Seed receipts to pre-populate the list. */
     initialReceipts?: ReceiptRecord[];
 }
-declare function useReceiptListMock(options?: ReceiptMockOptions): UseReceiptListResult;
+declare function useReceiptListMock(options?: ReceiptMockOptions): UseReceiptListResult$1;
 
-export { type AppRole, type ChangeRecord, ClientList, type ClientListProps, type ClientListView, type ClientRecord, type ColPermission, DEFAULT_PERMISSIONS, type FieldDef, type FieldType, type FilterRow, type MockOptions, OdsPanel, type OdsPanelProps, type PermissionsMatrix, type ReceiptCategory, type ReceiptItem, type ReceiptMockOptions, type ReceiptRecord, ReceiptScanner, type ReceiptScannerProps, type UseClientListResult, type UseReceiptListResult, type UserClaim, type UserClaimDisplayProps, useClientList, useClientListMock, useReceiptListMock };
+/**
+ * useReceiptList
+ *
+ * Firestore-backed hook for the ReceiptScanner component.
+ *
+ * Data layout in Firestore:
+ *   /receipts/{docId}   ← receipt records (scoped to the authenticated user via uid)
+ *
+ * Usage:
+ *   const props = useReceiptList(user.uid);
+ *   return <ReceiptScanner {...props} processReceipt={processReceipt} />;
+ */
+
+interface UseReceiptListResult {
+    receipts: ReceiptRecord[];
+    loading: boolean;
+    onSave: (record: Omit<ReceiptRecord, "id" | "createdAt">) => Promise<void>;
+    onDelete: (id: string) => Promise<void>;
+}
+/**
+ * @param uid  The current user's Firebase UID. Receipts are scoped per user.
+ */
+declare function useReceiptList(uid: string): UseReceiptListResult;
+
+export { type AppRole, type ChangeRecord, ClientList, type ClientListProps, type ClientListView, type ClientRecord, type ColPermission, DEFAULT_PERMISSIONS, type FieldDef, type FieldType, type FilterRow, type MockOptions, OdsPanel, type OdsPanelProps, type PermissionsMatrix, type ReceiptCategory, type ReceiptItem, type ReceiptMockOptions, type ReceiptRecord, ReceiptScanner, type ReceiptScannerProps, type UseClientListResult, type UseReceiptListResult, type UserClaim, type UserClaimDisplayProps, useClientList, useClientListMock, useReceiptList, useReceiptListMock };
