@@ -13,7 +13,7 @@
     "firebase": "^12.10.0",
     "google-auth-library": "^10.6.2",
     "next": "16.1.6",
-    "ods-ui-library": "file:../ods-ui-library",
+    "ods-ui-library": "file:./vendor/ods-ui-library",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
