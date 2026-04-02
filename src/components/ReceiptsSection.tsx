@@ -3,9 +3,10 @@
 import { useCallback } from "react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebase";
-import { ReceiptScanner, useReceiptList } from "ods-ui-library";
+import { ReceiptScanner } from "ods-ui-library";
 import type { ReceiptRecord } from "ods-ui-library";
 import { useAuth } from "../hooks/useAuth";
+import { useReceiptList } from "../hooks/useReceiptList";
 
 /**
  * Upload the file to Firebase Storage under receipts/{uid}/{timestamp}_{filename},
