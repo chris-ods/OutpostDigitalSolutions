@@ -88,7 +88,8 @@ export default function Home() {
           <nav className="hidden md:flex items-center gap-6 text-sm text-gray-400">
             <a href="#services" className="hover:text-white transition">Services</a>
             <a href="#about" className="hover:text-white transition">About</a>
-            <Link href="/design" className="hover:text-white transition">Demo</Link>
+            <Link href="/design" className="hover:text-white transition">ClientList</Link>
+            <Link href="/receipts" className="hover:text-white transition">Receipts</Link>
             <Link href="/privacy" className="hover:text-white transition">Privacy</Link>
           </nav>
           <Link
@@ -355,6 +356,134 @@ export default function Home() {
                   ))}
                 </div>
                 <p className="text-[9px] text-gray-700 mt-3">R = Rep · M = Manager · A = Admin · O = Owner</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ── Receipt Tracking Problem ── */}
+      <section className="py-24 px-6 border-t border-gray-800/50">
+        <div className="max-w-5xl mx-auto">
+
+          {/* Problem statement */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-900/30 border border-violet-700/40 text-violet-300 text-xs font-medium mb-6">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L13.5 9.5L21 12L13.5 14.5L12 22L10.5 14.5L3 12L10.5 9.5L12 2Z" fill="#a78bfa"/>
+              </svg>
+              AI-powered
+            </div>
+            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-5">
+              Trouble tracking<br />
+              <span className="text-violet-400">receipts?</span>
+            </h2>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
+              Digging through email, photographing paper receipts, typing totals into a spreadsheet —
+              it&apos;s slow and error-prone. Snap a photo and let AI do the rest.
+            </p>
+          </div>
+
+          {/* Pain vs solution */}
+          <div className="grid md:grid-cols-2 gap-4 mb-16">
+            <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-7">
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-600 mb-5">The usual way</p>
+              <ul className="space-y-4">
+                {[
+                  "Paper receipts fade, get lost, or end up in the wash.",
+                  "Manual entry is slow — and easy to mistype.",
+                  "Chasing employees for expense reports at month end.",
+                  "No categories, no totals, no audit trail.",
+                  "Accountant gets a shoebox of receipts at tax time.",
+                ].map((pain) => (
+                  <li key={pain} className="flex items-start gap-3 text-sm text-gray-500">
+                    <svg className="w-4 h-4 text-red-500/70 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    {pain}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="bg-violet-950/40 border border-violet-800/40 rounded-2xl p-7">
+              <p className="text-xs font-semibold uppercase tracking-widest text-violet-500 mb-5">With Gemini AI</p>
+              <ul className="space-y-4">
+                {[
+                  "Upload any photo, screenshot, or PDF — Gemini reads it instantly.",
+                  "Merchant, date, total, tax, tip, and line items extracted automatically.",
+                  "Review and correct anything before saving — you stay in control.",
+                  "Every receipt is categorized, searchable, and ready to export.",
+                  "Works on your phone. Snap and go.",
+                ].map((fix) => (
+                  <li key={fix} className="flex items-start gap-3 text-sm text-gray-300">
+                    <svg className="w-4 h-4 text-violet-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {fix}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Receipt demo CTA */}
+          <div className="bg-gray-900 border border-gray-800 rounded-3xl overflow-hidden">
+            <div className="p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-8">
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 rounded-full px-3 py-1 mb-4">
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
+                  <span className="text-violet-400 text-xs font-semibold">Live interactive demo</span>
+                </div>
+                <h3 className="text-2xl font-bold mb-3">Try the receipt scanner.</h3>
+                <p className="text-gray-400 text-sm leading-relaxed mb-4 max-w-lg">
+                  Drag and drop a receipt photo or PDF onto the upload zone —
+                  Gemini reads the image and fills in the merchant, date, total, tax,
+                  and every line item. Edit anything it got wrong, then save it to the list.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {["Gemini 2.0 Flash", "Drag & drop", "Line items", "8 categories", "Edit before save"].map((f) => (
+                    <span key={f} className="text-xs bg-gray-800 border border-gray-700 text-gray-400 px-2.5 py-1 rounded-lg">{f}</span>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/receipts"
+                    className="inline-flex items-center gap-2 bg-violet-500 hover:bg-violet-400 text-white font-semibold text-sm px-6 py-3 rounded-full transition-colors"
+                  >
+                    Open live demo
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                  </Link>
+                  <a
+                    href="mailto:hello@outpostdigitalsolutions.com"
+                    className="inline-flex items-center gap-2 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white font-semibold text-sm px-6 py-3 rounded-full transition-colors"
+                  >
+                    Request a build
+                  </a>
+                </div>
+              </div>
+
+              {/* How it works steps */}
+              <div className="shrink-0 w-full md:w-60 space-y-3">
+                {[
+                  { n: "1", label: "Upload", desc: "Drop a photo, screenshot, or PDF of any receipt." },
+                  { n: "2", label: "Gemini reads it", desc: "AI extracts merchant, date, total, and line items." },
+                  { n: "3", label: "Review", desc: "Edit anything before you confirm — you stay in control." },
+                  { n: "4", label: "Saved", desc: "Added to your receipt list, categorized and totaled." },
+                ].map(({ n, label, desc }) => (
+                  <div key={n} className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-violet-900/60 border border-violet-800 flex items-center justify-center text-violet-400 text-[11px] font-bold shrink-0 mt-0.5">
+                      {n}
+                    </div>
+                    <div>
+                      <p className="text-white text-xs font-semibold">{label}</p>
+                      <p className="text-gray-500 text-xs leading-relaxed">{desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
