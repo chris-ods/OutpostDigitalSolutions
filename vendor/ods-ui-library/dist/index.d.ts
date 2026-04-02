@@ -256,14 +256,11 @@ declare function ReceiptScanner({ receipts, processReceipt, onSave, onDelete, cl
 interface ReceiptListProps {
     receipts: ReceiptRecord[];
     loading?: boolean;
-    /** Called when the user edits a cell. Persist and pass updated receipts back. */
     onSave?: (id: string, field: string, value: string | number) => Promise<void>;
-    /** Called when the user clicks delete on a row. */
     onDelete?: (id: string) => Promise<void>;
-    /** Display title. Defaults to "Receipts". */
     listTitle?: string;
 }
-declare function ReceiptList({ receipts, loading, onSave, onDelete, listTitle }: ReceiptListProps): react_jsx_runtime.JSX.Element;
+declare function ReceiptList({ receipts, loading, onSave, onDelete, listTitle, }: ReceiptListProps): react_jsx_runtime.JSX.Element;
 
 /**
  * useClientList

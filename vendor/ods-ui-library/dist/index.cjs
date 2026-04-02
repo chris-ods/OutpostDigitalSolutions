@@ -111,7 +111,6 @@ var COLUMNS = [
   { key: "carrier", label: "Carrier", sortable: true, filterType: "enum" },
   { key: "appNumber", label: "App #", filterType: "text" },
   { key: "annualPremium", label: "Annual Premium", sortable: true, filterType: "number" },
-  { key: "splitPercent", label: "Split %", sortable: true, filterType: "number" },
   { key: "state", label: "State", sortable: true, filterType: "enum" },
   { key: "startDate", label: "Start Date", sortable: true, filterType: "date" },
   { key: "agentStatus", label: "Agent Status", sortable: true, filterType: "enum" },
@@ -159,7 +158,6 @@ var EDITABLE_COLS = /* @__PURE__ */ new Set([
   "carrier",
   "appNumber",
   "annualPremium",
-  "splitPercent",
   "state",
   "startDate",
   "agentStatus",
@@ -485,7 +483,7 @@ function ClientList({
   const hScrollTrackRef = (0, import_react.useRef)(null);
   const hDragData = (0, import_react.useRef)({ startX: 0, startScrollLeft: 0 });
   const [hThumb, setHThumb] = (0, import_react.useState)({ left: 0, width: 0, show: false });
-  const PAGE_SIZE2 = 50;
+  const PAGE_SIZE3 = 50;
   const [page, setPage] = (0, import_react.useState)(0);
   const [busy, setBusy] = (0, import_react.useState)(/* @__PURE__ */ new Set());
   const [loadingMore, setLoadingMore] = (0, import_react.useState)(false);
@@ -729,8 +727,8 @@ function ClientList({
   (0, import_react.useEffect)(() => {
     setPage(0);
   }, [searchText, filterRows, sortField, sortDir, showHistorical, dayFilter, carrierFilter]);
-  const totalPages = Math.max(1, Math.ceil(displayedClients.length / PAGE_SIZE2));
-  const pagedClients = displayedClients.slice(page * PAGE_SIZE2, (page + 1) * PAGE_SIZE2);
+  const totalPages = Math.max(1, Math.ceil(displayedClients.length / PAGE_SIZE3));
+  const pagedClients = displayedClients.slice(page * PAGE_SIZE3, (page + 1) * PAGE_SIZE3);
   const pendingRows = pagedClients.filter(isPending);
   const claimedRows = pagedClients.filter((c) => !isPending(c));
   const totalColSpan = visibleColDefs.length + (showActions ? 1 : 0);
@@ -978,7 +976,7 @@ function ClientList({
       setLoadingMore(false);
     }
   }, [onLoadMore, loadingMore]);
-  function exportCSV2() {
+  function exportCSV() {
     const rows = [...pendingRows, ...claimedRows];
     if (!rows.length) return;
     const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
@@ -994,7 +992,6 @@ function ClientList({
       "Carrier",
       "App #",
       "Annual Premium",
-      "Split %",
       "Start Date",
       "Agent Status",
       "Admin Status",
@@ -1018,7 +1015,6 @@ function ClientList({
       c.carrier ?? "",
       c.appNumber ?? "",
       String(c.annualPremium ?? 0),
-      c.splitPercent ? String(c.splitPercent) : "",
       c.startDate ?? "",
       c.agentStatus ?? "",
       c.adminStatus ?? "",
@@ -1089,13 +1085,6 @@ function ClientList({
       case "annualPremium":
         return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("td", { className: "cl-td", children: isEditing ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(CellInput, { type: "number", initialValue: String(client.annualPremium ?? ""), onSave: confirmEdit, onCancel: cancelEdit }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "cl-cell-edit", onClick: () => startE(String(client.annualPremium ?? "")), children: [
           /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "cl-premium", children: client.annualPremium ? fmtCurrency(client.annualPremium) : "\u2014" }),
-          !!client.splitPercent && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "cl-badge split", title: `Split ${client.splitPercent}%`, children: "Split" }),
-          (client.annualPremium ?? 0) > 0 && (client.annualPremium ?? 0) < 600 && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "cl-badge alp", title: "< $600 ALP \u2014 team gets 50% credit", children: "\xBD ALP" }),
-          isSaving ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Spinner, {}) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(PencilIcon, {})
-        ] }) }, col.key);
-      case "splitPercent":
-        return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("td", { className: "cl-td", children: isEditing ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(CellInput, { type: "number", initialValue: String(client.splitPercent ?? "0"), onSave: confirmEdit, onCancel: cancelEdit }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "cl-cell-edit", onClick: () => startE(String(client.splitPercent ?? "0")), children: [
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { children: client.splitPercent ? `${client.splitPercent}%` : "\u2014" }),
           isSaving ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Spinner, {}) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(PencilIcon, {})
         ] }) }, col.key);
       case "state":
@@ -1447,7 +1436,7 @@ function ClientList({
             children: localTitle
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("p", { className: "cl-subtitle", children: displayedClients.length > PAGE_SIZE2 ? `${(page * PAGE_SIZE2 + 1).toLocaleString()}\u2013${Math.min((page + 1) * PAGE_SIZE2, displayedClients.length).toLocaleString()} of ${displayedClients.length.toLocaleString()} records` : `${displayedClients.length.toLocaleString()} record${displayedClients.length !== 1 ? "s" : ""}` })
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("p", { className: "cl-subtitle", children: displayedClients.length > PAGE_SIZE3 ? `${(page * PAGE_SIZE3 + 1).toLocaleString()}\u2013${Math.min((page + 1) * PAGE_SIZE3, displayedClients.length).toLocaleString()} of ${displayedClients.length.toLocaleString()} records` : `${displayedClients.length.toLocaleString()} record${displayedClients.length !== 1 ? "s" : ""}` })
       ] })
     ] }) }) }),
     /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "cl-toolbar-row", children: [
@@ -1549,7 +1538,7 @@ function ClientList({
               /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cl-export-menu-title", children: "Export to CSV" }),
               /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cl-export-menu-sub", children: "Exports all currently filtered records" })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cl-export-menu-body", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("button", { className: "cl-export-dl-btn", onClick: exportCSV2, children: "Download" }) })
+            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cl-export-menu-body", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("button", { className: "cl-export-dl-btn", onClick: exportCSV, children: "Download" }) })
           ] })
         ] }),
         isPrivileged && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
@@ -1847,14 +1836,8 @@ var firebaseConfig = {
 var PERMISSIONS_COLLECTION = "permissions";
 
 // hooks/useClientList.ts
-var app;
-var db;
 function getDB() {
-  if (!db) {
-    app = (0, import_app.getApps)().length === 0 ? (0, import_app.initializeApp)(firebaseConfig) : (0, import_app.getApps)()[0];
-    db = (0, import_firestore.getFirestore)(app);
-  }
-  return db;
+  return (0, import_firestore.getFirestore)((0, import_app.getApp)());
 }
 var PAGE_SIZE = 30;
 function useClientList(collectionId) {
@@ -2109,8 +2092,8 @@ function getStore() {
   return (0, import_storage.getStorage)((0, import_app2.getApp)());
 }
 async function seedPermissionsIfAbsent(collectionId) {
-  const db2 = getDB2();
-  const permRef = (0, import_firestore2.doc)(db2, "permissions", collectionId);
+  const db = getDB2();
+  const permRef = (0, import_firestore2.doc)(db, "permissions", collectionId);
   const snap = await (0, import_firestore2.getDoc)(permRef);
   if (!snap.exists()) {
     const matrix = {
@@ -2300,7 +2283,7 @@ function OdsPanel({
     seedPermissionsIfAbsent(collectionId).catch(console.error);
   }, [collectionId]);
   const handleAdd = (0, import_react3.useCallback)(async (values, files) => {
-    const db2 = getDB2();
+    const db = getDB2();
     const storage = getStore();
     const fileUrls = {};
     for (const [key, file] of Object.entries(files)) {
@@ -2317,7 +2300,7 @@ function OdsPanel({
       }
     }
     const base = transformRecord ? transformRecord(values, fileUrls) : { ...coerced, ...fileUrls };
-    await (0, import_firestore2.addDoc)((0, import_firestore2.collection)(db2, collectionId), {
+    await (0, import_firestore2.addDoc)((0, import_firestore2.collection)(db, collectionId), {
       ...base,
       date: base.date ?? (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
       createdAt: (0, import_firestore2.serverTimestamp)(),
@@ -2941,7 +2924,7 @@ var COLUMNS2 = [
   { key: "category", label: "Category", sortable: true, filterType: "enum" },
   { key: "total", label: "Total", sortable: true, filterType: "number" },
   { key: "subtotal", label: "Subtotal", sortable: true, filterType: "number" },
-  { key: "tax", label: "Tax", sortable: true, filterType: "number" },
+  { key: "tax", label: "Tax", sortable: false, filterType: "number" },
   { key: "tip", label: "Tip", sortable: false, filterType: "number" },
   { key: "paymentMethod", label: "Payment", sortable: true, filterType: "enum" },
   { key: "currency", label: "Currency", sortable: false, filterType: "enum" },
@@ -2972,6 +2955,7 @@ var EDITABLE_COLS2 = /* @__PURE__ */ new Set([
   "currency",
   "notes"
 ]);
+var PAGE_SIZE2 = 50;
 function fmtDate2(s) {
   if (!s) return "\u2014";
   const [y, m, d] = s.split("-");
@@ -2979,7 +2963,8 @@ function fmtDate2(s) {
   return new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 function fmtMoney(v) {
-  if (v === void 0 || v === null || v === 0) return "\u2014";
+  if (v === void 0 || v === null) return "\u2014";
+  if (v === 0) return "$0.00";
   return "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 function fmtCreatedAt(iso) {
@@ -3044,8 +3029,13 @@ function filterRowsToSpecs2(rows) {
   }
   return result;
 }
-function applyFilters(receipts, specs) {
+function applyFilters(receipts, specs, search) {
+  const q = search.toLowerCase();
   return receipts.filter((r) => {
+    if (q) {
+      const hay = [r.merchant, r.category, r.paymentMethod, r.notes, r.date].filter(Boolean).join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
     for (const [field, spec] of Object.entries(specs)) {
       const raw = r[field];
       const val = raw === void 0 || raw === null ? "" : String(raw);
@@ -3070,8 +3060,8 @@ function getEnumValues(receipts, field) {
   });
   return Array.from(set).sort();
 }
-function exportCSV(receipts, visibleCols) {
-  const cols = COLUMNS2.filter((c) => visibleCols.includes(c.key));
+function doExportCSV(receipts, visibleKeys) {
+  const cols = COLUMNS2.filter((c) => visibleKeys.includes(c.key));
   const header = cols.map((c) => c.label).join(",");
   const rows = receipts.map(
     (r) => cols.map((c) => {
@@ -3087,9 +3077,6 @@ function exportCSV(receipts, visibleCols) {
   a.href = URL.createObjectURL(blob);
   a.download = "receipts.csv";
   a.click();
-}
-function Spinner2() {
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "cl-spinner", "aria-label": "Loading" });
 }
 function PencilIcon2() {
   return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { className: "cl-pencil", width: "11", height: "11", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" }) });
@@ -3146,64 +3133,137 @@ function CellInput2({ type, initialValue, options, onSave, onCancel }) {
     ] })
   ] });
 }
-function ReceiptList({ receipts, loading, onSave, onDelete, listTitle = "Receipts" }) {
-  const [colOrder, setColOrder] = (0, import_react5.useState)(DEFAULT_VISIBLE);
-  const [visibleCols, setVisibleCols] = (0, import_react5.useState)(DEFAULT_VISIBLE);
+function ReceiptList({
+  receipts,
+  loading,
+  onSave,
+  onDelete,
+  listTitle = "Receipts"
+}) {
+  const [colOrder, setColOrder] = (0, import_react5.useState)(COLUMNS2.map((c) => c.key));
+  const [colVisible, setColVisible] = (0, import_react5.useState)(DEFAULT_VISIBLE);
   const [showColPicker, setShowColPicker] = (0, import_react5.useState)(false);
+  const [showExport, setShowExport] = (0, import_react5.useState)(false);
+  const colPickerRef = (0, import_react5.useRef)(null);
+  const exportRef = (0, import_react5.useRef)(null);
   const [sortField, setSortField] = (0, import_react5.useState)("date");
   const [sortDir, setSortDir] = (0, import_react5.useState)("desc");
+  const [searchText, setSearchText] = (0, import_react5.useState)("");
   const [filterRows, setFilterRows] = (0, import_react5.useState)([]);
-  const [showFilters, setShowFilters] = (0, import_react5.useState)(false);
-  const uid3 = (0, import_react5.useRef)(0);
+  const [showFilterBuilder, setShowFilterBuilder] = (0, import_react5.useState)(false);
+  const uidRef = (0, import_react5.useRef)(0);
   function newId() {
-    return String(++uid3.current);
+    return String(++uidRef.current);
   }
   const [editingCell, setEditingCell] = (0, import_react5.useState)(null);
-  const dragCol = (0, import_react5.useRef)(null);
+  const [dragCol, setDragCol] = (0, import_react5.useState)(null);
+  const [dragOverCol, setDragOverCol] = (0, import_react5.useState)(null);
+  const [page, setPage] = (0, import_react5.useState)(0);
+  const tableScrollRef = (0, import_react5.useRef)(null);
+  const hScrollTrackRef = (0, import_react5.useRef)(null);
+  const [hThumb, setHThumb] = (0, import_react5.useState)({ show: false, left: 0, width: 0 });
+  const thumbDragging = (0, import_react5.useRef)(false);
+  const thumbStartX = (0, import_react5.useRef)(0);
+  const thumbStartLeft = (0, import_react5.useRef)(0);
+  (0, import_react5.useEffect)(() => {
+    function handle(e) {
+      if (colPickerRef.current && !colPickerRef.current.contains(e.target)) setShowColPicker(false);
+      if (exportRef.current && !exportRef.current.contains(e.target)) setShowExport(false);
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, []);
+  function syncHThumb() {
+    const el = tableScrollRef.current;
+    if (!el) return;
+    const trackW = el.clientWidth;
+    const scrollW = el.scrollWidth;
+    if (scrollW <= trackW) {
+      setHThumb({ show: false, left: 0, width: 0 });
+      return;
+    }
+    const thumbW = Math.max(40, trackW / scrollW * trackW);
+    const maxLeft = trackW - thumbW;
+    const left = el.scrollLeft / (scrollW - trackW) * maxLeft;
+    setHThumb({ show: true, left, width: thumbW });
+  }
+  (0, import_react5.useEffect)(() => {
+    syncHThumb();
+  }, [colOrder, colVisible, receipts]);
+  function onThumbMouseDown(e) {
+    thumbDragging.current = true;
+    thumbStartX.current = e.clientX;
+    thumbStartLeft.current = hThumb.left;
+    const onMove = (ev) => {
+      if (!thumbDragging.current || !tableScrollRef.current || !hScrollTrackRef.current) return;
+      const el = tableScrollRef.current;
+      const trackW = el.clientWidth;
+      const scrollW = el.scrollWidth;
+      const thumbW = hThumb.width;
+      const maxLeft = trackW - thumbW;
+      const newLeft = Math.max(0, Math.min(maxLeft, thumbStartLeft.current + ev.clientX - thumbStartX.current));
+      el.scrollLeft = newLeft / maxLeft * (scrollW - trackW);
+    };
+    const onUp = () => {
+      thumbDragging.current = false;
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp, { once: true });
+  }
+  function onTrackClick(e) {
+    const track = hScrollTrackRef.current;
+    const el = tableScrollRef.current;
+    if (!track || !el) return;
+    const rect = track.getBoundingClientRect();
+    const ratio = (e.clientX - rect.left) / rect.width;
+    el.scrollLeft = ratio * (el.scrollWidth - el.clientWidth);
+  }
+  function scrollToLeft() {
+    if (tableScrollRef.current) tableScrollRef.current.scrollLeft = 0;
+  }
   const filterSpecs = (0, import_react5.useMemo)(() => filterRowsToSpecs2(filterRows), [filterRows]);
-  const displayCols = (0, import_react5.useMemo)(
-    () => colOrder.filter((k) => visibleCols.includes(k)),
-    [colOrder, visibleCols]
-  );
-  const filtered = (0, import_react5.useMemo)(() => {
-    let rows = applyFilters(receipts, filterSpecs);
+  const filteredReceipts = (0, import_react5.useMemo)(() => {
+    let rows = applyFilters(receipts, filterSpecs, searchText);
     if (sortField) {
       rows = [...rows].sort((a, b) => {
-        let av = a[sortField];
-        let bv = b[sortField];
-        if (sortField === "createdAt") {
-          av = a.createdAt ?? "";
-          bv = b.createdAt ?? "";
-        }
-        const aStr = av === void 0 || av === null ? "" : String(av);
-        const bStr = bv === void 0 || bv === null ? "" : String(bv);
-        const aNum = parseFloat(aStr);
-        const bNum = parseFloat(bStr);
-        let cmp = 0;
-        if (!isNaN(aNum) && !isNaN(bNum)) {
-          cmp = aNum - bNum;
-        } else {
-          cmp = aStr.localeCompare(bStr);
-        }
+        const av = a[sortField] ?? "";
+        const bv = b[sortField] ?? "";
+        const an = parseFloat(String(av));
+        const bn = parseFloat(String(bv));
+        let cmp = !isNaN(an) && !isNaN(bn) ? an - bn : String(av).localeCompare(String(bv));
         return sortDir === "asc" ? cmp : -cmp;
       });
     }
     return rows;
-  }, [receipts, filterSpecs, sortField, sortDir]);
+  }, [receipts, filterSpecs, searchText, sortField, sortDir]);
+  const totalPages = Math.ceil(filteredReceipts.length / PAGE_SIZE2);
+  const pageReceipts = filteredReceipts.slice(page * PAGE_SIZE2, (page + 1) * PAGE_SIZE2);
+  const visibleColDefs = (0, import_react5.useMemo)(
+    () => colOrder.map((k) => COLUMNS2.find((c) => c.key === k)).filter((c) => c && (colVisible === null || colVisible.includes(c.key))),
+    [colOrder, colVisible]
+  );
   const totals = (0, import_react5.useMemo)(() => ({
-    total: filtered.reduce((s, r) => s + (r.total ?? 0), 0),
-    subtotal: filtered.reduce((s, r) => s + (r.subtotal ?? 0), 0),
-    tax: filtered.reduce((s, r) => s + (r.tax ?? 0), 0),
-    tip: filtered.reduce((s, r) => s + (r.tip ?? 0), 0)
-  }), [filtered]);
-  function toggleSort(key) {
+    total: filteredReceipts.reduce((s, r) => s + (r.total ?? 0), 0),
+    subtotal: filteredReceipts.reduce((s, r) => s + (r.subtotal ?? 0), 0),
+    tax: filteredReceipts.reduce((s, r) => s + (r.tax ?? 0), 0),
+    tip: filteredReceipts.reduce((s, r) => s + (r.tip ?? 0), 0)
+  }), [filteredReceipts]);
+  const activeFilterCount = (0, import_react5.useMemo)(
+    () => Object.values(filterSpecs).filter(
+      (v) => v.kind === "enum" ? v.values.length > 0 : v.kind === "text" ? !!v.q : !!(v.min || v.max)
+    ).length,
+    [filterSpecs]
+  );
+  const pickableCols = COLUMNS2.filter((c) => !c.noFilter || c.key !== "items");
+  function handleSort(key) {
     if (sortField === key) setSortDir((d) => d === "asc" ? "desc" : "asc");
     else {
       setSortField(key);
       setSortDir("asc");
     }
+    setPage(0);
   }
-  function addFilter() {
+  function addFilterRow() {
     const first = COLUMNS2.find((c) => !c.noFilter);
     if (!first) return;
     setFilterRows((prev) => [...prev, {
@@ -3213,22 +3273,37 @@ function ReceiptList({ receipts, loading, onSave, onDelete, listTitle = "Receipt
       value: "",
       value2: ""
     }]);
-    setShowFilters(true);
   }
-  function updateFilter(id, patch) {
+  function updateFilterRow(id, patch) {
     setFilterRows((prev) => prev.map((r) => r.id === id ? { ...r, ...patch } : r));
   }
-  function removeFilter(id) {
+  function removeFilterRow(id) {
     setFilterRows((prev) => prev.filter((r) => r.id !== id));
+  }
+  function reorderCol(from, to) {
+    setColOrder((prev) => {
+      const next = [...prev];
+      const fi = next.indexOf(from);
+      const ti = next.indexOf(to);
+      if (fi === -1 || ti === -1) return prev;
+      next.splice(fi, 1);
+      next.splice(ti, 0, from);
+      return next;
+    });
+  }
+  function togglePickerCol(key) {
+    setColVisible((prev) => {
+      const current = prev ?? COLUMNS2.map((c) => c.key);
+      return current.includes(key) ? current.filter((k) => k !== key) : [...current, key];
+    });
   }
   async function commitCell(id, field, raw) {
     setEditingCell(null);
     if (!onSave) return;
     const numFields = /* @__PURE__ */ new Set(["total", "subtotal", "tax", "tip"]);
-    const value = numFields.has(field) ? parseFloat(raw) || 0 : raw;
-    await onSave(id, field, value);
+    await onSave(id, field, numFields.has(field) ? parseFloat(raw) || 0 : raw);
   }
-  function renderCell(r, col) {
+  function renderCell(col, r) {
     const isEditing = editingCell?.id === r.id && editingCell?.field === col.key;
     const canEdit = !!onSave && EDITABLE_COLS2.has(col.key);
     if (isEditing) {
@@ -3247,7 +3322,7 @@ function ReceiptList({ receipts, loading, onSave, onDelete, listTitle = "Receipt
       else if (col.filterType === "date") type = "date";
       const raw = r[col.key];
       const initial = raw === void 0 || raw === null ? "" : String(raw);
-      return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { className: "cl-td", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
         CellInput2,
         {
           type,
@@ -3256,268 +3331,387 @@ function ReceiptList({ receipts, loading, onSave, onDelete, listTitle = "Receipt
           onSave: (v) => commitCell(r.id, col.key, v),
           onCancel: () => setEditingCell(null)
         }
-      );
+      ) }, col.key);
     }
-    let display = "\u2014";
+    let content = "\u2014";
     switch (col.key) {
       case "date":
-        display = fmtDate2(r.date);
+        content = fmtDate2(r.date);
         break;
       case "merchant":
-        display = r.merchant || "\u2014";
+        content = r.merchant || "\u2014";
         break;
       case "category":
-        display = r.category ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { style: { fontSize: 11, fontWeight: 500, opacity: 0.9 }, children: r.category }) : "\u2014";
+        content = r.category || "\u2014";
         break;
       case "total":
-        display = /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { style: { fontWeight: 600 }, children: fmtMoney(r.total) });
+        content = /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { style: { fontWeight: 600 }, children: fmtMoney(r.total) });
         break;
       case "subtotal":
-        display = fmtMoney(r.subtotal);
+        content = fmtMoney(r.subtotal);
         break;
       case "tax":
-        display = fmtMoney(r.tax);
+        content = fmtMoney(r.tax);
         break;
       case "tip":
-        display = r.tip ? fmtMoney(r.tip) : "\u2014";
+        content = r.tip ? fmtMoney(r.tip) : "\u2014";
         break;
       case "paymentMethod":
-        display = r.paymentMethod || "\u2014";
+        content = r.paymentMethod || "\u2014";
         break;
       case "currency":
-        display = r.currency || "USD";
+        content = r.currency || "USD";
         break;
       case "items":
-        display = r.items?.length ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { style: { color: "var(--cl-text-3)" }, children: [
-          r.items.length,
-          " item",
-          r.items.length !== 1 ? "s" : ""
-        ] }) : "\u2014";
+        content = r.items?.length ? `${r.items.length} item${r.items.length !== 1 ? "s" : ""}` : "\u2014";
         break;
       case "notes":
-        display = r.notes ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { style: { color: "var(--cl-text-3)", fontStyle: "italic" }, children: r.notes }) : "\u2014";
+        content = r.notes || "\u2014";
         break;
       case "createdAt":
-        display = fmtCreatedAt(r.createdAt);
+        content = fmtCreatedAt(r.createdAt);
         break;
       default:
-        display = String(r[col.key] ?? "\u2014");
+        content = String(r[col.key] ?? "\u2014");
     }
-    return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { className: "cl-td", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
       "div",
       {
-        className: `cl-cell-inner${canEdit ? " cl-cell-editable" : ""}`,
+        className: "cl-cell-inner" + (canEdit ? " cl-cell-editable" : ""),
         onClick: () => canEdit && setEditingCell({ id: r.id, field: col.key }),
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "cl-cell-value", children: display }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "cl-cell-value", children: content }),
           canEdit && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PencilIcon2, {})
         ]
       }
-    );
+    ) }, col.key);
   }
-  if (loading) {
-    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-root", style: { alignItems: "center", justifyContent: "center", minHeight: 200 }, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Spinner2, {}) });
-  }
-  const activeFilters = filterRows.filter((r) => r.value);
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-root", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-toolbar", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-toolbar-left", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "cl-list-title", children: listTitle }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "cl-count", children: filtered.length }),
-        filtered.length !== receipts.length && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { className: "cl-count", style: { color: "var(--cl-text-4)", marginLeft: 4 }, children: [
-          "of ",
-          receipts.length
-        ] })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-toolbar-right", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { style: { fontSize: 12, color: "var(--cl-text-3)", marginRight: 8 }, children: fmtMoney(totals.total) }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
-          "button",
-          {
-            className: `cl-icon-btn${showFilters ? " cl-icon-btn--active" : ""}`,
-            onClick: () => {
-              setShowFilters((v) => !v);
-              if (!showFilters && filterRows.length === 0) addFilter();
-            },
-            title: "Filters",
-            children: [
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { width: "14", height: "14", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M3 4h18M7 8h10M10 12h4M12 16h0" }) }),
-              activeFilters.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "cl-filter-badge", children: activeFilters.length })
-            ]
-          }
-        ),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { position: "relative" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-            "button",
-            {
-              className: `cl-icon-btn${showColPicker ? " cl-icon-btn--active" : ""}`,
-              onClick: () => setShowColPicker((v) => !v),
-              title: "Columns",
-              children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { width: "14", height: "14", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 4h1M9 8h1M9 12h1M9 16h1M9 20h1M14 4h1M14 8h1M14 12h1M14 16h1M14 20h1" }) })
-            }
-          ),
-          showColPicker && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-col-picker-panel", style: { right: 0, top: "calc(100% + 6px)" }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-col-picker-header", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { children: "Columns" }),
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { className: "cl-col-picker-reset", onClick: () => setVisibleCols(DEFAULT_VISIBLE), children: "Reset" })
-            ] }),
-            COLUMNS2.map((c) => /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("label", { className: "cl-col-picker-row", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-                "input",
-                {
-                  type: "checkbox",
-                  checked: visibleCols.includes(c.key),
-                  onChange: (e) => {
-                    if (e.target.checked) {
-                      setVisibleCols((v) => [...v, c.key]);
-                      setColOrder((o) => o.includes(c.key) ? o : [...o, c.key]);
-                    } else {
-                      setVisibleCols((v) => v.filter((k) => k !== c.key));
-                    }
-                  }
-                }
-              ),
-              c.label
-            ] }, c.key))
-          ] })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-          "button",
-          {
-            className: "cl-icon-btn",
-            onClick: () => exportCSV(filtered, visibleCols),
-            title: "Export CSV",
-            children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { width: "14", height: "14", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" }) })
-          }
-        )
-      ] })
-    ] }),
-    showFilters && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-filter-bar", children: [
+  function renderFilterBuilder() {
+    if (!showFilterBuilder) return null;
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-filter-builder", children: [
+      filterRows.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-fb-empty", children: 'No filters \u2014 click "Add filter" to start.' }),
       filterRows.map((row) => {
         const col = COLUMNS2.find((c) => c.key === row.field);
-        const ops = getOperators2(col?.filterType);
-        const isEnum = col?.filterType === "enum";
-        const enumVals = isEnum ? getEnumValues(receipts, row.field) : [];
-        return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-filter-row", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+        const ft = col?.filterType ?? "text";
+        const ops = getOperators2(ft);
+        const enumVals = ft === "enum" ? getEnumValues(receipts, row.field) : [];
+        return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-fb-row", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "cl-fb-where", children: "Where" }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
             "select",
             {
-              className: "cl-filter-select",
+              className: "cl-fb-select",
               value: row.field,
               onChange: (e) => {
-                const newCol = COLUMNS2.find((c) => c.key === e.target.value);
-                updateFilter(row.id, {
-                  field: e.target.value,
-                  operator: getOperators2(newCol?.filterType)[0],
-                  value: "",
-                  value2: ""
-                });
+                const nc = COLUMNS2.find((c) => c.key === e.target.value);
+                updateFilterRow(row.id, { field: e.target.value, operator: getOperators2(nc?.filterType)[0], value: "", value2: "" });
               },
-              children: COLUMNS2.filter((c) => !c.noFilter).map((c) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("option", { value: c.key, children: c.label }, c.key))
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("option", { value: "", children: "Select field\u2026" }),
+                COLUMNS2.filter((c) => !c.noFilter).map((c) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("option", { value: c.key, children: c.label }, c.key))
+              ]
             }
           ),
           /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
             "select",
             {
-              className: "cl-filter-select",
+              className: "cl-fb-select cl-fb-select-op",
               value: row.operator,
-              onChange: (e) => updateFilter(row.id, { operator: e.target.value, value: "", value2: "" }),
+              onChange: (e) => updateFilterRow(row.id, { operator: e.target.value, value: "", value2: "" }),
               children: ops.map((o) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("option", { value: o, children: o }, o))
             }
           ),
-          isEnum ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+          ft === "enum" ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
             "select",
             {
-              className: "cl-filter-select cl-filter-value",
+              className: "cl-fb-select cl-fb-select-val",
               value: row.value,
-              onChange: (e) => updateFilter(row.id, { value: e.target.value }),
+              onChange: (e) => updateFilterRow(row.id, { value: e.target.value }),
               children: [
-                /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("option", { value: "", children: "\u2014 select \u2014" }),
+                /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("option", { value: "", children: "Select\u2026" }),
                 enumVals.map((v) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("option", { value: v, children: v }, v))
               ]
             }
-          ) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          ) : row.operator === "between" ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(import_jsx_runtime5.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+              "input",
+              {
+                className: "cl-fb-input",
+                type: ft === "date" ? "date" : "number",
+                placeholder: "From",
+                value: row.value,
+                onChange: (e) => updateFilterRow(row.id, { value: e.target.value })
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "cl-fb-and", children: "and" }),
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+              "input",
+              {
+                className: "cl-fb-input",
+                type: ft === "date" ? "date" : "number",
+                placeholder: "To",
+                value: row.value2,
+                onChange: (e) => updateFilterRow(row.id, { value2: e.target.value })
+              }
+            )
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
             "input",
             {
-              className: "cl-filter-input cl-filter-value",
-              type: col?.filterType === "number" ? "number" : col?.filterType === "date" ? "date" : "text",
-              placeholder: "value\u2026",
+              className: "cl-fb-input cl-fb-input-wide",
+              type: ft === "date" ? "date" : ft === "number" ? "number" : "text",
+              placeholder: "Value\u2026",
               value: row.value,
-              onChange: (e) => updateFilter(row.id, { value: e.target.value })
+              onChange: (e) => updateFilterRow(row.id, { value: e.target.value })
             }
           ),
-          row.operator === "between" && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-            "input",
-            {
-              className: "cl-filter-input cl-filter-value",
-              type: col?.filterType === "number" ? "number" : "date",
-              placeholder: "to\u2026",
-              value: row.value2,
-              onChange: (e) => updateFilter(row.id, { value2: e.target.value })
-            }
-          ),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { className: "cl-filter-remove", onClick: () => removeFilter(row.id), children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { width: "10", height: "10", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 3, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }) }) })
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { className: "cl-fb-remove", onClick: () => removeFilterRow(row.id), title: "Remove filter", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { width: "12", height: "12", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2.5, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }) }) })
         ] }, row.id);
       }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { className: "cl-filter-add-btn", onClick: addFilter, children: "+ Add filter" })
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-table-wrapper", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-scroll-x", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("table", { className: "cl-table", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("tr", { children: [
-        displayCols.map((key) => {
-          const col = COLUMNS2.find((c) => c.key === key);
-          return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-            "th",
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-fb-footer", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("button", { className: "cl-fb-add", onClick: addFilterRow, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { width: "12", height: "12", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M12 4.5v15m7.5-7.5h-15" }) }),
+          "Add filter"
+        ] }),
+        filterRows.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { className: "cl-fb-clear", onClick: () => setFilterRows([]), children: "Clear all" })
+      ] })
+    ] });
+  }
+  if (loading) {
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-root cl-loading", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-loading-spinner" }) });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-root", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-header", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-header-row", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-header-left", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-header-accent" }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h1", { className: "cl-title", children: listTitle }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("p", { className: "cl-subtitle", children: [
+          filteredReceipts.length !== receipts.length ? `${filteredReceipts.length.toLocaleString()} of ${receipts.length.toLocaleString()} receipts` : `${receipts.length.toLocaleString()} receipt${receipts.length !== 1 ? "s" : ""}`,
+          filteredReceipts.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(import_jsx_runtime5.Fragment, { children: [
+            " \xB7 ",
+            fmtMoney(totals.total),
+            " total"
+          ] })
+        ] })
+      ] })
+    ] }) }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-toolbar-row", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-toolbar", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-toolbar-seg", style: { fontSize: 12, color: "var(--cl-text-4)", padding: "0 8px" }, children: receipts.length === 0 ? "No receipts yet" : `${receipts.length} receipt${receipts.length !== 1 ? "s" : ""}` }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-action-bar", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-action-wrap", ref: colPickerRef, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            "button",
             {
-              className: "cl-th",
-              draggable: true,
-              onDragStart: () => {
-                dragCol.current = key;
-              },
-              onDragOver: (e) => e.preventDefault(),
-              onDrop: () => {
-                if (!dragCol.current || dragCol.current === key) return;
-                setColOrder((prev) => {
-                  const next = [...prev];
-                  const from = next.indexOf(dragCol.current);
-                  const to = next.indexOf(key);
-                  if (from === -1 || to === -1) return prev;
-                  next.splice(from, 1);
-                  next.splice(to, 0, dragCol.current);
-                  return next;
-                });
-                dragCol.current = null;
-              },
-              children: col.sortable ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("button", { className: "cl-th-sort-btn", onClick: () => toggleSort(key), children: [
-                col.label,
-                sortField === key ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "cl-sort-arrow", children: sortDir === "asc" ? "\u2191" : "\u2193" }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "cl-sort-arrow cl-sort-arrow--inactive", children: "\u2195" })
-              ] }) : col.label
-            },
-            key
-          );
-        }),
-        onDelete && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("th", { className: "cl-th", style: { width: 36 } })
-      ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("tbody", { children: filtered.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { colSpan: displayCols.length + (onDelete ? 1 : 0), className: "cl-empty", children: receipts.length === 0 ? "No receipts yet \u2014 upload one above." : "No receipts match the current filters." }) }) : filtered.map((r) => /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("tr", { className: "cl-row", children: [
-        displayCols.map((key) => {
-          const col = COLUMNS2.find((c) => c.key === key);
-          return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { className: "cl-td", children: renderCell(r, col) }, key);
-        }),
-        onDelete && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { className: "cl-td", style: { textAlign: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+              className: "cl-action-btn" + (showColPicker ? " active" : ""),
+              onClick: () => setShowColPicker((p) => !p),
+              title: "Show / hide columns",
+              children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { width: "15", height: "15", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 4H5a1 1 0 00-1 1v14a1 1 0 001 1h4M9 4v16M9 4h6M9 20h6m0-16h4a1 1 0 011 1v14a1 1 0 01-1 1h-4M15 4v16" }) })
+            }
+          ),
+          showColPicker && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-export-menu cl-col-picker-menu", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-export-menu-header", style: { display: "flex", alignItems: "center", justifyContent: "space-between" }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-export-menu-title", children: "Show / Hide Columns" }),
+                /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-export-menu-sub", children: [
+                  colVisible === null ? pickableCols.length : colVisible.length,
+                  " of ",
+                  pickableCols.length,
+                  " shown"
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { className: "cl-col-picker-reset", onClick: () => setColVisible(null), children: "Reset" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-col-picker-body", children: pickableCols.map((col) => {
+              const checked = colVisible === null || colVisible.includes(col.key);
+              return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("label", { className: "cl-col-picker-row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("input", { type: "checkbox", checked, onChange: () => togglePickerCol(col.key) }),
+                /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { children: col.label })
+              ] }, col.key);
+            }) })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-action-wrap", ref: exportRef, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            "button",
+            {
+              className: "cl-action-btn" + (showExport ? " active" : ""),
+              onClick: () => setShowExport((p) => !p),
+              disabled: filteredReceipts.length === 0,
+              title: "Export to CSV",
+              children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { width: "15", height: "15", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" }) })
+            }
+          ),
+          showExport && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-export-menu", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-export-menu-header", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-export-menu-title", children: "Export to CSV" }),
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-export-menu-sub", children: "Exports all currently filtered records" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-export-menu-body", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { className: "cl-export-dl-btn", onClick: () => {
+              doExportCSV(filteredReceipts, colVisible ?? COLUMNS2.map((c) => c.key));
+              setShowExport(false);
+            }, children: "Download" }) })
+          ] })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-search-area", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-search-row", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-search-wrap", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { className: "cl-search-icon", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            "input",
+            {
+              className: "cl-search-input",
+              type: "text",
+              placeholder: "Search by merchant, category, notes\u2026",
+              value: searchText,
+              onChange: (e) => {
+                setSearchText(e.target.value);
+                setPage(0);
+              }
+            }
+          ),
+          searchText && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { className: "cl-search-clear", onClick: () => setSearchText(""), children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { width: "14", height: "14", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }) }) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
           "button",
           {
-            className: "cl-icon-btn",
-            style: { color: "var(--cl-text-5)" },
-            onClick: () => onDelete(r.id),
-            title: "Delete",
-            children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { width: "13", height: "13", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 1.5, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" }) })
+            className: "cl-filter-toggle" + (showFilterBuilder || activeFilterCount > 0 ? " active" : ""),
+            onClick: () => {
+              setShowFilterBuilder((p) => !p);
+              if (!showFilterBuilder && filterRows.length === 0) addFilterRow();
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { width: "14", height: "14", fill: "currentColor", viewBox: "0 0 20 20", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { fillRule: "evenodd", d: "M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L13 10.414V17a1 1 0 01-1.447.894l-4-2A1 1 0 017 15v-4.586L3.293 6.707A1 1 0 013 6V3z", clipRule: "evenodd" }) }),
+              "Filter",
+              activeFilterCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "cl-filter-toggle-count", children: activeFilterCount })
+            ]
           }
-        ) })
-      ] }, r.id)) }),
-      filtered.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("tfoot", { children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("tr", { className: "cl-row", style: { borderTop: "1px solid var(--cl-border-2)" }, children: [
-        displayCols.map((key) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { className: "cl-td", style: { color: "var(--cl-text-3)", fontWeight: 600, fontSize: 12 }, children: key === "merchant" ? `${filtered.length} receipt${filtered.length !== 1 ? "s" : ""}` : key === "total" ? fmtMoney(totals.total) : key === "subtotal" ? fmtMoney(totals.subtotal) : key === "tax" ? fmtMoney(totals.tax) : key === "tip" ? totals.tip ? fmtMoney(totals.tip) : "" : "" }, key)),
-        onDelete && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { className: "cl-td" })
-      ] }) })
-    ] }) }) })
+        )
+      ] }),
+      renderFilterBuilder()
+    ] }),
+    showFilterBuilder && activeFilterCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-active-filters", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "cl-active-filters-label", children: "Column filters:" }),
+      Object.entries(filterSpecs).map(([col, spec]) => {
+        const colDef = COLUMNS2.find((c) => c.key === col);
+        const name = colDef?.label || col;
+        let chip = "";
+        if (spec.kind === "enum" && spec.values.length) chip = spec.values.length > 1 ? `${name}: ${spec.values.length} selected` : `${name}: ${spec.values[0]}`;
+        if (spec.kind === "text" && spec.q) chip = `${name}: ~${spec.q}`;
+        if (spec.kind === "range" && (spec.min || spec.max)) chip = `${name}: ${spec.min ?? ""}\u2013${spec.max ?? ""}`;
+        if (!chip) return null;
+        return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { className: "cl-filter-chip", children: [
+          chip,
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { className: "cl-filter-chip-remove", onClick: () => setFilterRows((prev) => prev.filter((r) => r.field !== col)), children: "\xD7" })
+        ] }, col);
+      }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { className: "cl-filter-clear-all", onClick: () => setFilterRows([]), children: "Clear all" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-table-area", children: [
+      filteredReceipts.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-table-wrap", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-table-scroll", ref: tableScrollRef, onScroll: syncHThumb, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("table", { className: "cl-table", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("thead", { className: "cl-thead", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("tr", { children: [
+            visibleColDefs.map((col) => {
+              const isSorted = sortField === col.key;
+              const isDragging = dragCol === col.key;
+              const isDragOver = dragOverCol === col.key && dragCol !== col.key;
+              return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+                "th",
+                {
+                  className: ["cl-th", isDragging ? "dragging" : "", isDragOver ? "drag-over" : ""].filter(Boolean).join(" "),
+                  onDragOver: (e) => {
+                    e.preventDefault();
+                    if (dragCol && dragCol !== col.key) setDragOverCol(col.key);
+                  },
+                  onDrop: () => {
+                    if (dragCol && dragCol !== col.key) reorderCol(dragCol, col.key);
+                    setDragOverCol(null);
+                  },
+                  children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-th-inner", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+                      "span",
+                      {
+                        className: "cl-drag-grip",
+                        draggable: true,
+                        onDragStart: (e) => {
+                          e.stopPropagation();
+                          setDragCol(col.key);
+                        },
+                        onDragEnd: () => {
+                          setDragCol(null);
+                          setDragOverCol(null);
+                        },
+                        title: "Drag to reorder",
+                        children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("svg", { width: "12", height: "12", fill: "currentColor", viewBox: "0 0 16 16", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("circle", { cx: "5", cy: "4", r: "1.5" }),
+                          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("circle", { cx: "11", cy: "4", r: "1.5" }),
+                          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("circle", { cx: "5", cy: "8", r: "1.5" }),
+                          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("circle", { cx: "11", cy: "8", r: "1.5" }),
+                          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("circle", { cx: "5", cy: "12", r: "1.5" }),
+                          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("circle", { cx: "11", cy: "12", r: "1.5" })
+                        ] })
+                      }
+                    ),
+                    col.sortable ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("button", { className: "cl-sort-btn" + (isSorted ? " sorted" : ""), onClick: () => handleSort(col.key), children: [
+                      col.label,
+                      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "cl-sort-arrow" + (isSorted ? "" : " unsorted"), children: isSorted ? sortDir === "asc" ? "\u2191" : "\u2193" : "\u2195" })
+                    ] }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { children: col.label })
+                  ] })
+                },
+                col.key
+              );
+            }),
+            onDelete && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("th", { className: "cl-th-actions", children: "Delete" })
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("tbody", { children: [
+            pageReceipts.map((r) => /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("tr", { className: "cl-tr", children: [
+              visibleColDefs.map((col) => renderCell(col, r)),
+              onDelete && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { className: "cl-td-actions", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { className: "cl-btn-unclaim", onClick: () => onDelete(r.id), title: "Delete", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { width: "12", height: "12", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }) }) }) })
+            ] }, r.id)),
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("tr", { className: "cl-tr", style: { borderTop: "1px solid var(--cl-border-2)", background: "var(--cl-surface)" }, children: [
+              visibleColDefs.map((col) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { className: "cl-td", style: { color: "var(--cl-text-3)", fontWeight: 600 }, children: col.key === "merchant" ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { style: { color: "var(--cl-text-4)", fontWeight: 400 }, children: [
+                filteredReceipts.length,
+                " receipt",
+                filteredReceipts.length !== 1 ? "s" : ""
+              ] }) : col.key === "total" ? fmtMoney(totals.total) : col.key === "subtotal" ? fmtMoney(totals.subtotal) : col.key === "tax" ? fmtMoney(totals.tax) : col.key === "tip" ? totals.tip ? fmtMoney(totals.tip) : "" : "" }, col.key)),
+              onDelete && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { className: "cl-td-actions" })
+            ] })
+          ] })
+        ] }) }),
+        hThumb.show && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-hscroll-bar", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { className: "cl-scroll-left-btn", onClick: scrollToLeft, title: "Scroll to start", children: "\u2039" }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-hscroll-track", ref: hScrollTrackRef, onMouseDown: onTrackClick, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            "div",
+            {
+              className: "cl-hscroll-thumb",
+              style: { left: hThumb.left, width: hThumb.width },
+              onMouseDown: onThumbMouseDown,
+              onClick: (e) => e.stopPropagation()
+            }
+          ) })
+        ] })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-empty", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "cl-empty-icon", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { width: "28", height: "28", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 1.5, style: { color: "var(--cl-text-4)" }, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 14.25l6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185z" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { className: "cl-empty-title", children: receipts.length === 0 ? "No receipts yet" : "No receipts match the filters" }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { className: "cl-empty-sub", children: receipts.length === 0 ? "Upload a receipt above to get started." : "Try adjusting your search or filters." })
+      ] }),
+      totalPages > 1 && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "cl-pagination", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("button", { className: "cl-page-btn", onClick: () => setPage((p) => p - 1), disabled: page === 0, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { width: "12", height: "12", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2.5, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15 19l-7-7 7-7" }) }),
+          "Prev"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { className: "cl-page-info", children: [
+          "Page ",
+          page + 1,
+          " of ",
+          totalPages
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("button", { className: "cl-page-btn", onClick: () => setPage((p) => p + 1), disabled: page >= totalPages - 1, children: [
+          "Next",
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { width: "12", height: "12", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2.5, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 5l7 7-7 7" }) })
+        ] })
+      ] })
+    ] })
   ] });
 }
 
