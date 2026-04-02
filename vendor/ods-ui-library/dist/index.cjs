@@ -32,8 +32,10 @@ var index_exports = {};
 __export(index_exports, {
   ClientList: () => ClientList,
   DEFAULT_PERMISSIONS: () => DEFAULT_PERMISSIONS,
+  ReceiptScanner: () => ReceiptScanner,
   useClientList: () => useClientList,
-  useClientListMock: () => useClientListMock
+  useClientListMock: () => useClientListMock,
+  useReceiptListMock: () => useReceiptListMock
 });
 module.exports = __toCommonJS(index_exports);
 
@@ -421,7 +423,7 @@ function WeekCalendar({
 }
 function ClientList({
   clients: clientsProp,
-  uid,
+  uid: uid3,
   userName = "",
   isAdmin = false,
   isManager = false,
@@ -1063,7 +1065,7 @@ function ClientList({
           isSaving ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Spinner, {}) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(PencilIcon, {})
         ] }) }, col.key);
       case "agentName":
-        return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("td", { className: "cl-td", children: client.agentId === uid ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { style: { color: "var(--cl-text-4)", fontStyle: "italic" }, children: "You" }) : client.agentName || /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "cl-no-agent", children: "no agent" }) }, col.key);
+        return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("td", { className: "cl-td", children: client.agentId === uid3 ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { style: { color: "var(--cl-text-4)", fontStyle: "italic" }, children: "You" }) : client.agentName || /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "cl-no-agent", children: "no agent" }) }, col.key);
       case "contractorId":
         return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("td", { className: "cl-td mono", children: isEditing ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(CellInput, { type: "text", initialValue: String(client.contractorId ?? ""), onSave: confirmEdit, onCancel: cancelEdit }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "cl-cell-edit", onClick: () => startE(String(client.contractorId ?? "")), children: [
           /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { style: { color: "var(--cl-text-3)" }, children: String(client.contractorId || "\u2014") }),
@@ -1819,8 +1821,709 @@ function ClientList({
   ] });
 }
 
-// hooks/useClientList.ts
+// ReceiptScanner.tsx
 var import_react2 = require("react");
+var import_jsx_runtime3 = require("react/jsx-runtime");
+var CATEGORIES = [
+  "Food & Dining",
+  "Travel",
+  "Transportation",
+  "Office Supplies",
+  "Utilities",
+  "Entertainment",
+  "Healthcare",
+  "Shopping",
+  "Other"
+];
+var PAYMENT_METHODS = [
+  "Credit Card",
+  "Debit Card",
+  "Cash",
+  "Check",
+  "Apple Pay",
+  "Google Pay",
+  "Other"
+];
+var CATEGORY_COLORS = {
+  "Food & Dining": "bg-orange-900/40 text-orange-400 border-orange-800",
+  Travel: "bg-blue-900/40 text-blue-400 border-blue-800",
+  Transportation: "bg-purple-900/40 text-purple-400 border-purple-800",
+  "Office Supplies": "bg-cyan-900/40 text-cyan-400 border-cyan-800",
+  Utilities: "bg-yellow-900/40 text-yellow-400 border-yellow-800",
+  Entertainment: "bg-pink-900/40 text-pink-400 border-pink-800",
+  Healthcare: "bg-green-900/40 text-green-400 border-green-800",
+  Shopping: "bg-violet-900/40 text-violet-400 border-violet-800",
+  Other: "bg-gray-800 text-gray-400 border-gray-700"
+};
+function uid() {
+  return Math.random().toString(36).slice(2, 10);
+}
+function blankForm() {
+  return {
+    merchant: "",
+    date: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10),
+    subtotal: 0,
+    tax: 0,
+    tip: 0,
+    total: 0,
+    category: "Other",
+    paymentMethod: "Credit Card",
+    currency: "USD",
+    notes: "",
+    items: []
+  };
+}
+function GeminiStar({ size = 12, color = "#a78bfa" }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+    "path",
+    {
+      d: "M12 2L13.5 9.5L21 12L13.5 14.5L12 22L10.5 14.5L3 12L10.5 9.5L12 2Z",
+      fill: color
+    }
+  ) });
+}
+function CategoryBadge({ cat }) {
+  const cls = CATEGORY_COLORS[cat] ?? CATEGORY_COLORS["Other"];
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `text-[11px] border px-2 py-0.5 rounded-full font-medium ${cls}`, children: cat });
+}
+function FieldLabel({ children }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "text-[11px] text-gray-500 font-medium uppercase tracking-wider", children });
+}
+function ReceiptScanner({
+  receipts,
+  processReceipt,
+  onSave,
+  onDelete,
+  className = ""
+}) {
+  const [stage, setStage] = (0, import_react2.useState)("idle");
+  const [dragOver, setDragOver] = (0, import_react2.useState)(false);
+  const [error, setError] = (0, import_react2.useState)(null);
+  const [form, setForm] = (0, import_react2.useState)(blankForm());
+  const [preview, setPreview] = (0, import_react2.useState)(null);
+  const [deletingId, setDeletingId] = (0, import_react2.useState)(null);
+  const fileRef = (0, import_react2.useRef)(null);
+  function setField(key, val) {
+    setForm((f) => ({ ...f, [key]: val }));
+  }
+  function recalcTotal(partial = {}) {
+    setForm((f) => {
+      const m = { ...f, ...partial };
+      return { ...m, total: +(m.subtotal + m.tax + m.tip).toFixed(2) };
+    });
+  }
+  const handleFile = (0, import_react2.useCallback)(
+    async (file) => {
+      setError(null);
+      const allowed = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/gif",
+        "application/pdf"
+      ];
+      if (!allowed.includes(file.type)) {
+        setError("Please upload a JPG, PNG, WebP, or PDF file.");
+        return;
+      }
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => setPreview(e.target?.result);
+        reader.readAsDataURL(file);
+      } else {
+        setPreview(null);
+      }
+      setStage("processing");
+      try {
+        const parsed = await processReceipt(file);
+        setForm({
+          ...blankForm(),
+          ...parsed,
+          items: (parsed.items ?? []).map((item) => ({
+            id: uid(),
+            description: item.description ?? "",
+            qty: item.qty ?? 1,
+            unitPrice: item.unitPrice ?? 0,
+            total: item.total ?? 0
+          }))
+        });
+        setStage("review");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to process receipt.");
+        setStage("idle");
+      }
+    },
+    [processReceipt]
+  );
+  function onDrop(e) {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  }
+  function onInputChange(e) {
+    const file = e.target.files?.[0];
+    if (file) handleFile(file);
+    e.target.value = "";
+  }
+  function addItem() {
+    setForm((f) => ({
+      ...f,
+      items: [
+        ...f.items,
+        { id: uid(), description: "", qty: 1, unitPrice: 0, total: 0 }
+      ]
+    }));
+  }
+  function updateItem(id, key, val) {
+    setForm((f) => ({
+      ...f,
+      items: f.items.map((item) => {
+        if (item.id !== id) return item;
+        const updated = { ...item, [key]: val };
+        if (key === "qty" || key === "unitPrice") {
+          updated.total = +(updated.qty * updated.unitPrice).toFixed(2);
+        }
+        return updated;
+      })
+    }));
+  }
+  function removeItem(id) {
+    setForm((f) => ({ ...f, items: f.items.filter((i) => i.id !== id) }));
+  }
+  async function handleSave() {
+    setStage("saving");
+    try {
+      await onSave(form);
+      setForm(blankForm());
+      setPreview(null);
+      setError(null);
+      setStage("idle");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save receipt.");
+      setStage("review");
+    }
+  }
+  function handleCancel() {
+    setForm(blankForm());
+    setPreview(null);
+    setError(null);
+    setStage("idle");
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: `space-y-6 ${className}`, children: [
+    (stage === "idle" || stage === "processing") && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+      "div",
+      {
+        onDragOver: (e) => {
+          e.preventDefault();
+          setDragOver(true);
+        },
+        onDragLeave: () => setDragOver(false),
+        onDrop,
+        onClick: () => stage === "idle" && fileRef.current?.click(),
+        className: [
+          "relative border-2 border-dashed rounded-2xl transition-all select-none",
+          stage === "processing" ? "border-violet-700 bg-violet-950/20 cursor-default" : dragOver ? "border-violet-500 bg-violet-950/30 cursor-copy" : "border-gray-700 bg-gray-900/50 hover:border-gray-600 hover:bg-gray-900 cursor-pointer"
+        ].join(" "),
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+            "input",
+            {
+              ref: fileRef,
+              type: "file",
+              accept: "image/jpeg,image/png,image/webp,image/gif,application/pdf",
+              className: "hidden",
+              onChange: onInputChange
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "flex flex-col items-center justify-center py-14 px-6 text-center", children: stage === "processing" ? /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(import_jsx_runtime3.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "relative w-14 h-14 mb-5", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "absolute inset-0 rounded-full border-4 border-violet-900" }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "absolute inset-0 rounded-full border-4 border-t-violet-400 animate-spin" }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "absolute inset-0 flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(GeminiStar, { size: 20 }) })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-white font-medium text-sm", children: "Gemini is reading your receipt\u2026" }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-gray-500 text-xs mt-1", children: "This usually takes a few seconds" })
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(import_jsx_runtime3.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "w-12 h-12 rounded-2xl bg-gray-800 border border-gray-700 flex items-center justify-center mb-4", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+              "svg",
+              {
+                className: "w-6 h-6 text-gray-400",
+                fill: "none",
+                viewBox: "0 0 24 24",
+                stroke: "currentColor",
+                strokeWidth: 1.5,
+                children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                  "path",
+                  {
+                    strokeLinecap: "round",
+                    strokeLinejoin: "round",
+                    d: "M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                  }
+                )
+              }
+            ) }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-white font-medium text-sm mb-1", children: "Drop a receipt here or click to upload" }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-gray-500 text-xs mb-4", children: "JPG, PNG, WebP, or PDF \u2014 Gemini extracts the details" }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "inline-flex items-center gap-1.5 text-xs text-violet-400 font-medium", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(GeminiStar, { size: 11 }),
+              "Powered by Gemini"
+            ] })
+          ] }) })
+        ]
+      }
+    ),
+    error && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-start gap-3 bg-red-950/30 border border-red-800/60 rounded-xl px-4 py-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+        "svg",
+        {
+          className: "w-4 h-4 text-red-400 shrink-0 mt-0.5",
+          fill: "none",
+          viewBox: "0 0 24 24",
+          stroke: "currentColor",
+          strokeWidth: 2,
+          children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+            "path",
+            {
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              d: "M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z"
+            }
+          )
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-red-400 text-xs leading-relaxed", children: error })
+    ] }),
+    (stage === "review" || stage === "saving") && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center justify-between px-5 py-4 border-b border-gray-800", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center gap-2.5", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "w-7 h-7 rounded-lg bg-violet-900/50 border border-violet-800/60 flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(GeminiStar, { size: 13 }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "text-white font-semibold text-sm", children: "Review & confirm" }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "text-xs text-gray-500 hidden sm:block", children: "Edit anything Gemini got wrong" })
+        ] }),
+        preview && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          "img",
+          {
+            src: preview,
+            alt: "Receipt preview",
+            className: "h-10 w-8 object-cover rounded-md border border-gray-700 opacity-70 hover:opacity-100 transition-opacity"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "p-5 space-y-5", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: "Merchant" }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+              "input",
+              {
+                type: "text",
+                value: form.merchant,
+                onChange: (e) => setField("merchant", e.target.value),
+                placeholder: "Store or vendor name",
+                className: "bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600/30 transition"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: "Date" }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+              "input",
+              {
+                type: "date",
+                value: form.date,
+                onChange: (e) => setField("date", e.target.value),
+                className: "bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600/30 transition [color-scheme:dark]"
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: "Category" }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+              "select",
+              {
+                value: form.category,
+                onChange: (e) => setField("category", e.target.value),
+                className: "bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600/30 transition",
+                children: CATEGORIES.map((c) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: c, children: c }, c))
+              }
+            )
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: "Payment method" }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+              "select",
+              {
+                value: form.paymentMethod,
+                onChange: (e) => setField("paymentMethod", e.target.value),
+                className: "bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600/30 transition",
+                children: PAYMENT_METHODS.map((p) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: p, children: p }, p))
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "grid grid-cols-2 sm:grid-cols-4 gap-4", children: [
+          ["subtotal", "tax", "tip"].map((k) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: k }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "relative", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none", children: "$" }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                "input",
+                {
+                  type: "number",
+                  min: "0",
+                  step: "0.01",
+                  value: form[k] || "",
+                  onChange: (e) => recalcTotal({ [k]: parseFloat(e.target.value) || 0 }),
+                  className: "w-full bg-gray-800 border border-gray-700 rounded-lg pl-6 pr-3 py-2 text-white text-sm focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600/30 transition"
+                }
+              )
+            ] })
+          ] }, k)),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: "Total" }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "relative", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none", children: "$" }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                "input",
+                {
+                  type: "number",
+                  min: "0",
+                  step: "0.01",
+                  value: form.total || "",
+                  onChange: (e) => setField("total", parseFloat(e.target.value) || 0),
+                  className: "w-full bg-gray-800 border border-gray-700 rounded-lg pl-6 pr-3 py-2 text-white font-semibold text-sm focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600/30 transition"
+                }
+              )
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center justify-between mb-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: "Line items" }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+              "button",
+              {
+                type: "button",
+                onClick: addItem,
+                className: "text-xs text-violet-400 hover:text-violet-300 font-medium transition-colors flex items-center gap-1",
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                    "svg",
+                    {
+                      className: "w-3 h-3",
+                      fill: "none",
+                      viewBox: "0 0 24 24",
+                      stroke: "currentColor",
+                      strokeWidth: 2.5,
+                      children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                        "path",
+                        {
+                          strokeLinecap: "round",
+                          strokeLinejoin: "round",
+                          d: "M12 4.5v15m7.5-7.5h-15"
+                        }
+                      )
+                    }
+                  ),
+                  "Add item"
+                ]
+              }
+            )
+          ] }),
+          form.items.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "rounded-xl border border-gray-800 overflow-hidden", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("table", { className: "w-full text-xs", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("tr", { className: "border-b border-gray-800", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "text-left text-gray-500 font-medium px-3 py-2 w-full", children: "Description" }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "text-right text-gray-500 font-medium px-3 py-2 whitespace-nowrap", children: "Qty" }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "text-right text-gray-500 font-medium px-3 py-2 whitespace-nowrap", children: "Unit $" }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "text-right text-gray-500 font-medium px-3 py-2 whitespace-nowrap", children: "Total" }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("th", { className: "px-2 py-2 w-6" })
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("tbody", { children: form.items.map((item, i) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+              "tr",
+              {
+                className: i < form.items.length - 1 ? "border-b border-gray-800/60" : "",
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                    "input",
+                    {
+                      type: "text",
+                      value: item.description,
+                      onChange: (e) => updateItem(item.id, "description", e.target.value),
+                      placeholder: "Item description",
+                      className: "w-full bg-transparent text-white placeholder:text-gray-600 focus:outline-none focus:bg-gray-800 rounded px-1 py-0.5 transition-colors"
+                    }
+                  ) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                    "input",
+                    {
+                      type: "number",
+                      min: "0",
+                      step: "1",
+                      value: item.qty,
+                      onChange: (e) => updateItem(
+                        item.id,
+                        "qty",
+                        parseFloat(e.target.value) || 0
+                      ),
+                      className: "w-14 text-right bg-transparent text-white focus:outline-none focus:bg-gray-800 rounded px-1 py-0.5 transition-colors"
+                    }
+                  ) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                    "input",
+                    {
+                      type: "number",
+                      min: "0",
+                      step: "0.01",
+                      value: item.unitPrice,
+                      onChange: (e) => updateItem(
+                        item.id,
+                        "unitPrice",
+                        parseFloat(e.target.value) || 0
+                      ),
+                      className: "w-20 text-right bg-transparent text-white focus:outline-none focus:bg-gray-800 rounded px-1 py-0.5 transition-colors"
+                    }
+                  ) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("td", { className: "px-3 py-1.5 text-right text-gray-300 tabular-nums", children: [
+                    "$",
+                    item.total.toFixed(2)
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("td", { className: "px-2 py-1.5", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                    "button",
+                    {
+                      type: "button",
+                      onClick: () => removeItem(item.id),
+                      className: "text-gray-600 hover:text-red-400 transition-colors",
+                      children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                        "svg",
+                        {
+                          className: "w-3.5 h-3.5",
+                          fill: "none",
+                          viewBox: "0 0 24 24",
+                          stroke: "currentColor",
+                          strokeWidth: 2,
+                          children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                            "path",
+                            {
+                              strokeLinecap: "round",
+                              strokeLinejoin: "round",
+                              d: "M6 18L18 6M6 6l12 12"
+                            }
+                          )
+                        }
+                      )
+                    }
+                  ) })
+                ]
+              },
+              item.id
+            )) })
+          ] }) }) : /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-gray-600 text-xs italic py-2", children: "No line items detected \u2014 add them manually if needed." })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "flex flex-col gap-1.5", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldLabel, { children: "Notes" }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+            "textarea",
+            {
+              value: form.notes,
+              onChange: (e) => setField("notes", e.target.value),
+              placeholder: "Any additional notes\u2026",
+              rows: 2,
+              className: "bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600/30 transition resize-none"
+            }
+          )
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center justify-between px-5 py-4 border-t border-gray-800 bg-gray-950/30", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          "button",
+          {
+            type: "button",
+            onClick: handleCancel,
+            disabled: stage === "saving",
+            className: "text-sm text-gray-500 hover:text-gray-300 transition-colors disabled:opacity-40",
+            children: "Cancel"
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+          "button",
+          {
+            type: "button",
+            onClick: handleSave,
+            disabled: stage === "saving",
+            className: "inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold px-5 py-2 rounded-xl transition-colors",
+            children: [
+              stage === "saving" && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("svg", { className: "w-4 h-4 animate-spin", fill: "none", viewBox: "0 0 24 24", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                  "circle",
+                  {
+                    className: "opacity-25",
+                    cx: "12",
+                    cy: "12",
+                    r: "10",
+                    stroke: "currentColor",
+                    strokeWidth: "4"
+                  }
+                ),
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                  "path",
+                  {
+                    className: "opacity-75",
+                    fill: "currentColor",
+                    d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  }
+                )
+              ] }),
+              "Save receipt"
+            ]
+          }
+        )
+      ] })
+    ] }),
+    receipts.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "space-y-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("h3", { className: "text-white font-semibold text-sm", children: [
+          "Saved receipts",
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "ml-2 text-gray-500 font-normal tabular-nums", children: receipts.length })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "text-xs text-gray-500", children: [
+          "$",
+          receipts.reduce((s, r) => s + r.total, 0).toFixed(2),
+          " total"
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden", children: receipts.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+        "div",
+        {
+          className: [
+            "flex items-center gap-4 px-4 py-3 hover:bg-gray-800/50 transition-colors",
+            i < receipts.length - 1 ? "border-b border-gray-800/60" : ""
+          ].join(" "),
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "shrink-0 w-8 h-8 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+              "svg",
+              {
+                className: "w-4 h-4 text-gray-500",
+                fill: "none",
+                viewBox: "0 0 24 24",
+                stroke: "currentColor",
+                strokeWidth: 1.5,
+                children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                  "path",
+                  {
+                    strokeLinecap: "round",
+                    strokeLinejoin: "round",
+                    d: "M9 14.25l6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185z"
+                  }
+                )
+              }
+            ) }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex-1 min-w-0", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center gap-2 mb-0.5 flex-wrap", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "text-white text-sm font-medium truncate", children: r.merchant || "Unknown merchant" }),
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(CategoryBadge, { cat: r.category })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center gap-2 text-xs text-gray-500 flex-wrap", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: r.date }),
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\xB7" }),
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: r.paymentMethod }),
+                r.items.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(import_jsx_runtime3.Fragment, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\xB7" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { children: [
+                    r.items.length,
+                    " item",
+                    r.items.length !== 1 ? "s" : ""
+                  ] })
+                ] }),
+                r.notes && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(import_jsx_runtime3.Fragment, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: "\xB7" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "truncate max-w-[160px]", children: r.notes })
+                ] })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "shrink-0 text-right", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("p", { className: "text-white font-semibold text-sm tabular-nums", children: [
+                "$",
+                r.total.toFixed(2)
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-gray-600 text-[11px]", children: r.currency })
+            ] }),
+            onDelete && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+              "button",
+              {
+                type: "button",
+                onClick: async () => {
+                  setDeletingId(r.id);
+                  try {
+                    await onDelete(r.id);
+                  } finally {
+                    setDeletingId(null);
+                  }
+                },
+                disabled: deletingId === r.id,
+                className: "shrink-0 text-gray-600 hover:text-red-400 transition-colors disabled:opacity-40",
+                title: "Delete receipt",
+                children: deletingId === r.id ? /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+                  "svg",
+                  {
+                    className: "w-4 h-4 animate-spin",
+                    fill: "none",
+                    viewBox: "0 0 24 24",
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                        "circle",
+                        {
+                          className: "opacity-25",
+                          cx: "12",
+                          cy: "12",
+                          r: "10",
+                          stroke: "currentColor",
+                          strokeWidth: "4"
+                        }
+                      ),
+                      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                        "path",
+                        {
+                          className: "opacity-75",
+                          fill: "currentColor",
+                          d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        }
+                      )
+                    ]
+                  }
+                ) : /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                  "svg",
+                  {
+                    className: "w-4 h-4",
+                    fill: "none",
+                    viewBox: "0 0 24 24",
+                    stroke: "currentColor",
+                    strokeWidth: 1.5,
+                    children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+                      "path",
+                      {
+                        strokeLinecap: "round",
+                        strokeLinejoin: "round",
+                        d: "M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                      }
+                    )
+                  }
+                )
+              }
+            )
+          ]
+        },
+        r.id
+      )) })
+    ] }),
+    receipts.length === 0 && stage === "idle" && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "text-center text-gray-600 text-xs py-4", children: "No receipts saved yet \u2014 upload one above to get started." })
+  ] });
+}
+
+// hooks/useClientList.ts
+var import_react3 = require("react");
 var import_app = require("firebase/app");
 var import_firestore = require("firebase/firestore");
 
@@ -1848,15 +2551,15 @@ function getDB() {
 var PAGE_SIZE = 30;
 function useClientList(collectionId) {
   const firestore = getDB();
-  const [clients, setClients] = (0, import_react2.useState)([]);
-  const [views, setViews] = (0, import_react2.useState)([]);
-  const [permissions, setPermissions] = (0, import_react2.useState)(DEFAULT_PERMISSIONS);
-  const [listTitle, setListTitle] = (0, import_react2.useState)(collectionId);
-  const [loading, setLoading] = (0, import_react2.useState)(true);
-  const [hasMore, setHasMore] = (0, import_react2.useState)(false);
-  const [pageLimit, setPageLimit] = (0, import_react2.useState)(PAGE_SIZE);
-  const loadingMore = (0, import_react2.useRef)(false);
-  (0, import_react2.useEffect)(() => {
+  const [clients, setClients] = (0, import_react3.useState)([]);
+  const [views, setViews] = (0, import_react3.useState)([]);
+  const [permissions, setPermissions] = (0, import_react3.useState)(DEFAULT_PERMISSIONS);
+  const [listTitle, setListTitle] = (0, import_react3.useState)(collectionId);
+  const [loading, setLoading] = (0, import_react3.useState)(true);
+  const [hasMore, setHasMore] = (0, import_react3.useState)(false);
+  const [pageLimit, setPageLimit] = (0, import_react3.useState)(PAGE_SIZE);
+  const loadingMore = (0, import_react3.useRef)(false);
+  (0, import_react3.useEffect)(() => {
     const q = (0, import_firestore.query)(
       (0, import_firestore.collection)(firestore, collectionId),
       (0, import_firestore.orderBy)("date", "desc"),
@@ -1876,7 +2579,7 @@ function useClientList(collectionId) {
     });
     return () => unsub();
   }, [collectionId, firestore, pageLimit]);
-  (0, import_react2.useEffect)(() => {
+  (0, import_react3.useEffect)(() => {
     const viewsRef = (0, import_firestore.collection)(firestore, collectionId, "_views");
     const unsub = (0, import_firestore.onSnapshot)(viewsRef, (snap) => {
       const saved = snap.docs.map((d) => ({
@@ -1889,7 +2592,7 @@ function useClientList(collectionId) {
     });
     return () => unsub();
   }, [collectionId, firestore]);
-  (0, import_react2.useEffect)(() => {
+  (0, import_react3.useEffect)(() => {
     const permRef = (0, import_firestore.doc)(firestore, PERMISSIONS_COLLECTION, collectionId);
     (0, import_firestore.getDoc)(permRef).then((snap) => {
       if (snap.exists()) {
@@ -1899,7 +2602,7 @@ function useClientList(collectionId) {
       console.error(`[useClientList] permissions load error (${collectionId}):`, err);
     });
   }, [collectionId, firestore]);
-  const onSave = (0, import_react2.useCallback)(async (id, field, value, updaterName, fromValue) => {
+  const onSave = (0, import_react3.useCallback)(async (id, field, value, updaterName, fromValue) => {
     const docRef = (0, import_firestore.doc)(firestore, collectionId, id);
     const changeEntry = {
       at: { seconds: Math.floor(Date.now() / 1e3) },
@@ -1915,26 +2618,26 @@ function useClientList(collectionId) {
       changeLog: (0, import_firestore.arrayUnion)(changeEntry)
     });
   }, [collectionId, firestore]);
-  const onSaveView = (0, import_react2.useCallback)(async (view) => {
+  const onSaveView = (0, import_react3.useCallback)(async (view) => {
     const viewsRef = (0, import_firestore.collection)(firestore, collectionId, "_views");
     const docRef = await (0, import_firestore.addDoc)(viewsRef, { ...view, createdAt: (0, import_firestore.serverTimestamp)() });
     return docRef.id;
   }, [collectionId, firestore]);
-  const onDeleteView = (0, import_react2.useCallback)(async (id) => {
+  const onDeleteView = (0, import_react3.useCallback)(async (id) => {
     const viewRef = (0, import_firestore.doc)(firestore, collectionId, "_views", id);
     await (0, import_firestore.deleteDoc)(viewRef);
   }, [collectionId, firestore]);
-  const onRenameList = (0, import_react2.useCallback)(async (name) => {
+  const onRenameList = (0, import_react3.useCallback)(async (name) => {
     const metaRef = (0, import_firestore.doc)(firestore, collectionId, "_meta");
     await (0, import_firestore.setDoc)(metaRef, { title: name }, { merge: true });
     setListTitle(name);
   }, [collectionId, firestore]);
-  const onSavePermissions = (0, import_react2.useCallback)(async (matrix) => {
+  const onSavePermissions = (0, import_react3.useCallback)(async (matrix) => {
     const permRef = (0, import_firestore.doc)(firestore, PERMISSIONS_COLLECTION, collectionId);
     await (0, import_firestore.setDoc)(permRef, matrix);
     setPermissions(matrix);
   }, [collectionId, firestore]);
-  const onLoadMore = (0, import_react2.useCallback)(async () => {
+  const onLoadMore = (0, import_react3.useCallback)(async () => {
     if (loadingMore.current || !hasMore) return;
     loadingMore.current = true;
     setPageLimit((prev) => prev + PAGE_SIZE);
@@ -1956,7 +2659,7 @@ function useClientList(collectionId) {
 }
 
 // hooks/useClientListMock.ts
-var import_react3 = require("react");
+var import_react4 = require("react");
 function useClientListMock(_collectionId, options = {}) {
   const {
     initialClients = [],
@@ -1966,13 +2669,13 @@ function useClientListMock(_collectionId, options = {}) {
     loading: initialLoading = false,
     hasMore: initialHasMore = false
   } = options;
-  const [clients, setClients] = (0, import_react3.useState)(initialClients);
-  const [views, setViews] = (0, import_react3.useState)(initialViews);
-  const [listTitle, setListTitle] = (0, import_react3.useState)(initialTitle ?? _collectionId);
-  const [permissions, setPermissions] = (0, import_react3.useState)(initialPermissions);
-  const [loading] = (0, import_react3.useState)(initialLoading);
-  const [hasMore] = (0, import_react3.useState)(initialHasMore);
-  const onSave = (0, import_react3.useCallback)(async (id, field, value, updaterName, fromValue) => {
+  const [clients, setClients] = (0, import_react4.useState)(initialClients);
+  const [views, setViews] = (0, import_react4.useState)(initialViews);
+  const [listTitle, setListTitle] = (0, import_react4.useState)(initialTitle ?? _collectionId);
+  const [permissions, setPermissions] = (0, import_react4.useState)(initialPermissions);
+  const [loading] = (0, import_react4.useState)(initialLoading);
+  const [hasMore] = (0, import_react4.useState)(initialHasMore);
+  const onSave = (0, import_react4.useCallback)(async (id, field, value, updaterName, fromValue) => {
     const changeEntry = {
       at: { seconds: Math.floor(Date.now() / 1e3) },
       by: updaterName,
@@ -1992,21 +2695,21 @@ function useClientListMock(_collectionId, options = {}) {
       )
     );
   }, []);
-  const onSaveView = (0, import_react3.useCallback)(async (view) => {
+  const onSaveView = (0, import_react4.useCallback)(async (view) => {
     const id = `mock-view-${Date.now()}`;
     setViews((prev) => [...prev, { id, ...view }]);
     return id;
   }, []);
-  const onDeleteView = (0, import_react3.useCallback)(async (id) => {
+  const onDeleteView = (0, import_react4.useCallback)(async (id) => {
     setViews((prev) => prev.filter((v) => v.id !== id));
   }, []);
-  const onRenameList = (0, import_react3.useCallback)(async (name) => {
+  const onRenameList = (0, import_react4.useCallback)(async (name) => {
     setListTitle(name);
   }, []);
-  const onSavePermissions = (0, import_react3.useCallback)(async (matrix) => {
+  const onSavePermissions = (0, import_react4.useCallback)(async (matrix) => {
     setPermissions(matrix);
   }, []);
-  const onLoadMore = (0, import_react3.useCallback)(async () => {
+  const onLoadMore = (0, import_react4.useCallback)(async () => {
   }, []);
   return {
     clients,
@@ -2023,11 +2726,39 @@ function useClientListMock(_collectionId, options = {}) {
     onLoadMore
   };
 }
+
+// hooks/useReceiptListMock.ts
+var import_react5 = require("react");
+function uid2() {
+  return Math.random().toString(36).slice(2, 10);
+}
+function useReceiptListMock(options = {}) {
+  const [receipts, setReceipts] = (0, import_react5.useState)(
+    options.initialReceipts ?? []
+  );
+  const onSave = (0, import_react5.useCallback)(
+    async (record) => {
+      const full = {
+        ...record,
+        id: uid2(),
+        createdAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      setReceipts((prev) => [full, ...prev]);
+    },
+    []
+  );
+  const onDelete = (0, import_react5.useCallback)(async (id) => {
+    setReceipts((prev) => prev.filter((r) => r.id !== id));
+  }, []);
+  return { receipts, onSave, onDelete };
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   ClientList,
   DEFAULT_PERMISSIONS,
+  ReceiptScanner,
   useClientList,
-  useClientListMock
+  useClientListMock,
+  useReceiptListMock
 });
 //# sourceMappingURL=index.cjs.map
