@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ClientList, DEFAULT_PERMISSIONS } from "ods-ui-library";
 import type { ClientRecord, AppRole, ClientListView, PermissionsMatrix, ChangeRecord } from "ods-ui-library";
 import { Nav } from "../../components/Nav";
 import { Footer } from "../../components/Footer";
+import { useAuth } from "../../hooks/useAuth";
 
 // ─── Sample Data (22 clients + 3 pending) ─────────────────────────────────────
 
@@ -244,6 +247,8 @@ const DEFAULT_STATE = {
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function DesignPage() {
+  const { user } = useAuth();
+  const router = useRouter();
   const [role, setRole] = useState<AppRole>("owner");
   const [clients, setClients] = useState<ClientRecord[]>(DEFAULT_STATE.clients);
   const [views, setViews] = useState<ClientListView[]>(DEFAULT_STATE.views);
@@ -312,7 +317,31 @@ export default function DesignPage() {
 
   return (
     <div className="bg-black text-white min-h-screen">
-      <Nav />
+      {user ? (
+        /* Portal user — show a back button instead of the public Nav */
+        <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/10">
+          <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+            <button
+              onClick={() => router.push("/portal")}
+              className="flex items-center gap-2 text-white/60 hover:text-white text-sm transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+              Back to Portal
+            </button>
+            <span className="text-white/30 text-xs font-semibold uppercase tracking-widest">ClientList Demo</span>
+            <Link
+              href="/portal"
+              className="text-sm font-medium bg-white text-black px-4 py-1.5 rounded-full hover:bg-white/90 transition-colors"
+            >
+              Portal
+            </Link>
+          </div>
+        </header>
+      ) : (
+        <Nav />
+      )}
 
       {/* ── Hero ── */}
       <section className="pt-32 pb-20 px-6 text-center">
