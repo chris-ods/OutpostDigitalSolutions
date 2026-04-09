@@ -130,7 +130,7 @@ const DEFAULT_VISIBLE_COLS = ["name", "category", "docDate", "fileSize", "upload
 export default function DocumentsPage() {
   const claim = useUserClaim();
   const { uid, profile } = claim;
-  const { prefs: userPrefs, savePrefs: saveUserPrefs } = useListUserPrefs(uid, "documents");
+  const { prefs: userPrefs, savePrefs: saveUserPrefs, views, saveView, deleteView } = useListUserPrefs(uid, "documents");
 
   const [docs, setDocs]       = useState<BizDoc[]>([]);
   const [docsLoading, setDocsLoading] = useState(true);
@@ -357,6 +357,9 @@ export default function DocumentsPage() {
         displayMode="document"
         userPrefs={userPrefs}
         onSaveUserPrefs={saveUserPrefs}
+        views={views}
+        onSaveView={saveView}
+        onDeleteView={deleteView}
         listTitle="Documents"
         initialSortField="docDate"
         initialSortDir="desc"

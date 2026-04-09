@@ -216,7 +216,7 @@ export default function DashboardPage() {
   const claim = useUserClaim();
   const { uid, profile } = claim;
   const { teamNames, phase } = useTeamConfig();
-  const { prefs: repTableUserPrefs, savePrefs: saveRepTableUserPrefs } = useListUserPrefs(uid, "dashboard-reps");
+  const { prefs: repTableUserPrefs, savePrefs: saveRepTableUserPrefs, views: repTableViews, saveView: saveRepTableView, deleteView: deleteRepTableView } = useListUserPrefs(uid, "dashboard-reps");
 
   const [myClients, setMyClients]             = useState<Client[]>([]);
   const [allClients, setAllClients]           = useState<Client[]>([]);
@@ -490,6 +490,9 @@ export default function DashboardPage() {
               onSaveSchema={saveRepListSchema}
               userPrefs={repTableUserPrefs}
               onSaveUserPrefs={saveRepTableUserPrefs}
+              views={repTableViews}
+              onSaveView={saveRepTableView}
+              onDeleteView={deleteRepTableView}
               listTitle="Rep Performance"
               initialSortField="weekALP"
               initialSortDir="desc"

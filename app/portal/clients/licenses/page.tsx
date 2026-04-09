@@ -77,7 +77,7 @@ const LICENSE_COLUMNS: OdsColDef[] = [
 export default function LicenseLookupPage() {
   const guard = useAuthGuard("any");
   const claim = useUserClaim();
-  const { prefs: userPrefs, savePrefs: saveUserPrefs } = useListUserPrefs(claim.uid, "licenses");
+  const { prefs: userPrefs, savePrefs: saveUserPrefs, views, saveView, deleteView } = useListUserPrefs(claim.uid, "licenses");
 
   const [data, setData] = useState<OdsRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -196,6 +196,9 @@ export default function LicenseLookupPage() {
         onSaveSchema={handleSaveSchema}
         userPrefs={userPrefs}
         onSaveUserPrefs={saveUserPrefs}
+        views={views}
+        onSaveView={saveView}
+        onDeleteView={deleteView}
         listTitle="License Lookup"
         initialSortField="agentName"
         initialSortDir="asc"

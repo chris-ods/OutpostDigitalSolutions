@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import {
-  collection, query, where, getDocs, doc, updateDoc, getDoc, addDoc,
+  collection, query, where, getDocs, doc, updateDoc, getDoc,
   deleteDoc, setDoc, onSnapshot, serverTimestamp, arrayUnion,
 } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 import { OdsList } from "ods-ui-library";
-import type { OdsRecord, AppRole, OdsListView, PermissionsMatrix, OdsColDef, OdsListSchema } from "ods-ui-library";
+import type { OdsRecord, AppRole, PermissionsMatrix, OdsColDef, OdsListSchema } from "ods-ui-library";
 import { buildDefaultPermissions } from "ods-ui-library";
 import { isAdminLevel, UserProfile } from "../../../lib/types";
 import { useTeamConfig } from "../../../lib/hooks/useTeamConfig";
@@ -82,11 +82,10 @@ const DEFAULT_VISIBLE_COLS = [
 export default function ClientsPage() {
   const claim = useUserClaim();
   const { uid, profile } = claim;
-  const { prefs: userPrefs, savePrefs: saveUserPrefs } = useListUserPrefs(uid, "clients");
+  const { prefs: userPrefs, savePrefs: saveUserPrefs, views, saveView, deleteView } = useListUserPrefs(uid, "clients");
 
   const [clients, setClients] = useState<OdsRecord[]>([]);
   const [agents, setAgents] = useState<{ uid: string; name: string; contractorId: string; teamNumber: number }[]>([]);
-  const [views, setViews] = useState<OdsListView[]>([]);
   const [permissions, setPermissions] = useState<PermissionsMatrix>(() => buildDefaultPermissions(CLIENT_COLUMNS));
   const [schema, setSchema] = useState<OdsListSchema | undefined>();
   const [loading, setLoading] = useState(true);
@@ -145,22 +144,6 @@ export default function ClientsPage() {
     return () => unsub();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid, profile]);
-
-  // ── Views live sync ───────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!uid) return;
-    const viewsRef = collection(db, COLLECTION_ID, "_config", "views");
-    const unsub = onSnapshot(viewsRef, (snap) => {
-      const saved: OdsListView[] = snap.docs.map((d) => ({
-        id: d.id,
-        ...(d.data() as Omit<OdsListView, "id">),
-      }));
-      setViews(saved);
-    }, () => {
-      // Permission denied for non-admin — views are optional
-    });
-    return () => unsub();
-  }, [uid]);
 
   // ── Permissions load (real-time) ──────────────────────────────────────────
   useEffect(() => {
@@ -297,16 +280,6 @@ export default function ClientsPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clients, agents]);
 
-  const onSaveView = useCallback(async (view: Omit<OdsListView, "id">): Promise<string> => {
-    const viewsRef = collection(db, COLLECTION_ID, "_config", "views");
-    const docRef = await addDoc(viewsRef, { ...view, createdAt: serverTimestamp() });
-    return docRef.id;
-  }, []);
-
-  const onDeleteView = useCallback(async (id: string) => {
-    await deleteDoc(doc(db, COLLECTION_ID, "_config", "views", id));
-  }, []);
-
   const onSavePermissions = useCallback(async (matrix: PermissionsMatrix) => {
     await setDoc(doc(db, COLLECTION_ID, "_config"), matrix, { merge: true });
     setPermissions(matrix);
@@ -427,8 +400,8 @@ export default function ClientsPage() {
           historicalCutoff={HISTORICAL_CUTOFF}
           onSave={onSave}
           onDeleteRecord={onDeleteRecord}
-          onSaveView={onSaveView}
-          onDeleteView={onDeleteView}
+          onSaveView={saveView}
+          onDeleteView={deleteView}
           onSavePermissions={onSavePermissions}
           schema={{
             ...schema,

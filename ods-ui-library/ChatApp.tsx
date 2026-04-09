@@ -283,6 +283,8 @@ export function ChatApp({ db, storage, currentUser, isAdminLevel }: ChatAppProps
   const [newGroupName, setNewGroupName]         = useState("");
   const [newGroupMembers, setNewGroupMembers]   = useState<string[]>([]);
   const [creatingGroup, setCreatingGroup]       = useState(false);
+  const [createGroupError, setCreateGroupError] = useState<string | null>(null);
+  const [openingDmUid, setOpeningDmUid]         = useState<string | null>(null);
   const [showManageMembers, setShowManageMembers] = useState(false);
 
   const [deleteConfirm, setDeleteConfirm] = useState<ConvMeta | null>(null);
@@ -361,7 +363,7 @@ export function ChatApp({ db, storage, currentUser, isAdminLevel }: ChatAppProps
     const unsub = onSnapshot(q, (snap) => {
       const list: ConvMeta[] = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<ConvMeta, "id">) }));
       setConvs(list.sort((a, b) => (b.lastMessageAt?.seconds ?? 0) - (a.lastMessageAt?.seconds ?? 0)));
-    }, () => {});
+    }, (err) => { console.error("chats listener failed:", err); });
     return () => unsub();
   }, [db, myUid, isDev]);
 
@@ -399,7 +401,7 @@ export function ChatApp({ db, storage, currentUser, isAdminLevel }: ChatAppProps
 
     const unsub = onSnapshot(q, (snap) => {
       setMessages(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<ChatMessage, "id">) })));
-    }, () => {});
+    }, (err) => { console.error("messages listener failed:", err); });
     return () => unsub();
   }, [db, activeChatId]);
 
@@ -539,21 +541,30 @@ export function ChatApp({ db, storage, currentUser, isAdminLevel }: ChatAppProps
 
   // ── Open DM ───────────────────────────────────────────────────────────────
   const openDm = async (other: PortalUser) => {
+    if (openingDmUid) return;
     const chatId  = dmId(myUid, other.uid);
     setSearchText("");
-    const chatRef = doc(db, "chats", chatId);
-    let docExists = false;
-    try { const snap = await getDoc(chatRef); docExists = snap.exists(); } catch {}
-    if (!docExists) {
-      await setDoc(chatRef, {
-        type: "dm",
-        participants: [myUid, other.uid].sort(),
-        lastMessage: "",
-        lastMessageAt: null,
-        createdAt: serverTimestamp(),
-      });
+    setOpeningDmUid(other.uid);
+    try {
+      const chatRef = doc(db, "chats", chatId);
+      let docExists = false;
+      try { const snap = await getDoc(chatRef); docExists = snap.exists(); } catch {}
+      if (!docExists) {
+        await setDoc(chatRef, {
+          type: "dm",
+          participants: [myUid, other.uid].sort(),
+          lastMessage: "",
+          lastMessageAt: null,
+          createdAt: serverTimestamp(),
+        });
+      }
+      setActiveChatId(chatId);
+    } catch (err) {
+      console.error("Failed to open DM:", err);
+      alert(`Failed to open DM: ${err instanceof Error ? err.message : "unknown error"}`);
+    } finally {
+      setOpeningDmUid(null);
     }
-    setActiveChatId(chatId);
   };
 
   // ── Soft-delete / restore ─────────────────────────────────────────────────
@@ -582,6 +593,7 @@ export function ChatApp({ db, storage, currentUser, isAdminLevel }: ChatAppProps
   const createGroupChannel = async () => {
     if (!newGroupName.trim() || creatingGroup) return;
     setCreatingGroup(true);
+    setCreateGroupError(null);
     try {
       const slug = newGroupName.trim().toLowerCase().replace(/\s+/g, "-");
       const participants = Array.from(new Set([myUid, ...newGroupMembers]));
@@ -593,6 +605,7 @@ export function ChatApp({ db, storage, currentUser, isAdminLevel }: ChatAppProps
       setActiveChatId(ref.id);
     } catch (err) {
       console.error("Failed to create channel:", err);
+      setCreateGroupError(err instanceof Error ? err.message : "Failed to create channel");
     } finally {
       setCreatingGroup(false);
     }
@@ -954,13 +967,19 @@ export function ChatApp({ db, storage, currentUser, isAdminLevel }: ChatAppProps
                 <p className="px-3 py-4 text-center text-app-text-5 text-xs">No users found.</p>
               ) : (
                 searchResults.map((u) => (
-                  <button key={u.uid} type="button" onClick={() => openDm(u)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-app-surface-2/60 transition text-left">
+                  <button key={u.uid} type="button" onClick={() => openDm(u)} disabled={!!openingDmUid}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-app-surface-2/60 transition text-left disabled:opacity-60">
                     <Avatar photoURL={u.photoURL} name={`${u.firstName} ${u.lastName}`} uid={u.uid} size="sm" status={presence[u.uid]} level={u.level} teamNumber={u.teamNumber} />
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="text-app-text text-xs font-medium truncate">{u.firstName} {u.lastName}</p>
                       <p className="text-app-text-4 text-[10px]">{roleLabel(u.role, u.level)}</p>
                     </div>
+                    {openingDmUid === u.uid && (
+                      <svg className="w-3.5 h-3.5 animate-spin text-app-text-3 shrink-0" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                      </svg>
+                    )}
                   </button>
                 ))
               )}
@@ -1011,7 +1030,7 @@ export function ChatApp({ db, storage, currentUser, isAdminLevel }: ChatAppProps
                 <div className="flex items-center justify-between px-3 py-1">
                   <span className="text-app-text-4 text-[10px] font-semibold uppercase tracking-wider">Channels</span>
                   {isOwner && (
-                    <button type="button" onClick={() => setShowCreateGroup(true)} title="Create channel"
+                    <button type="button" onClick={() => { setCreateGroupError(null); setShowCreateGroup(true); }} title="Create channel"
                       className="text-app-text-4 hover:text-app-text transition">
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -1402,12 +1421,19 @@ export function ChatApp({ db, storage, currentUser, isAdminLevel }: ChatAppProps
               {activeUsers.map((u) => (
                 <button key={u.uid} type="button"
                   onClick={() => { if (u.uid !== myUid) openDm(u); }}
-                  className={`w-full flex items-start gap-2 pl-3 pr-3 pt-2 pb-3 text-left transition ${u.uid !== myUid ? "hover:bg-app-surface-2/60 cursor-pointer" : "cursor-default"}`}>
+                  disabled={!!openingDmUid && u.uid !== myUid}
+                  className={`w-full flex items-start gap-2 pl-3 pr-3 pt-2 pb-3 text-left transition ${u.uid !== myUid ? "hover:bg-app-surface-2/60 cursor-pointer" : "cursor-default"} disabled:opacity-60`}>
                   <Avatar photoURL={u.photoURL} name={`${u.firstName} ${u.lastName}`} uid={u.uid} size="sm" status="active" level={u.level} teamNumber={u.teamNumber} />
-                  <div className="min-w-0 pt-0.5">
+                  <div className="min-w-0 pt-0.5 flex-1">
                     <p className="text-app-text text-xs font-medium truncate">{u.firstName} {u.lastName}</p>
                     <p className="text-app-text-4 text-[10px]">{teamLabel(u)}</p>
                   </div>
+                  {openingDmUid === u.uid && (
+                    <svg className="w-3.5 h-3.5 animate-spin text-app-text-3 shrink-0 mt-1" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                  )}
                 </button>
               ))}
             </>
@@ -1418,12 +1444,19 @@ export function ChatApp({ db, storage, currentUser, isAdminLevel }: ChatAppProps
               {idleUsers.map((u) => (
                 <button key={u.uid} type="button"
                   onClick={() => { if (u.uid !== myUid) openDm(u); }}
-                  className={`w-full flex items-start gap-2 pl-3 pr-3 pt-2 pb-3 text-left transition ${u.uid !== myUid ? "hover:bg-app-surface-2/60 cursor-pointer" : "cursor-default"}`}>
+                  disabled={!!openingDmUid && u.uid !== myUid}
+                  className={`w-full flex items-start gap-2 pl-3 pr-3 pt-2 pb-3 text-left transition ${u.uid !== myUid ? "hover:bg-app-surface-2/60 cursor-pointer" : "cursor-default"} disabled:opacity-60`}>
                   <Avatar photoURL={u.photoURL} name={`${u.firstName} ${u.lastName}`} uid={u.uid} size="sm" status="idle" level={u.level} teamNumber={u.teamNumber} />
-                  <div className="min-w-0 pt-0.5">
+                  <div className="min-w-0 pt-0.5 flex-1">
                     <p className="text-app-text-3 text-xs font-medium truncate">{u.firstName} {u.lastName}</p>
                     <p className="text-app-text-4 text-[10px]">{teamLabel(u)}</p>
                   </div>
+                  {openingDmUid === u.uid && (
+                    <svg className="w-3.5 h-3.5 animate-spin text-app-text-3 shrink-0 mt-1" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                  )}
                 </button>
               ))}
             </>
@@ -1434,12 +1467,19 @@ export function ChatApp({ db, storage, currentUser, isAdminLevel }: ChatAppProps
               {offlineUsers.map((u) => (
                 <button key={u.uid} type="button"
                   onClick={() => { if (u.uid !== myUid) openDm(u); }}
-                  className={`w-full flex items-start gap-2 pl-3 pr-3 pt-2 pb-3 text-left transition ${u.uid !== myUid ? "hover:bg-app-surface-2/60 cursor-pointer" : "cursor-default"}`}>
+                  disabled={!!openingDmUid && u.uid !== myUid}
+                  className={`w-full flex items-start gap-2 pl-3 pr-3 pt-2 pb-3 text-left transition ${u.uid !== myUid ? "hover:bg-app-surface-2/60 cursor-pointer" : "cursor-default"} disabled:opacity-60`}>
                   <Avatar photoURL={u.photoURL} name={`${u.firstName} ${u.lastName}`} uid={u.uid} size="sm" status="offline" level={u.level} teamNumber={u.teamNumber} />
-                  <div className="min-w-0 pt-0.5">
+                  <div className="min-w-0 pt-0.5 flex-1">
                     <p className="text-app-text-4 text-xs font-medium truncate">{u.firstName} {u.lastName}</p>
                     <p className="text-app-text-4 text-[10px]">{teamLabel(u)}</p>
                   </div>
+                  {openingDmUid === u.uid && (
+                    <svg className="w-3.5 h-3.5 animate-spin text-app-text-3 shrink-0 mt-1" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                  )}
                 </button>
               ))}
             </>
@@ -1583,7 +1623,7 @@ export function ChatApp({ db, storage, currentUser, isAdminLevel }: ChatAppProps
     {/* ── Create Group Channel Modal ── */}
     {showCreateGroup && (
       <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
-        onClick={(e) => { if (e.target === e.currentTarget) { setShowCreateGroup(false); setNewGroupName(""); setNewGroupMembers([]); } }}>
+        onClick={(e) => { if (e.target === e.currentTarget && !creatingGroup) { setShowCreateGroup(false); setNewGroupName(""); setNewGroupMembers([]); setCreateGroupError(null); } }}>
         <div className="bg-app-surface border border-app-border-2 rounded-2xl w-full max-w-md p-6 shadow-2xl">
           <h3 className="text-app-text font-bold text-lg mb-1">Create Channel</h3>
           <p className="text-app-text-4 text-sm mb-5">Channels are where your team communicates.</p>
@@ -1617,11 +1657,23 @@ export function ChatApp({ db, storage, currentUser, isAdminLevel }: ChatAppProps
               );
             })}
           </div>
+          {createGroupError && (
+            <div className="mb-3 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
+              {createGroupError}
+            </div>
+          )}
           <div className="flex gap-3 justify-end">
-            <button type="button" onClick={() => { setShowCreateGroup(false); setNewGroupName(""); setNewGroupMembers([]); }}
-              className="px-4 py-2 text-app-text-3 hover:text-app-text text-sm transition">Cancel</button>
+            <button type="button" onClick={() => { setShowCreateGroup(false); setNewGroupName(""); setNewGroupMembers([]); setCreateGroupError(null); }}
+              disabled={creatingGroup}
+              className="px-4 py-2 text-app-text-3 hover:text-app-text text-sm transition disabled:opacity-50">Cancel</button>
             <button type="button" onClick={createGroupChannel} disabled={!newGroupName.trim() || creatingGroup}
-              className="px-5 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-app-surface-2 disabled:text-app-text-4 text-white text-sm font-semibold rounded-xl transition">
+              className="px-5 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-app-surface-2 disabled:text-app-text-4 text-white text-sm font-semibold rounded-xl transition inline-flex items-center gap-2">
+              {creatingGroup && (
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+              )}
               {creatingGroup ? "Creating…" : "Create Channel"}
             </button>
           </div>

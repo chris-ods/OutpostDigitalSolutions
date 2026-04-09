@@ -267,13 +267,16 @@ service cloud.firestore {
     }
 
     // DM chats: participants only. All roles can DM — no permission restriction.
+    // Admins (admin/owner/developer) get blanket read access so the dev/owner
+    // chat client can list all chats and message history without permission errors.
     match /chats/{chatId} {
       // resource == null means the document does not yet exist (new DM check).
       // Allow the read so getDoc() returns an empty snapshot instead of throwing.
       allow read: if authed() && (
         chatId == "general" ||
         resource == null ||
-        resource.data.participants.hasAny([request.auth.uid])
+        resource.data.participants.hasAny([request.auth.uid]) ||
+        isAdmin()
       );
       // Any authenticated user can create a DM they are part of
       allow create: if authed() && (
@@ -294,6 +297,7 @@ service cloud.firestore {
         // Guard with exists() before calling get() to avoid null-dereference in rules
         allow read: if authed() && (
           chatId == "general" ||
+          isAdmin() ||
           (exists(/databases/$(database)/documents/chats/$(chatId)) &&
            get(/databases/$(database)/documents/chats/$(chatId))
              .data.participants.hasAny([request.auth.uid]))

@@ -21,7 +21,7 @@ export default function AgentsPage() {
   const guard = useAuthGuard("any");
   const claim = useUserClaim();
   const { teams } = useTeamConfig();
-  const { prefs: userPrefs, savePrefs: saveUserPrefs } = useListUserPrefs(claim.uid, "agents");
+  const { prefs: userPrefs, savePrefs: saveUserPrefs, views, saveView, deleteView } = useListUserPrefs(claim.uid, "agents");
   // Team colors now come from the teams collection directly
 
   const [agents, setAgents] = useState<AgentRow[]>([]);
@@ -183,6 +183,9 @@ export default function AgentsPage() {
         onSaveSchema={handleSaveSchema}
         userPrefs={userPrefs}
         onSaveUserPrefs={saveUserPrefs}
+        views={views}
+        onSaveView={saveView}
+        onDeleteView={deleteView}
       />
 
       {editingRecord && <SubCollectionModal record={editingRecord} onClose={() => setEditingRecord(null)} />}

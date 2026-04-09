@@ -301,3 +301,31 @@ E0402 19:50:46.266450    1621 watch.go:40] Failed to load config from "/Users/ch
  {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0402 19:50:56.266511    1621 watch.go:40] Failed to load config from \"/Users/christianbearden/OutpostDigitalSolutions/dataconnect\": could not find dataconnect.yaml in `/Users/christianbearden/OutpostDigitalSolutions/dataconnect`\n"}}
 [info] [Firebase Plugin] Stopping Data Connect toolkit
 [warn] ⚠  Data Connect Emulator has exited upon receiving signal: SIGINT 
+[debug] [2026-04-09T17:24:15.858Z] [Firebase Plugin] Activating Firebase extension.
+[debug] [2026-04-09T17:24:20.713Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2026-04-09T17:24:20.714Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-04-09T17:24:20.714Z] > authorizing via signed-in user (admin@outpostdigitalsolutions.com)
+[debug] [2026-04-09T17:24:20.716Z] Checked if tokens are valid: true, expires at: 1775758060518
+[debug] [2026-04-09T17:24:20.716Z] Checked if tokens are valid: true, expires at: 1775758060518
+[debug] [2026-04-09T17:24:20.716Z] [Firebase Plugin] User found:  admin@outpostdigitalsolutions.com
+[info] [Firebase Plugin] (Core:Project) New user detected, fetching projects
+[debug] [2026-04-09T17:24:20.717Z] Checked if tokens are valid: true, expires at: 1775758060518
+[debug] [2026-04-09T17:24:20.718Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[info] [Firebase Plugin] Starting Data Connect toolkit (version 3.3.1) on port 50001
+[debug] [2026-04-09T17:24:21.027Z] 'fdc build' failed with error: Unable to build your Data Connect schema and connectors (exit code 1): E0409 12:24:21.024175   46404 cmd.go:43] Error loading data connect config: could not find dataconnect.yaml in `/Users/christianbearden/OutpostDigitalSolutions/dataconnect`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"'fdc build' failed with error: Unable to build your Data Connect schema and connectors (exit code 1): E0409 12:24:21.024175   46404 cmd.go:43] Error loading data connect config: could not find dataconnect.yaml in `/Users/christianbearden/OutpostDigitalSolutions/dataconnect`\n"}}
+[debug] [2026-04-09T17:24:21.027Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-04-09T17:24:21.027Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2026-04-09T17:24:21.027Z] Starting Data Connect Emulator with command {"binary":"/Users/christianbearden/.cache/firebase/emulators/dataconnect-emulator-3.3.1","args":["--logtostderr","-v=2","dev","--listen=localhost:50001","--config_dir=/Users/christianbearden/OutpostDigitalSolutions/dataconnect","--enable_output_schema_extensions=true","--enable_output_generated_sdk=true"],"optionalArgs":["listen","config_dir","enable_output_schema_extensions","enable_output_generated_sdk"],"joinArgs":true,"shell":false,"port":9399} {"metadata":{"emulator":{"name":"dataconnect"},"message":"Starting Data Connect Emulator with command {\"binary\":\"/Users/christianbearden/.cache/firebase/emulators/dataconnect-emulator-3.3.1\",\"args\":[\"--logtostderr\",\"-v=2\",\"dev\",\"--listen=localhost:50001\",\"--config_dir=/Users/christianbearden/OutpostDigitalSolutions/dataconnect\",\"--enable_output_schema_extensions=true\",\"--enable_output_generated_sdk=true\"],\"optionalArgs\":[\"listen\",\"config_dir\",\"enable_output_schema_extensions\",\"enable_output_generated_sdk\"],\"joinArgs\":true,\"shell\":false,\"port\":9399}"}}
+[info] i  dataconnect: Data Connect Emulator logging to dataconnect-debug.log {"metadata":{"emulator":{"name":"dataconnect"},"message":"Data Connect Emulator logging to dataconnect-debug.log"}}
+[debug] [2026-04-09T17:24:21.067Z] E0409 12:24:21.060357   46407 dev.go:83] Failed to load initial config from "/Users/christianbearden/OutpostDigitalSolutions/dataconnect": could not find dataconnect.yaml in `/Users/christianbearden/OutpostDigitalSolutions/dataconnect`
+E0409 12:24:21.062552   46407 watch.go:116] watchAllDir unable to walk dir `/Users/christianbearden/OutpostDigitalSolutions/dataconnect`: lstat /Users/christianbearden/OutpostDigitalSolutions/dataconnect: no such file or directory
+F0409 12:24:21.066043   46407 dev.go:102] Could not listen on address localhost:50001: listen tcp 127.0.0.1:50001: bind: address already in use
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0409 12:24:21.060357   46407 dev.go:83] Failed to load initial config from \"/Users/christianbearden/OutpostDigitalSolutions/dataconnect\": could not find dataconnect.yaml in `/Users/christianbearden/OutpostDigitalSolutions/dataconnect`\nE0409 12:24:21.062552   46407 watch.go:116] watchAllDir unable to walk dir `/Users/christianbearden/OutpostDigitalSolutions/dataconnect`: lstat /Users/christianbearden/OutpostDigitalSolutions/dataconnect: no such file or directory\nF0409 12:24:21.066043   46407 dev.go:102] Could not listen on address localhost:50001: listen tcp 127.0.0.1:50001: bind: address already in use\n"}}
+[error] ⬢  dataconnect: Data Connect Emulator has exited because its configured port 9399 is already in use. Are you running another copy of the emulator suite? {"metadata":{"emulator":{"name":"dataconnect"},"message":"Data Connect Emulator has exited because its configured port 9399 is already in use. Are you running another copy of the emulator suite?"}}
+[warn] ⚠  dataconnect: Fatal error occurred: 
+   Data Connect Emulator has exited with code: 1, 
+   stopping all running emulators {"metadata":{"emulator":{"name":"dataconnect"},"message":"Fatal error occurred: \n   Data Connect Emulator has exited with code: 1, \n   stopping all running emulators"}}
+[error] [Firebase Plugin] error:  {}
+[debug] [2026-04-09T17:24:24.107Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2026-04-09T17:24:24.107Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
