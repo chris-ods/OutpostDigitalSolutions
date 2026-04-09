@@ -2,11 +2,75 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // ── Receipts ─────────────────────────────────────────────────────────────
-    // Users can only read and write files in their own receipts folder.
-    match /receipts/{uid}/{filename} {
-      allow read, write: if request.auth != null
-        && request.auth.uid == uid;
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function authed() {
+      return request.auth != null;
     }
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    function userRole() {
+      return firestore.get(
+        /databases/(default)/documents/users/$(request.auth.uid)
+      ).data.role;
+    }
+    function isAdmin()   { return authed() && userRole() in ['admin', 'owner', 'developer']; }
+    function isManager() { return authed() && userRole() == 'manager'; }
+
+    // ── Profile photos ────────────────────────────────────────────────────────
+    // Upload path: profile-photos/{uid}/avatar
+    match /profile-photos/{uid}/{fileName} {
+      // Any authenticated user can view profile photos (needed for chat avatars)
+      allow read:   if authed();
+      // Only the user themselves can write their own photo (images only, max 5 MB)
+      allow write:  if authed() &&
+                       request.auth.uid == uid &&
+                       isImage() &&
+                       request.resource.size <= 5 * 1024 * 1024;
+    }
+
+    // ── Chat images ───────────────────────────────────────────────────────────
+    // Upload path: chat-images/{chatId}/{userId}/{filename}
+    // Images are tied to the uploader's UID — only they can write to their own path.
+    match /chat-images/{chatId}/{userId}/{fileName} {
+      allow read:  if authed();
+      allow write: if authed() &&
+                      request.auth.uid == userId &&
+                      isImage() &&
+                      request.resource.size <= 10 * 1024 * 1024;
+    }
+
+    // ── Onboarding packets ──────────────────────────────────────────────────
+    // Upload path: onboarding-packets/{uid}/{filename}
+    // ── Terms acceptance certificates ──────────────────────────────────────
+    match /terms-certificates/{uid}/{fileName} {
+      allow read:  if authed();
+      allow write: if authed() && request.auth.uid == uid &&
+                      request.resource.size <= 50 * 1024 * 1024;
+    }
+
+    match /onboarding-packets/{uid}/{fileName} {
+      allow read:  if authed();
+      allow write: if authed() && request.auth.uid == uid &&
+                      request.resource.size <= 50 * 1024 * 1024;
+    }
+
+    // ── Document library ──────────────────────────────────────────────────────
+    // Upload path: documents/{uploaderId}/{filename}
+    match /documents/{uploaderId}/{fileName} {
+      // All authenticated users can download org documents
+      allow read: if authed();
+      // Uploader can only write to their own path (max 50 MB)
+      allow create: if authed() &&
+                       request.auth.uid == uploaderId &&
+                       request.resource.size <= 50 * 1024 * 1024;
+      // Admins, managers, or the original uploader can update/delete
+      allow update, delete: if authed() && (
+        isAdmin() ||
+        isManager() ||
+        request.auth.uid == uploaderId
+      );
+    }
+
   }
 }

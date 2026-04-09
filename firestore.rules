@@ -2,22 +2,312 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Receipts ─────────────────────────────────────────────────────────────
-    // Each user can only read, write, and delete their own receipts.
-    match /receipts/{receiptId} {
-      allow read, delete: if request.auth != null
-        && request.auth.uid == resource.data.uid;
-      allow create: if request.auth != null
-        && request.auth.uid == request.resource.data.uid;
-      allow update: if request.auth != null
-        && request.auth.uid == resource.data.uid
-        && request.auth.uid == request.resource.data.uid;
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function authed() {
+      return request.auth != null;
+    }
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function isAdmin()     { return authed() && userDoc().role in ['admin', 'owner', 'developer']; }
+    function isOwner()     { return authed() && userDoc().role in ['owner', 'developer']; }
+    function isDeveloper() { return authed() && userDoc().role == 'developer'; }
+    function isManager()   { return authed() && userDoc().role == 'manager'; }
+
+    // ── Public / pre-auth ─────────────────────────────────────────────────────
+    match /usernames/{username} {
+      allow read: if true;
+    }
+    match /settings/teamConfig {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+    match /settings/chatConfig {
+      allow read:  if authed();
+      allow write: if isOwner();
+    }
+    match /settings/leaderboardConfig {
+      allow read:  if authed();
+      allow write: if isOwner();
+    }
+    match /settings/agentTabPermissions {
+      allow read:  if authed();
+      allow write: if isOwner();
+    }
+    match /settings/licenseLookupPermissions {
+      allow read:  if authed();
+      allow write: if isOwner();
+    }
+    match /settings/{schemaId} {
+      allow read:  if authed();
+      allow write: if isOwner();
+    }
+    // ── Teams ─────────────────────────────────────────────────────────────
+    match /teams/{teamId} {
+      allow read:  if true;
+      allow write: if isOwner();
+    }
+    match /onboardingRequests/{requestId} {
+      // Public create — the join request form is pre-auth
+      allow create: if true;
+      // Only admins can list/update/delete requests (approval workflow)
+      allow read, update, delete: if isAdmin();
+    }
+    match /passwordResetRequests/{requestId} {
+      // Public create — users locked out can request an admin reset
+      allow create: if true;
+      // Only admins can view and manage these requests
+      allow read, update, delete: if isAdmin();
+    }
+    // Contractor ID uniqueness registry — public read so join form can check,
+    // authenticated write so only the approval flow can claim an ID.
+    match /contractorIds/{contractorId} {
+      allow read:  if true;
+      allow write: if authed();
+    }
+
+    // ── Audit Log — server writes only, admin reads ───────────────────────────
+    match /auditLog/{logId} {
+      allow read: if isAdmin();
+      allow write: if false; // server-side only via Admin SDK
+    }
+
+    // ── Users ─────────────────────────────────────────────────────────────────
+    // All authenticated users can read profiles (needed for chat search and
+    // DM name resolution). Only the user themselves or an admin can write.
+    // Role changes are admin-only — a user cannot elevate their own role.
+    match /users/{userId} {
+      allow read:  if authed();
+      allow write: if authed() && (
+        isDeveloper() ||
+        (
+          isAdmin() &&
+          // resource is null when creating a new doc — allow creation freely for admins
+          (resource == null || (
+            resource.data.role != 'owner' &&
+            resource.data.role != 'developer'
+          )) &&
+          request.resource.data.role != 'owner' &&
+          request.resource.data.role != 'developer' &&
+          // Admins cannot change their own role
+          (request.auth.uid == userId ?
+            (resource != null && request.resource.data.role == resource.data.role) : true)
+        ) ||
+        // Non-admin users can update their own existing doc without changing role
+        (request.auth.uid == userId && !isAdmin() &&
+          resource != null && request.resource.data.role == resource.data.role)
+      );
+
+      match /clientViews/{viewId} {
+        allow read, write: if authed() && request.auth.uid == userId;
+      }
+
+      // Per-user list accessibility preferences (fontSize etc.)
+      match /listPrefs/{listKey} {
+        allow read, write: if authed() && request.auth.uid == userId;
+      }
+
+      // User settings (signature on file, preferences)
+      match /settings/{settingId} {
+        allow read, write: if authed() && request.auth.uid == userId;
+      }
+
+      // Credentials — all authenticated can read (agents see own); admin write
+      match /credentials/{credId} {
+        allow read:  if authed();
+        allow write: if isAdmin();
+      }
+
+      // Writing numbers — admins write; all authenticated can read (CSRs pre-fill submissions)
+      match /writingNumbers/{docId} {
+        allow read: if authed();
+        allow write: if isAdmin();
+      }
+
+      // State licenses — admins write; all authenticated can read
+      match /stateLicenses/{docId} {
+        allow read: if authed();
+        allow write: if isAdmin();
+      }
+
+      // Identity / secrets — user can read their own; admin can read/write all
+      match /secrets/{docId} {
+        allow read:  if authed() && (request.auth.uid == userId || isAdmin());
+        allow write: if isAdmin();
+      }
     }
 
     // ── Clients ───────────────────────────────────────────────────────────────
-    // Authenticated users only — role enforcement is handled in the app.
-    match /{collection}/{docId} {
-      allow read, write: if request.auth != null;
+    // Read: all authenticated users can read client records.
+    //   - Reps need collection-level read for the leaderboard and dashboard.
+    //   - The UI enforces per-rep scoping; the raw data is internal-only.
+    // Write: role-scoped as before.
+    // ── Client config (permissions matrix) ──────────────────────────────────
+    match /clients/_config {
+      allow read:  if authed();
+      allow write: if isAdmin();
     }
+    // ── Client saved views ───────────────────────────────────────────────────
+    match /clients/_config/views/{viewId} {
+      allow read, write: if authed();
+    }
+    // ── Client records ───────────────────────────────────────────────────────
+    // Read: all authenticated (app-level filtering handles data scope per role)
+    // Create: admin, manager, or the agent themselves
+    // Update: admin/owner/dev can edit anything.
+    //         Managers can edit any record on their team or where they're the portal.
+    //         Reps can only edit their own records (agentId matches UID).
+    //         Reps/managers cannot change adminStatus or agentStatus.
+    // Delete: admin only
+    match /clients/{clientId} {
+      allow read: if authed();
+      allow create: if authed() && (
+        isAdmin() ||
+        isManager() ||
+        request.resource.data.agentId == request.auth.uid
+      );
+      allow update: if authed() && (
+        isAdmin() ||
+        (
+          isManager() &&
+          (resource.data.agentTeamNumber == userDoc().teamNumber || resource.data.portal == request.auth.uid) &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['adminStatus', 'agentStatus'])
+        ) ||
+        (
+          resource.data.agentId == request.auth.uid &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['adminStatus', 'agentStatus'])
+        )
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ── Deleted clients (soft delete archive) ─────────────────────────────────
+    // Admins can write (soft delete moves records here). Only developer can read/recover.
+    match /deletedClients/{docId} {
+      allow read:   if isDeveloper();
+      allow create: if isAdmin();
+      allow update: if isDeveloper();
+      allow delete: if isDeveloper();
+    }
+
+    // ── Payroll entries + imported CSV rows ───────────────────────────────────
+    // Admins and managers can read/write payroll data; reps cannot.
+    match /payroll/{weekStart}/entries/{userId} {
+      allow read, write: if authed() && (isAdmin() || isManager());
+    }
+    match /payroll/{weekStart}/imported/{rowId} {
+      allow read, write: if authed() && (isAdmin() || isManager());
+    }
+
+    // ── Payroll records (locked bi-weekly pay periods) ──────────────────────
+    // Admins and managers can read. Admins can create/update (lock, mark paid).
+    // Only developers can delete (unlock removes the lock flag, not the doc).
+    match /payrollRecords/{periodStart} {
+      allow read:   if authed() && (isAdmin() || isManager());
+      allow create, update: if isAdmin();
+      allow delete: if isDeveloper();
+    }
+
+    // ── Payroll archives (point-in-time snapshots) ────────────────────────────
+    // Admins and managers can view archives; only admins can create/overwrite.
+    match /payrollArchives/{weekStart} {
+      allow read:  if authed() && (isAdmin() || isManager());
+      allow write: if isAdmin();
+    }
+
+    // ── Document library ──────────────────────────────────────────────────────
+    // Admins see all. Managers see their own + same-team docs. Reps see only their own.
+    // ── Onboarding certificates ─────────────────────────────────────────────
+    match /onboardingCertificates/{uid} {
+      allow read:   if authed() && (isAdmin() || request.auth.uid == uid);
+      allow create: if authed() && request.auth.uid == uid;
+      allow update: if isAdmin();
+      allow delete: if false; // never delete signed agreements
+    }
+
+    // ── Terms acceptances (T&C signing records) ──────────────────────────────
+    match /termsAcceptances/{docId} {
+      allow read:   if authed();
+      allow create: if authed();
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    match /documents/{docId} {
+      allow read: if authed() && (
+        isAdmin() ||
+        resource.data.uploadedBy == request.auth.uid ||
+        (isManager() && resource.data.uploadedByTeam == userDoc().teamNumber)
+      );
+      allow create: if authed();
+      allow update, delete: if authed() && (
+        isAdmin() ||
+        isManager() ||
+        resource.data.uploadedBy == request.auth.uid
+      );
+    }
+
+    // ── Presence ──────────────────────────────────────────────────────────────
+    // Tracks online/offline status for the active-users indicator.
+    match /presence/{uid} {
+      allow read:  if authed();
+      allow write: if authed() && request.auth.uid == uid;
+    }
+
+    // ── Chat ──────────────────────────────────────────────────────────────────
+    // General team chat: any authenticated user.
+    // ── Chat Archives — server writes, admin reads ─────────────────────────
+    match /chatArchives/{chatId} {
+      allow read: if isAdmin();
+      allow write: if false; // server-side only via Admin SDK
+      match /weeks/{weekId} {
+        allow read: if isAdmin();
+        allow write: if false;
+      }
+    }
+
+    // DM chats: participants only. All roles can DM — no permission restriction.
+    match /chats/{chatId} {
+      // resource == null means the document does not yet exist (new DM check).
+      // Allow the read so getDoc() returns an empty snapshot instead of throwing.
+      allow read: if authed() && (
+        chatId == "general" ||
+        resource == null ||
+        resource.data.participants.hasAny([request.auth.uid])
+      );
+      // Any authenticated user can create a DM they are part of
+      allow create: if authed() && (
+        chatId == "general" ||
+        request.resource.data.participants.hasAll([request.auth.uid])
+      );
+      // Participants can update metadata (last-message, deletedBy); admins can manage any channel.
+      // Any participant may soft-delete by adding their own UID to deletedBy (arrayUnion).
+      allow update: if authed() && (
+        chatId == "general" ||
+        resource.data.participants.hasAny([request.auth.uid]) ||
+        isAdmin()
+      );
+      // Only admins can delete group channels
+      allow delete: if isAdmin();
+
+      match /messages/{messageId} {
+        // Guard with exists() before calling get() to avoid null-dereference in rules
+        allow read: if authed() && (
+          chatId == "general" ||
+          (exists(/databases/$(database)/documents/chats/$(chatId)) &&
+           get(/databases/$(database)/documents/chats/$(chatId))
+             .data.participants.hasAny([request.auth.uid]))
+        );
+        // Only the sender can post; parent chat must exist and include them
+        allow create: if authed() &&
+          request.resource.data.senderId == request.auth.uid && (
+            chatId == "general" ||
+            (exists(/databases/$(database)/documents/chats/$(chatId)) &&
+             get(/databases/$(database)/documents/chats/$(chatId))
+               .data.participants.hasAny([request.auth.uid]))
+          );
+      }
+    }
+
   }
 }

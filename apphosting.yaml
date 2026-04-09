@@ -3,8 +3,45 @@
 runConfig:
   minInstances: 0
 
-# Environment variables and secrets.
 env:
+  # Firebase client config — Outpost Digital Solutions Firebase project
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: "AIzaSyDzOehZykTrdgDpHDq6v9m7Qm7GQf5IuSg"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: "outpostdigitalsolutions.firebaseapp.com"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: "outpostdigitalsolutions"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: "outpostdigitalsolutions.firebasestorage.app"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "3015430856"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:3015430856:web:4d1d26b6e0d43f0d530bfd"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Google Analytics (preserved from previous ODS apphosting config)
   - variable: GA_PROPERTY_ID
     value: "528518036"
     availability:
@@ -17,5 +54,18 @@ env:
 
   - variable: GA_PRIVATE_KEY
     secret: GA_PRIVATE_KEY
+    availability:
+      - RUNTIME
+
+  # TODO: Provision these in Google Cloud Secret Manager before deploying.
+  # The encryption key must be a 64-char hex string (32 bytes).
+  # Until provisioned, encryption-dependent features and the cron route will fail at runtime.
+  - variable: ATX_ENCRYPTION_KEY
+    secret: atx-encryption-key
+    availability:
+      - RUNTIME
+
+  - variable: CRON_SECRET
+    secret: cron-secret
     availability:
       - RUNTIME

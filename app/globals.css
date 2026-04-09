@@ -1,0 +1,230 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Light mode (default) ──────────────────────────────────────────────────── */
+:root {
+  --app-bg:           #f9fafb;   /* gray-50  */
+  --app-surface:      #ffffff;   /* white    */
+  --app-surface-2:    #f3f4f6;   /* gray-100 */
+  --app-border:       #e5e7eb;   /* gray-200 */
+  --app-border-2:     #d1d5db;   /* gray-300 */
+  --app-text:         #111827;   /* gray-900 */
+  --app-text-2:       #374151;   /* gray-700 */
+  --app-text-3:       #4b5563;   /* gray-600 */
+  --app-text-4:       #9ca3af;   /* gray-400 */
+  --app-text-5:       #d1d5db;   /* gray-300 */
+  --app-accent:       #2563eb;   /* blue-600 */
+  --app-accent-hover: #1d4ed8;   /* blue-700 */
+  --app-success:      #16a34a;   /* green-600 */
+  --app-success-soft: #dcfce7;   /* green-100 */
+  --app-warning:      #d97706;   /* amber-600 */
+  --app-warning-soft: #fef3c7;   /* amber-100 */
+  --app-danger:       #dc2626;   /* red-600 */
+  --app-danger-soft:  #fee2e2;   /* red-100 */
+
+  /* ── SwiftUI System Colors ──────────────────────────────────────────── */
+  --app-sys-red:        #FF3B30;
+  --app-sys-orange:     #FF9500;
+  --app-sys-yellow:     #FFCC00;
+  --app-sys-green:      #34C759;
+  --app-sys-mint:       #00C7BE;
+  --app-sys-teal:       #30B0C7;
+  --app-sys-cyan:       #32ADE6;
+  --app-sys-blue:       #007AFF;
+  --app-sys-indigo:     #5856D6;
+  --app-sys-purple:     #AF52DE;
+  --app-sys-pink:       #FF2D55;
+  --app-sys-brown:      #A2845E;
+
+  /* ── SwiftUI Gray Scale ─────────────────────────────────────────────── */
+  --app-sys-gray:       #8E8E93;
+  --app-sys-gray2:      #AEAEB2;
+  --app-sys-gray3:      #C7C7CC;
+  --app-sys-gray4:      #D1D1D6;
+  --app-sys-gray5:      #E5E5EA;
+  --app-sys-gray6:      #F2F2F7;
+
+  /* ── SwiftUI Label Colors ───────────────────────────────────────────── */
+  --app-sys-label:              rgba(0, 0, 0, 1.0);
+  --app-sys-secondary-label:    rgba(60, 60, 67, 0.6);
+  --app-sys-tertiary-label:     rgba(60, 60, 67, 0.3);
+  --app-sys-quaternary-label:   rgba(60, 60, 67, 0.18);
+
+  /* ── SwiftUI Fill Colors ────────────────────────────────────────────── */
+  --app-sys-fill:               rgba(120, 120, 128, 0.2);
+  --app-sys-secondary-fill:     rgba(120, 120, 128, 0.16);
+  --app-sys-tertiary-fill:      rgba(120, 120, 128, 0.12);
+  --app-sys-quaternary-fill:    rgba(120, 120, 128, 0.08);
+
+  /* ── SwiftUI Background Colors ──────────────────────────────────────── */
+  --app-sys-bg:                 #FFFFFF;
+  --app-sys-secondary-bg:       #F2F2F7;
+  --app-sys-tertiary-bg:        #FFFFFF;
+
+  /* ── SwiftUI Grouped Background Colors ──────────────────────────────── */
+  --app-sys-grouped-bg:           #F2F2F7;
+  --app-sys-secondary-grouped-bg: #FFFFFF;
+  --app-sys-tertiary-grouped-bg:  #F2F2F7;
+
+  /* ── SwiftUI Separator Colors ───────────────────────────────────────── */
+  --app-sys-separator:          rgba(60, 60, 67, 0.29);
+  --app-sys-opaque-separator:   #C6C6C8;
+}
+
+/* ── Dark mode ─────────────────────────────────────────────────────────────── */
+.dark {
+  --app-bg:           #030712;   /* gray-950 */
+  --app-surface:      #111827;   /* gray-900 */
+  --app-surface-2:    #1f2937;   /* gray-800 */
+  --app-border:       #1f2937;   /* gray-800 */
+  --app-border-2:     #374151;   /* gray-700 */
+  --app-text:         #f9fafb;   /* gray-50  */
+  --app-text-2:       #d1d5db;   /* gray-300 */
+  --app-text-3:       #9ca3af;   /* gray-400 */
+  --app-text-4:       #6b7280;   /* gray-500 */
+  --app-text-5:       #4b5563;   /* gray-600 */
+  --app-accent:       #3b82f6;   /* blue-500 */
+  --app-accent-hover: #2563eb;   /* blue-600 */
+  --app-success:      #22c55e;   /* green-500 */
+  --app-success-soft: rgba(34,197,94,0.15);
+  --app-warning:      #f59e0b;   /* amber-500 */
+  --app-warning-soft: rgba(245,158,11,0.15);
+  --app-danger:       #ef4444;   /* red-500 */
+  --app-danger-soft:  rgba(239,68,68,0.15);
+
+  /* ── SwiftUI System Colors ──────────────────────────────────────────── */
+  --app-sys-red:        #FF453A;
+  --app-sys-orange:     #FF9F0A;
+  --app-sys-yellow:     #FFD60A;
+  --app-sys-green:      #30D158;
+  --app-sys-mint:       #63E6E2;
+  --app-sys-teal:       #40CBE0;
+  --app-sys-cyan:       #64D2FF;
+  --app-sys-blue:       #0A84FF;
+  --app-sys-indigo:     #5E5CE6;
+  --app-sys-purple:     #BF5AF2;
+  --app-sys-pink:       #FF375F;
+  --app-sys-brown:      #AC8E68;
+
+  /* ── SwiftUI Gray Scale ─────────────────────────────────────────────── */
+  --app-sys-gray:       #8E8E93;
+  --app-sys-gray2:      #636366;
+  --app-sys-gray3:      #48484A;
+  --app-sys-gray4:      #3A3A3C;
+  --app-sys-gray5:      #2C2C2E;
+  --app-sys-gray6:      #1C1C1E;
+
+  /* ── SwiftUI Label Colors ───────────────────────────────────────────── */
+  --app-sys-label:              rgba(255, 255, 255, 1.0);
+  --app-sys-secondary-label:    rgba(235, 235, 245, 0.6);
+  --app-sys-tertiary-label:     rgba(235, 235, 245, 0.3);
+  --app-sys-quaternary-label:   rgba(235, 235, 245, 0.18);
+
+  /* ── SwiftUI Fill Colors ────────────────────────────────────────────── */
+  --app-sys-fill:               rgba(120, 120, 128, 0.36);
+  --app-sys-secondary-fill:     rgba(120, 120, 128, 0.32);
+  --app-sys-tertiary-fill:      rgba(120, 120, 128, 0.24);
+  --app-sys-quaternary-fill:    rgba(120, 120, 128, 0.18);
+
+  /* ── SwiftUI Background Colors ──────────────────────────────────────── */
+  --app-sys-bg:                 #000000;
+  --app-sys-secondary-bg:       #1C1C1E;
+  --app-sys-tertiary-bg:        #2C2C2E;
+
+  /* ── SwiftUI Grouped Background Colors ──────────────────────────────── */
+  --app-sys-grouped-bg:           #000000;
+  --app-sys-secondary-grouped-bg: #1C1C1E;
+  --app-sys-tertiary-grouped-bg:  #2C2C2E;
+
+  /* ── SwiftUI Separator Colors ───────────────────────────────────────── */
+  --app-sys-separator:          rgba(84, 84, 88, 0.6);
+  --app-sys-opaque-separator:   #38383A;
+}
+
+/* ── Text size accessibility ───────────────────────────────────────────────── */
+:root                        { font-size: 16px; }
+:root[data-text-size="sm"]   { font-size: 14px; }
+:root[data-text-size="lg"]   { font-size: 18px; }
+:root[data-text-size="xl"]   { font-size: 20px; }
+
+/* ── Tailwind v4 theme tokens ──────────────────────────────────────────────── */
+@theme inline {
+  --color-app-bg:           var(--app-bg);
+  --color-app-surface:      var(--app-surface);
+  --color-app-surface-2:    var(--app-surface-2);
+  --color-app-border:       var(--app-border);
+  --color-app-border-2:     var(--app-border-2);
+  --color-app-text:         var(--app-text);
+  --color-app-text-2:       var(--app-text-2);
+  --color-app-text-3:       var(--app-text-3);
+  --color-app-text-4:       var(--app-text-4);
+  --color-app-text-5:       var(--app-text-5);
+  --color-app-accent:       var(--app-accent);
+  --color-app-accent-hover: var(--app-accent-hover);
+  --color-app-success:      var(--app-success);
+  --color-app-success-soft: var(--app-success-soft);
+  --color-app-warning:      var(--app-warning);
+  --color-app-warning-soft: var(--app-warning-soft);
+  --color-app-danger:       var(--app-danger);
+  --color-app-danger-soft:  var(--app-danger-soft);
+
+  --color-background: var(--app-bg);
+  --color-foreground: var(--app-text);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* ── SwiftUI System Colors ── */
+  --color-app-sys-red:        var(--app-sys-red);
+  --color-app-sys-orange:     var(--app-sys-orange);
+  --color-app-sys-yellow:     var(--app-sys-yellow);
+  --color-app-sys-green:      var(--app-sys-green);
+  --color-app-sys-mint:       var(--app-sys-mint);
+  --color-app-sys-teal:       var(--app-sys-teal);
+  --color-app-sys-cyan:       var(--app-sys-cyan);
+  --color-app-sys-blue:       var(--app-sys-blue);
+  --color-app-sys-indigo:     var(--app-sys-indigo);
+  --color-app-sys-purple:     var(--app-sys-purple);
+  --color-app-sys-pink:       var(--app-sys-pink);
+  --color-app-sys-brown:      var(--app-sys-brown);
+
+  /* ── SwiftUI Gray Scale ── */
+  --color-app-sys-gray:       var(--app-sys-gray);
+  --color-app-sys-gray2:      var(--app-sys-gray2);
+  --color-app-sys-gray3:      var(--app-sys-gray3);
+  --color-app-sys-gray4:      var(--app-sys-gray4);
+  --color-app-sys-gray5:      var(--app-sys-gray5);
+  --color-app-sys-gray6:      var(--app-sys-gray6);
+
+  /* ── SwiftUI Labels ── */
+  --color-app-sys-label:              var(--app-sys-label);
+  --color-app-sys-secondary-label:    var(--app-sys-secondary-label);
+  --color-app-sys-tertiary-label:     var(--app-sys-tertiary-label);
+  --color-app-sys-quaternary-label:   var(--app-sys-quaternary-label);
+
+  /* ── SwiftUI Fills ── */
+  --color-app-sys-fill:               var(--app-sys-fill);
+  --color-app-sys-secondary-fill:     var(--app-sys-secondary-fill);
+  --color-app-sys-tertiary-fill:      var(--app-sys-tertiary-fill);
+  --color-app-sys-quaternary-fill:    var(--app-sys-quaternary-fill);
+
+  /* ── SwiftUI Backgrounds ── */
+  --color-app-sys-bg:                   var(--app-sys-bg);
+  --color-app-sys-secondary-bg:         var(--app-sys-secondary-bg);
+  --color-app-sys-tertiary-bg:          var(--app-sys-tertiary-bg);
+
+  /* ── SwiftUI Grouped Backgrounds ── */
+  --color-app-sys-grouped-bg:             var(--app-sys-grouped-bg);
+  --color-app-sys-secondary-grouped-bg:   var(--app-sys-secondary-grouped-bg);
+  --color-app-sys-tertiary-grouped-bg:    var(--app-sys-tertiary-grouped-bg);
+
+  /* ── SwiftUI Separators ── */
+  --color-app-sys-separator:          var(--app-sys-separator);
+  --color-app-sys-opaque-separator:   var(--app-sys-opaque-separator);
+}
+
+body {
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-family: var(--font-geist-sans, ui-sans-serif), system-ui, -apple-system, sans-serif;
+}
