@@ -7,12 +7,12 @@ export interface Agreement {
 export const AGREEMENTS: Agreement[] = [
   {
     id: "onboarding-packet",
-    title: "ATXFG LLC - Onboarding Packet",
-    body: `Welcome to ATX Financial Group! We are excited to have you onboard as an independent contractor. Please carefully review and complete this onboarding packet to begin your work with us.
+    title: "Outpost Digital Solutions LLC - Onboarding Packet",
+    body: `Welcome to Outpost Digital Solutions! We are excited to have you onboard as an independent contractor. Please carefully review and complete this onboarding packet to begin your work with us.
 
 Key Expectations and Responsibilities
 
-- You are joining ATXFG as an independent contractor (1099), not an employee.
+- You are joining Outpost Digital Solutions as an independent contractor (1099), not an employee.
 - You are responsible for your own taxes and providing your own tools and transportation.
 - Professionalism and punctuality are expected at all times.
 - All commissions are paid via EFT after completing required forms.
@@ -24,22 +24,22 @@ What to Bring on Your First Day:
 - Pen and paper for notes
 - Reliable transportation to our office at 6504 Bridge Point Pkway, Austin, TX 78730
 
-For any questions, contact: aatxfg@gmail.com
+For any questions, contact: support@outpostdigitalsolutions.com
 
-We look forward to supporting your success and welcoming you to the ATX Financial Group family.`,
+We look forward to supporting your success and welcoming you to the Outpost Digital Solutions family.`,
   },
   {
     id: "eft-authorization",
-    title: "ATXFG LLC - 1099 Commission EFT Payroll Authorization Form",
-    body: `This form authorizes ATXFG LLC to deposit commission payments via EFT (direct deposit) to the bank account designated below. By completing and signing this form, the agent acknowledges and agrees to the following:
+    title: "Outpost Digital Solutions LLC - 1099 Commission EFT Payroll Authorization Form",
+    body: `This form authorizes Outpost Digital Solutions LLC to deposit commission payments via EFT (direct deposit) to the bank account designated below. By completing and signing this form, the agent acknowledges and agrees to the following:
 
-1. All payments are for commissions earned as an independent contractor. You are not an employee of ATXFG LLC.
+1. All payments are for commissions earned as an independent contractor. You are not an employee of Outpost Digital Solutions LLC.
 
-2. Payments will be reported on IRS Form 1099-NEC. No federal income tax, Social Security, Medicare, or other withholding taxes will be deducted by ATXFG LLC.
+2. Payments will be reported on IRS Form 1099-NEC. No federal income tax, Social Security, Medicare, or other withholding taxes will be deducted by Outpost Digital Solutions LLC.
 
 3. As an independent contractor, you are solely responsible for reporting and paying all federal, state, and local taxes associated with these payments.
 
-4. Because you are not an employee, you are not eligible for unemployment benefits if your engagement with ATXFG LLC is terminated.
+4. Because you are not an employee, you are not eligible for unemployment benefits if your engagement with Outpost Digital Solutions LLC is terminated.
 
 5. By signing below, you confirm that all banking information is accurate and that you accept responsibility for any delays or errors caused by incorrect information.`,
   },
@@ -48,7 +48,7 @@ We look forward to supporting your success and welcoming you to the ATX Financia
     title: "Independent Contractor Agreement",
     body: `This Independent Contractor Agreement ("Agreement") is entered into by and between:
 
-ATXFG LLC ("Company") and the undersigned agent ("Contractor").
+Outpost Digital Solutions LLC ("Company") and the undersigned agent ("Contractor").
 
 This Agreement is made effective as of the date signed by Contractor.
 
@@ -75,24 +75,24 @@ This Agreement shall be governed by and construed in accordance with the laws of
   },
   {
     id: "contractor-acknowledgment",
-    title: "ATXFG LLC - Contractor Acknowledgment & Expectations",
-    body: `This document confirms that I, the undersigned contractor, understand and agree to the following terms and expectations as an independent contractor for ATXFG LLC:
+    title: "Outpost Digital Solutions LLC - Contractor Acknowledgment & Expectations",
+    body: `This document confirms that I, the undersigned contractor, understand and agree to the following terms and expectations as an independent contractor for Outpost Digital Solutions LLC:
 
-1. I acknowledge that I am an independent contractor (1099) and not an employee of ATXFG LLC.
+1. I acknowledge that I am an independent contractor (1099) and not an employee of Outpost Digital Solutions LLC.
 
 2. I understand that I am solely responsible for reporting and paying all federal, state, and local taxes on commissions earned.
 
-3. I acknowledge that I am not eligible for unemployment, workers' compensation, or employee benefits from ATXFG LLC.
+3. I acknowledge that I am not eligible for unemployment, workers' compensation, or employee benefits from Outpost Digital Solutions LLC.
 
-4. I agree to maintain professionalism, punctuality, and a positive representation of ATXFG LLC at all times.
+4. I agree to maintain professionalism, punctuality, and a positive representation of Outpost Digital Solutions LLC at all times.
 
-5. I agree not to share, distribute, or use ATXFG LLC leads, scripts, or client information outside of company business (NDA).
+5. I agree not to share, distribute, or use Outpost Digital Solutions LLC leads, scripts, or client information outside of company business (NDA).
 
-6. I agree not to solicit ATXFG LLC clients, leads, or agents for any competing business during my contract and for 12 months after termination.
+6. I agree not to solicit Outpost Digital Solutions LLC clients, leads, or agents for any competing business during my contract and for 12 months after termination.
 
 7. I am responsible for my own laptop/computer, phone, internet, transportation, and required insurance licensing.
 
-8. I understand that all company-provided accounts, emails, and systems remain property of ATXFG LLC and must be returned or relinquished upon termination.
+8. I understand that all company-provided accounts, emails, and systems remain property of Outpost Digital Solutions LLC and must be returned or relinquished upon termination.
 
 9. I understand that violation of these expectations may result in immediate termination and potential forfeiture of future commissions as per the Independent Contractor Agreement.
 
@@ -100,8 +100,8 @@ By signing below, I acknowledge that I have read, understood, and agreed to the 
   },
   {
     id: "dialer-addendum",
-    title: "ATXFG LLC - Dialer Performance & Contract Requirements Addendum",
-    body: `This addendum outlines the performance expectations and requirements for independent contractor dialers engaged by ATXFG LLC. By signing below, the contractor acknowledges that meeting these requirements is a condition for maintaining an active 1099 contract.
+    title: "Outpost Digital Solutions LLC - Dialer Performance & Contract Requirements Addendum",
+    body: `This addendum outlines the performance expectations and requirements for independent contractor dialers engaged by Outpost Digital Solutions LLC. By signing below, the contractor acknowledges that meeting these requirements is a condition for maintaining an active 1099 contract.
 
 1. Weekly Sales Contribution: Must generate sufficient qualified appointments to directly contribute to at least 13 closed sales per week for your assigned licensed manager.
 

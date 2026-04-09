@@ -175,7 +175,7 @@ async function generateCertificatePDF({
     pdf.setFontSize(8);
     pdf.setTextColor(148, 163, 184);
     pdf.text(
-      `ATX Financial Group — Terms Acceptance Certificate — Page ${i} of ${pages}`,
+      `Outpost Digital Solutions — Terms Acceptance Certificate — Page ${i} of ${pages}`,
       w / 2, pageHeight - 30, { align: "center" },
     );
   }

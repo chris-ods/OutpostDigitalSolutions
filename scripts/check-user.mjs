@@ -6,10 +6,11 @@ import { getFirestore } from "firebase-admin/firestore";
 const uid = process.argv[2];
 if (!uid) { console.error("Usage: node scripts/check-user.mjs <uid>"); process.exit(1); }
 
+// TODO: Replace with path to your Outpost Digital Solutions Firebase admin service account JSON.
 const app = initializeApp({
   credential: cert(JSON.parse(
     (await import("fs")).readFileSync(
-      new URL("../../Downloads/atx-financial-firebase-adminsdk-fbsvc-bb8d46aff7.json", import.meta.url),
+      new URL("../../Downloads/outpostdigitalsolutions-firebase-adminsdk.json", import.meta.url),
       "utf8"
     )
   )),

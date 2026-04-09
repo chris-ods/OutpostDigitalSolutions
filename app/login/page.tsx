@@ -299,7 +299,7 @@ export default function LoginPage() {
             Request Portal Access
           </Link>
           <p className="text-app-text-5 text-xs">
-            New to ATX Financial Group? Request access above.
+            New to Outpost Digital Solutions? Request access above.
           </p>
         </div>
       </div>

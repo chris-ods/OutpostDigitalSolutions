@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       alreadyExists = true;
     } catch {
       // User doesn't exist — create one with a temp password
-      const tempPassword = `ATX-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+      const tempPassword = `ODS-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
       const newUser = await adminAuth.createUser({
         email,
         password: tempPassword,

@@ -9,21 +9,21 @@ interface BrandLogoProps {
   priority?: boolean;
 }
 
-/** Full ATX Financial Group logo — auto-switches between light/dark variants. */
+/** Full Outpost Digital Solutions logo — auto-switches between light/dark variants. */
 export function BrandLogo({ width = 220, height = 78, className = "", priority = false }: BrandLogoProps) {
   return (
     <>
       <Image
-        src="/atx_logo.png"
-        alt="ATX Financial Group"
+        src="/ods_logo.png"
+        alt="Outpost Digital Solutions"
         width={width}
         height={height}
         priority={priority}
         className={`object-contain dark:hidden ${className}`}
       />
       <Image
-        src="/atx_logo_dark.png"
-        alt="ATX Financial Group"
+        src="/ods_logo_dark.png"
+        alt="Outpost Digital Solutions"
         width={width}
         height={height}
         priority={priority}
@@ -38,12 +38,12 @@ interface BrandIconProps {
   className?: string;
 }
 
-/** Small square ATX icon for sidebar / compact spaces. */
+/** Small square Outpost Digital Solutions icon for sidebar / compact spaces. */
 export function BrandIcon({ size = 36, className = "" }: BrandIconProps) {
   return (
     <Image
-      src="/atx_icon.png"
-      alt="ATX Financial Group"
+      src="/ods_icon.png"
+      alt="Outpost Digital Solutions"
       width={size}
       height={size}
       className={`object-contain ${className}`}

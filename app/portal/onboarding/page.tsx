@@ -270,7 +270,7 @@ export default function OnboardingPage() {
         const now = new Date();
         let logoDataUrl: string | undefined;
         try {
-          const logoRes = await fetch("/atx_logo_dark.png");
+          const logoRes = await fetch("/ods_logo_dark.png");
           const logoBlob = await logoRes.blob();
           const img = new Image();
           const imgUrl = URL.createObjectURL(logoBlob);
@@ -356,7 +356,7 @@ export default function OnboardingPage() {
         <div className="bg-app-surface border border-app-border rounded-2xl p-6 md:p-10 shadow-xl mt-4">
           <div className="mb-6">
             <h1 className="text-xl font-bold text-app-text">
-              {step === 1 && "Welcome to ATX Financial Group"}
+              {step === 1 && "Welcome to Outpost Digital Solutions"}
               {step === 2 && "Identity & Banking"}
               {step === 3 && "Review & Sign Agreements"}
             </h1>

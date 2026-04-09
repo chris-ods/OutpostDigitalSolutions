@@ -62,7 +62,7 @@ export async function generateOnboardingPDF({
   pdf.setFontSize(18);
   pdf.setFont("helvetica", "bold");
   const titleX = logoDataUrl ? margin + 78 : margin;
-  pdf.text("ATX Financial Group", titleX, 42);
+  pdf.text("Outpost Digital Solutions", titleX, 42);
   pdf.setFontSize(10);
   pdf.setFont("helvetica", "normal");
   pdf.setTextColor(180, 190, 210);
@@ -206,7 +206,7 @@ export async function generateOnboardingPDF({
     pdf.setFontSize(7);
     pdf.setTextColor(148, 163, 184);
     pdf.text(
-      `ATXFG LLC — Onboarding Packet — ${fingerprint.toUpperCase()} — Page ${i} of ${pages}`,
+      `Outpost Digital Solutions LLC — Onboarding Packet — ${fingerprint.toUpperCase()} — Page ${i} of ${pages}`,
       w / 2, pageH - 24, { align: "center" },
     );
     // Bottom border

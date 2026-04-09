@@ -5,12 +5,12 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey:            "AIzaSyD2xrJQZGVHFdBM0SHAdm6qXdgbHS27dok",
-  authDomain:        "atx-financial.firebaseapp.com",
-  projectId:         "atx-financial",
-  storageBucket:     "atx-financial.firebasestorage.app",
-  messagingSenderId: "226974852953",
-  appId:             "1:226974852953:web:01298b38e14d74fcf04e48",
+  apiKey:            "AIzaSyDzOehZykTrdgDpHDq6v9m7Qm7GQf5IuSg",
+  authDomain:        "outpostdigitalsolutions.firebaseapp.com",
+  projectId:         "outpostdigitalsolutions",
+  storageBucket:     "outpostdigitalsolutions.firebasestorage.app",
+  messagingSenderId: "3015430856",
+  appId:             "1:3015430856:web:4d1d26b6e0d43f0d530bfd",
 };
 
 const app = initializeApp(firebaseConfig);

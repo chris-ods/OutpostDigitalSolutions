@@ -1,9 +1,9 @@
 /**
  * AES-256-GCM field-level encryption for PII/secrets.
  *
- * The encryption key is read from the environment variable ATX_ENCRYPTION_KEY.
+ * The encryption key is read from the environment variable ODS_ENCRYPTION_KEY.
  * In production, set this via Google Cloud Secret Manager → Cloud Run env.
- * Locally, add to .env.local: ATX_ENCRYPTION_KEY=<64-char hex string>
+ * Locally, add to .env.local: ODS_ENCRYPTION_KEY=<64-char hex string>
  *
  * Generate a key: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
  */
@@ -15,9 +15,9 @@ const IV_LENGTH = 12;
 const TAG_LENGTH = 16;
 
 function getKey(): Buffer {
-  const hex = process.env.ATX_ENCRYPTION_KEY;
+  const hex = process.env.ODS_ENCRYPTION_KEY;
   if (!hex || hex.length !== 64) {
-    throw new Error("ATX_ENCRYPTION_KEY must be a 64-char hex string (32 bytes)");
+    throw new Error("ODS_ENCRYPTION_KEY must be a 64-char hex string (32 bytes)");
   }
   return Buffer.from(hex, "hex");
 }

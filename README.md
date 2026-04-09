@@ -1,6 +1,6 @@
-# ATX Financial
+# Outpost Digital Solutions
 
-Internal platform for ATX Financial Group — tracks insurance sales, agent performance, commissions, and team operations.
+Internal platform for Outpost Digital Solutions — tracks insurance sales, agent performance, commissions, and team operations.
 
 ## Tech Stack
 
@@ -110,4 +110,4 @@ setAgents((prev) => prev.map((a) => a.uid === id ? { ...a, [field]: value } : a)
 
 ## Deployment
 
-Deployed via Firebase App Hosting to `atx-financial--atx-financial.us-central1.hosted.app`. Pushes to `main` trigger automatic deploys.
+Deployed via Firebase App Hosting. Pushes to `main` trigger automatic deploys.

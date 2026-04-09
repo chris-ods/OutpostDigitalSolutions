@@ -76,7 +76,7 @@ export function generatePayrollPDF(opts: PayrollPDFOptions): Blob {
   pdf.setTextColor(...WHITE);
   pdf.setFontSize(16);
   pdf.setFont("helvetica", "bold");
-  pdf.text("ATX Financial Group", titleX, 30);
+  pdf.text("Outpost Digital Solutions", titleX, 30);
   pdf.setFontSize(9);
   pdf.setFont("helvetica", "normal");
   pdf.setTextColor(180, 190, 210);
@@ -349,7 +349,7 @@ export function generatePayrollPDF(opts: PayrollPDFOptions): Blob {
     margin + 10, y + 28,
   );
   pdf.text(
-    "This document is generated for internal accounting and audit purposes. ATXFG LLC — All Rights Reserved.",
+    "This document is generated for internal accounting and audit purposes. Outpost Digital Solutions LLC — All Rights Reserved.",
     margin + 10, y + 40,
   );
 
@@ -360,7 +360,7 @@ export function generatePayrollPDF(opts: PayrollPDFOptions): Blob {
     pdf.setFontSize(6.5);
     pdf.setTextColor(...LIGHT);
     pdf.text(
-      `ATXFG LLC — Payroll Register — ${fmtPeriod(opts.periodStart, opts.periodEnd)} — Page ${i} of ${pages}`,
+      `Outpost Digital Solutions LLC — Payroll Register — ${fmtPeriod(opts.periodStart, opts.periodEnd)} — Page ${i} of ${pages}`,
       w / 2, pageH - 20, { align: "center" },
     );
     pdf.setDrawColor(...BORDER);

@@ -37,10 +37,10 @@ const ThemeContext = createContext<ThemeContextValue>({
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-const THEME_KEY = "atx-theme";
-const TEXT_SIZE_KEY = "atx-text-size";
-const FONT_KEY = "atx-font";
-const ACCENT_KEY = "atx-accent";
+const THEME_KEY = "ods-theme";
+const TEXT_SIZE_KEY = "ods-text-size";
+const FONT_KEY = "ods-font";
+const ACCENT_KEY = "ods-accent";
 
 const FONT_STACKS: Record<FontFamily, string> = {
   geist: "var(--font-geist-sans, ui-sans-serif), system-ui, -apple-system, sans-serif",

@@ -2,8 +2,9 @@ import { initializeApp, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { readFileSync } from "fs";
 
+// TODO: Replace with path to your Outpost Digital Solutions Firebase admin service account JSON.
 const sa = JSON.parse(
-  readFileSync("/Users/christianbearden/Downloads/atx-financial-firebase-adminsdk-fbsvc-9e3a9fa642.json", "utf8")
+  readFileSync("/Users/christianbearden/Downloads/outpostdigitalsolutions-firebase-adminsdk.json", "utf8")
 );
 const app = initializeApp({ credential: cert(sa) });
 const db = getFirestore(app);
