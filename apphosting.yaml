@@ -57,15 +57,13 @@ env:
     availability:
       - RUNTIME
 
-  # TODO: Provision these in Google Cloud Secret Manager before deploying.
-  # The encryption key must be a 64-char hex string (32 bytes).
-  # Until provisioned, encryption-dependent features and the cron route will fail at runtime.
-  - variable: ATX_ENCRYPTION_KEY
-    secret: atx-encryption-key
-    availability:
-      - RUNTIME
-
-  - variable: CRON_SECRET
-    secret: cron-secret
-    availability:
-      - RUNTIME
+  # NOTE: ATX_ENCRYPTION_KEY and CRON_SECRET are intentionally NOT set here.
+  # They are only required by /api/admin/secrets and /api/cron/archive-chats —
+  # both will throw at runtime if invoked until you provision them in Secret Manager:
+  #
+  #   firebase apphosting:secrets:set atx-encryption-key
+  #   firebase apphosting:secrets:set cron-secret
+  #   firebase apphosting:secrets:grantaccess atx-encryption-key --backend <backend-id>
+  #   firebase apphosting:secrets:grantaccess cron-secret --backend <backend-id>
+  #
+  # Then re-add the env entries below.
