@@ -46,8 +46,22 @@ export default function LoginPage() {
 
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/portal");
-    } catch {
-      setError("Invalid username or password.");
+    } catch (err: unknown) {
+      const code = (err as { code?: string }).code ?? "";
+      console.error("Firebase auth error:", code, err);
+      if (code === "auth/user-not-found") {
+        setError("No account found with that email.");
+      } else if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
+        setError("Incorrect password.");
+      } else if (code === "auth/user-disabled") {
+        setError("This account has been disabled. Contact an admin.");
+      } else if (code === "auth/too-many-requests") {
+        setError("Too many failed attempts. Try again later.");
+      } else if (code === "auth/invalid-email") {
+        setError("Invalid email address.");
+      } else {
+        setError("Unable to sign in. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
