@@ -6,7 +6,6 @@ import { doc, getDoc, addDoc, collection, serverTimestamp } from "firebase/fires
 import { auth, db } from "../../lib/firebase";
 import { useRouter } from "next/navigation";
 import { BrandLogo } from "../../lib/components/BrandLogo";
-import Link from "next/link";
 
 const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
@@ -291,17 +290,6 @@ export default function LoginPage() {
           )} {/* end resetMode conditional */}
         </div>
 
-        <div className="mt-6 flex flex-col items-center gap-3">
-          <Link
-            href="/join"
-            className="w-full py-2.5 px-4 bg-app-surface-2 hover:bg-app-surface-2 border border-app-border-2 text-app-text-2 hover:text-app-text font-medium rounded-lg transition text-sm text-center"
-          >
-            Request Portal Access
-          </Link>
-          <p className="text-app-text-5 text-xs">
-            New to Outpost Digital Solutions? Request access above.
-          </p>
-        </div>
       </div>
     </div>
   );
